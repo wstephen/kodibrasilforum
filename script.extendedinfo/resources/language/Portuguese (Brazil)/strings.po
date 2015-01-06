@@ -165,10 +165,6 @@ msgctxt "#32114"
 msgid "Keyword"
 msgstr "Palavras Chaves"
 
-msgctxt "#32114"
-msgid "Actor / Crew member"
-msgstr "Ator / Membro do Elenco"
-
 msgctxt "#32115"
 msgid "Crew"
 msgstr "Elenco"
@@ -184,3 +180,39 @@ msgstr "Vídeos Oficiais"
 msgctxt "#32118"
 msgid "YouTube Videos"
 msgstr "Vídeos do Youtube"
+
+msgctxt "#32119"
+msgid "Artwork"
+msgstr "Artwork"
+
+msgctxt "#32120"
+msgid "Movie Actor Roles"
+msgstr "Papel do ator no filme"
+
+msgctxt "#32121"
+msgid "TV Show Roles"
+msgstr "Papel no Seriado"
+
+msgctxt "#32122"
+msgid "Movie crew member"
+msgstr "Membro da equipe do filme"
+
+msgctxt "#32123"
+msgid "TV Show crew member"
+msgstr "Membro da equipe do seriado"
+
+msgctxt "#32124"
+msgid "Items"
+msgstr "Itens"
+
+msgctxt "#32125"
+msgid "Page"
+msgstr "Página"
+
+msgctxt "#32126"
+msgid "Actor / Crew member"
+msgstr "Ator / Membro do Elenco"
+
+msgctxt "#32127"
+msgid "Certification"
+msgstr "Certificação"
