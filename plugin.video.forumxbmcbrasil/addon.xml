@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addon id="plugin.video.xbmcbrasil"
-	name="XBMC Brasil Vídeos Tutoriais"
+	name="XBMC Brasil Videos Tutoriais"
 	version="1.0.2"
 	provider-name="Wanilton">
   <requires>
