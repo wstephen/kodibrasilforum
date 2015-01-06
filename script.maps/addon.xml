@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="script.maps" name="Maps" version="0.1.0" provider-name="A. Alsaleh">
+	<requires>
+		<import addon="xbmc.python" version="2.1.0"/>
+	</requires>
+	<extension point="xbmc.python.script" library="default.py">
+		<provides>executable</provides>
+	</extension>
+	<extension point="xbmc.addon.metadata">
+		<platform>all</platform>
+		<language>en</language>
+		<summary lang="en">World maps, locations, and views</summary>
+		<description lang="en">By utilizing multiple maps and locations providers, this add-on will allow you to explore the World map, find points of interest, and see panoramic views in certain places.</description>
+		<disclaimer lang="en">Requires your own credentials to access the providers. Each provider has its own terms of service.</disclaimer>
+		<license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
+		<email>a.a.alsaleh@gmail.com</email>
+		<forum>http://forum.xbmc.org/showthread.php?tid=202096</forum>
+		<website></website>
+		<source></source>
+	</extension>
+</addon>

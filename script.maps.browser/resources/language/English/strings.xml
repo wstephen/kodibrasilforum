@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<!-- Translated using Transifex web application. For support, or if you would like to to help out, please visit your language team! -->
+<!-- English language-Team URL: http://www.transifex.com/projects/p/xbmc-addons/language/en/ -->
+<!-- Report language file syntax bugs at: alanwww1@xbmc.org -->
+
+<strings>
+	<string id="34001">Welcome to XBMC Maps Browser</string>
+	<string id="34002">Press context menu button to toggle navigation mode</string>
+	<string id="34003">Press "info" button to change map type</string>
+	<string id="34004">FourSquare Places Search</string>
+	<string id="34005">Top Picks</string>
+	<string id="34006">Food</string>
+	<string id="34007">Drinks</string>
+	<string id="34008">Coffee</string>
+	<string id="34009">Shops</string>
+	<string id="34010">Arts</string>
+	<string id="34011">Outdoors</string>
+	<string id="34012">Sights</string>
+	<string id="34013">Trending</string>
+	<string id="34014">Specials</string>
+	<string id="34015">Next venues</string>
+	<string id="34016">Last.Fm near concerts</string>
+	<string id="34017">Last.Fm near festivals</string>
+	<string id="34018">Last.Fm concert search (by tag)</string>
+	<string id="34019">Reset places</string>
+	<string id="34020">Choose places to display</string>
+	<string id="34021">Choose folder with geotagged images</string>
+	<string id="34022">"Enter music tags to search for"</string>
+	<string id="34023">Last.Fm concert cearch (by artist)</string>
+	<string id="34024">Google maps search</string>
+	<string id="34025">Type in artist name</string>
+	<string id="34026">Choose search type</string>
+	<string id="34027">Places from geotagged images</string>
+	<string id="34028">Eventful Near Events</string>
+	<string id="34029">FourSquare Explore</string>
+	<string id="34030">MapQuest Traffic Incidents</string>
+	<string id="34031">Google Places</string>
+	<string id="34032">Enter search string</string>
+	<string id="34033">Last.FM Venue Search</string>
+</strings>

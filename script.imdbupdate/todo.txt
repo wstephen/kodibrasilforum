@@ -1,0 +1,3 @@
+- Dialog now shows the current movie / total (Updating rating for movie: 23/506)
+
+- download ergebnis anzeigen

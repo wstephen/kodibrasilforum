@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<settings>
+	<category label="32800">
+		<setting default="Google" type="labelenum" values="Bing|Google|HERE|MapQuest" id="map.provider" label="32810"></setting>
+		<setting default="Google" type="labelenum" values="Bing|Google" id="geocoding.provider" label="32811"></setting>
+		<setting default="Foursquare" type="labelenum" values="Foursquare" id="places.provider" label="32812"></setting>
+		<setting default="Google" type="labelenum" values="Google" id="panorama.provider" label="32813"></setting>
+		<setting default="0" lvalues="32900|32901|32902" type="enum" id="map.type" label="32814"></setting>
+		<setting option="int" default="2" label="32815" range="0,21" type="slider" id="map.zoom"></setting>
+		<setting default="0" lvalues="32903|32904|32905" type="enum" id="map.quality" label="32816"></setting>
+		<setting default="0.0000,0.0000" type="text" id="map.home" label="32817"></setting>
+		<setting default="false" type="bool" id="location.remember" label="32818"></setting>
+		<setting default="0.0" type="none" id="location.lat"></setting>
+		<setting default="0.0" type="none" id="location.lng"></setting>
+		<setting default="2" type="none" id="location.zoom"></setting>
+	</category>
+	<category label="32801">
+		<setting default="false" type="bool" id="map.cache" label="32830"></setting>
+		<setting enable="eq(-1,true)" default="1" label="32831" lvalues="32906|32907" type="enum" id="map.cache.timeout"></setting>
+		<setting action="RunScript($CWD/default.py, clearMapsCacheAction)" type="action" id="map.cache.clear" label="32832"></setting>
+	</category>
+	<category label="32802">
+		<setting type="text" id="api.bing.key" label="Bing Maps Key"></setting>
+		<setting type="text" id="api.foursquare.id" label="Foursquare API Client ID"></setting>
+		<setting type="text" id="api.foursquare.secret" label="Foursquare API Client Secret"></setting>
+		<setting type="text" id="api.google.key" label="Google Public API Key"></setting>
+		<setting type="text" id="api.here.key" label="HERE App_Id"></setting>
+		<setting type="text" id="api.here.code" label="HERE App_Code"></setting>
+		<setting type="text" id="api.mapquest.key" label="MapQuest AppKey"></setting>
+	</category>
+</settings>

@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+    <setting id="viewmode" type="enum" label="Select ViewMode" default="0" values="Thumbnail (default)|Single|Double" />
+</settings>

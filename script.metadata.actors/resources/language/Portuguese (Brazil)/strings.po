@@ -1,0 +1,227 @@
+# XBMC Media Center language file
+# Addon Name: Metadata Actors
+# Addon id: script.metadata,actors
+# Addon Provider: Frostbox
+# Translators:
+# Wanilton Campos <>, 2014
+msgid ""
+msgstr ""
+"Project-Id-Version: xbmcbrasil\n"
+"Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
+"POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2014-09-02 17:27+0000\n"
+"Last-Translator: Wanilton Campos <>\n"
+"Language-Team: Portuguese (Brazil) (http://www.transifex.com/projects/p/xbmcbrasil/language/pt_BR/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: pt_BR\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgctxt "#32000"
+msgid "XBMC Metadata Actors"
+msgstr "KODI Metadados de Atores"
+
+msgctxt "#32010"
+msgid "Filmography"
+msgstr "Filmografia"
+
+msgctxt "#32011"
+msgid "Known Movies"
+msgstr "Filmes Conhecidos"
+
+msgctxt "#32012"
+msgid "Birthday"
+msgstr "Nascido em"
+
+msgctxt "#32013"
+msgid "Day of Death"
+msgstr "Morreu em"
+
+msgctxt "#32014"
+msgid "Place of Birth"
+msgstr "Natural de"
+
+msgctxt "#32015"
+msgid "Adult Actor"
+msgstr "Ator Aduto"
+
+msgctxt "#32016"
+msgid "Also Known As"
+msgstr "Outros Nomes"
+
+msgctxt "#32017"
+msgid "Homepage"
+msgstr "Homepage"
+
+msgctxt "#32018"
+msgid "Role"
+msgstr "Papel"
+
+msgctxt "#32019"
+msgid "Job"
+msgstr "Tarefa"
+
+msgctxt "#32020"
+msgid "age %s"
+msgstr "idade %s"
+
+msgctxt "#32021"
+msgid "since %s years"
+msgstr "desde  %s anos"
+
+msgctxt "#32022"
+msgid "Release Date"
+msgstr "Lançado em"
+
+msgctxt "#32024"
+msgid "Page"
+msgstr "Página"
+
+msgctxt "#32025"
+msgid "Items"
+msgstr "Itens"
+
+msgctxt "#32030"
+msgid "Movies Acting"
+msgstr "Filmes em que atuou"
+
+msgctxt "#32031"
+msgid "TvShows Acting"
+msgstr "Seriados em que atuou"
+
+msgctxt "#32032"
+msgid "Movies Directing"
+msgstr "Filmes que dirigiu"
+
+msgctxt "#32033"
+msgid "Enter Person Name"
+msgstr "Entre com o Nome da Pessoa"
+
+msgctxt "#32034"
+msgid "Person results for %s"
+msgstr "Resultados para %s"
+
+msgctxt "#32035"
+msgid "For editing a profile..."
+msgstr "Para editar um perfil..."
+
+msgctxt "#32036"
+msgid "You must have an account TMDB!"
+msgstr "Você deve possuir uma conta no TMDB!"
+
+msgctxt "#32040"
+msgid "Select Image Size"
+msgstr "Selecione o tamanho da imagem"
+
+msgctxt "#32041"
+msgid "Success! New thumb created."
+msgstr "Sucesso! Nova miniatura criada."
+
+msgctxt "#32042"
+msgid "Error! Impossible to create new thumb!"
+msgstr "Erro! Impossível criar uma nova miniatura!"
+
+msgctxt "#32050"
+msgid "Online information"
+msgstr "Informação Online"
+
+msgctxt "#32051"
+msgid "Trailers"
+msgstr "Trailers"
+
+msgctxt "#32052"
+msgid "No trailers found!"
+msgstr "Nenhum trailer encontrado!"
+
+msgctxt "#32099"
+msgid "Include Pornstars"
+msgstr "Incluir Estrelas Pornográficas"
+
+msgctxt "#32102"
+msgid "Quality of flipping fanarts"
+msgstr "Qualidade dos fanarts lançados"
+
+msgctxt "#32105"
+msgid "Dialog info"
+msgstr "Info na caixa de diálogo"
+
+msgctxt "#32106"
+msgid "Show full format"
+msgstr "Mostrar formato cheio"
+
+msgctxt "#32107"
+msgid "Show label Adult Actor"
+msgstr "Mostrar etiqueta Ator Adulto"
+
+msgctxt "#32108"
+msgid "Only if true"
+msgstr "Somente se verdadeiro"
+
+msgctxt "#32110"
+msgid "Multiimage"
+msgstr "Múltiplas Imagens"
+
+msgctxt "#32111"
+msgid "Enable Multiimage"
+msgstr "Ativar Múltiplas imagens"
+
+msgctxt "#32112"
+msgid "Randomize"
+msgstr "Randomizar"
+
+msgctxt "#32113"
+msgid "Time per image (second)"
+msgstr "Tempo por imagem (segundos)"
+
+msgctxt "32121"
+msgid "Select one fanart or more for extrafanart"
+msgstr "Selecione um fanart ou mais para extrafanarts"
+
+msgctxt "#32122"
+msgid "Confirm Downloading.."
+msgstr "Confirme Downloading..."
+
+msgctxt "#32123"
+msgid "%i of %i have been selected!"
+msgstr "%i de %i foi selecionado!"
+
+msgctxt "#32124"
+msgid "Are you sure download this files?"
+msgstr "Você tem certeza que quer fazer download destes arquivos?"
+
+msgctxt "#32125"
+msgid "Download: %i of %i - %i%%"
+msgstr "Download: %i de %i - %i%%"
+
+msgctxt "#32126"
+msgid "Choose folder for&#32;"
+msgstr "Escolha pasta para"
+
+msgctxt "#32127"
+msgid "extrafanart"
+msgstr "extrafanart"
+
+msgctxt "#32128"
+msgid "extrathumb"
+msgstr "extrathumb"
+
+msgctxt "#32131"
+msgid "Select one thumb or more for extrathumb"
+msgstr "Selecione uma miniatura ou mais para extrathumbs"
+
+msgctxt "#32135"
+msgid "Confirm overwrite..."
+msgstr "Confirme sobrepor..."
+
+msgctxt "#32136"
+msgid "Do you want overwrite your existing files?"
+msgstr "Você deseja sobrepor seus arquivos existentes?"
+
+msgctxt "#32311"
+msgid "Fanart image[CR][CR]Unavailable[CR][CR] Click button to set"
+msgstr "Imagem de Fanart[CR][CR]Indisponível[CR][CR] Clique no botão para setar"
+
+msgctxt "#32330"
+msgid "Click button to play[CR][CR]Movie trailer"
+msgstr "Clique no botão para reproduzir[CR][CR]trailer do filme"

@@ -1,0 +1,550 @@
+<?xml version="1.0" encoding="utf-8"?>
+<window>
+    <backgroundcolor>FF000000</backgroundcolor>
+    <defaultcontrol always="true">101</defaultcontrol>
+    <allowoverlay>no</allowoverlay>
+    <controls>
+        <control id="9023" type="button">
+            <include>HiddenObject</include>
+            <onfocus>SetProperty(index,$ESCINFO[Container(200).ListItem.Property(index)],home)</onfocus>
+            <onfocus condition="!IsEmpty(Container(200).ListItem.Property(Street))">SetProperty(Location,$INFO[Container(200).ListItem.Property(City)] $INFO[Container(200).ListItem.Property(Street)])</onfocus>
+            <onfocus condition="IsEmpty(Container(200).ListItem.Property(Street))">SetProperty(Location,$INFO[Container(200).ListItem.Property(City)] $INFO[Container(200).ListItem.Property(Name)])</onfocus>
+            <onfocus>SendClick(111)</onfocus>
+            <onfocus>SetFocus(200)</onfocus>
+            <visible>!Stringcompare(Container(200).ListItem.Property(index),Window.Property(index))</visible>
+        </control>
+        <control id="9022" type="button">
+            <include>HiddenObject</include>
+            <onfocus condition="!IsEmpty(Container(200).ListItem.Property(Street))">SetProperty(Location,$ESCINFO[Container(200).ListItem.Property(City)] $ESCINFO[Container(200).ListItem.Property(Street)])</onfocus>
+            <onfocus condition="IsEmpty(Container(200).ListItem.Property(Street))">SetProperty(Location,$ESCINFO[Container(200).ListItem.Property(City)] $ESCINFO[Container(200).ListItem.Property(Name)])</onfocus>
+            <onfocus>SetProperty(index,$ESCINFO[Container(200).ListItem.Property(index)],home)</onfocus>
+            <onfocus>SendClick(111)</onfocus>
+            <onfocus>SetFocus(200)</onfocus>
+            <visible>!Stringcompare(Container(200).ListItem.Property(index),Window.Property(index))</visible>
+        </control>
+        <control id="111" type="button">
+            <include>HiddenObject</include>
+        </control>
+        <control type="image">
+            <posx>0</posx>
+            <width>1920</width>
+            <height>1080</height>
+            <aspectratio>scale</aspectratio>
+            <fadetime>FanartCrossfadeTime</fadetime>
+            <include>Animation_VisibleChange200</include>
+            <texture>$INFO[Window.Property(streetview_image)]</texture>
+            <visible>!IsEmpty(Window.Property(streetview))</visible>
+        </control>
+        <control type="group">
+            <include>Animation_VisibleChange200</include>
+            <visible>IsEmpty(Window.Property(streetview))</visible>
+        <control type="image">
+            <posx>0</posx>
+            <width>1920</width>
+            <height>1080</height>
+            <aspectratio>scale</aspectratio>
+            <fadetime>FanartCrossfadeTime</fadetime>
+            <texture>$INFO[Window.Property(map_image)]</texture>
+        </control>
+
+<!--         <control type="image">
+            <posx>690</posx>
+            <posy>480</posy>
+            <width>60</width>
+            <height>60</height>
+            <texture>Pin.png</texture>
+        </control>
+        <control type="image">
+            <posx>1200</posx>
+            <posy>480</posy>
+            <width>60</width>
+            <height>60</height>
+            <texture>Pin.png</texture>
+        </control> -->
+<!--         <control type="image">
+            <posx>931</posx>
+            <posy>433</posy>
+            <width>114</width>
+            <height>114</height>
+            <texture>Pin.png</texture>
+        </control> -->
+    </control>
+           <!--       <control type="label">
+            <posx>750</posx>
+            <width>420</width>
+            <height>42</height>
+            <align>center</align>
+            <label>Test</label>
+            <font>Font_Reg33_Caps</font>
+            <shadowcolor>88e5e5e5</shadowcolor>
+            <textcolor>FF363636</textcolor>
+        </control>-->
+        <control type="group">
+            <visible>!IsEmpty(Window.Property(streetview))</visible>
+            <animation delay="600" effect="slide" end="0,0" start="400,0" time="560" tween="cubic" reversible="true">Visible</animation>
+            <posx>1500</posx>
+            <control type="image">
+                <posx>-5</posx>
+                <posy>40</posy>
+                <height>260</height>
+                <width>410</width>
+                <texture background="true" colordiffuse="FF000000">views/addonwall_select.png</texture>
+            </control>
+            <control type="image">
+                <posy>20</posy>
+                <height>300</height>
+                <width>400</width>
+                <aspectratio>keep</aspectratio>
+                <texture background="true">$INFO[Window.Property(map_image)]</texture>
+                <fadetime>FanartCrossfadeTime</fadetime>
+            </control>
+            <control type="image">
+                <posx>160</posx>
+                <posy>150</posy>
+                <width>35</width>
+                <height>35</height>
+                <texture>defaulticons/DefaultFolderBack.png</texture>
+                <animation center="200,167" condition="true" effect="rotate" end="-90" time="0">Conditional</animation>
+                <animation center="200,167" condition="IntegerGreaterThan(Window.Property(direction),0)" effect="rotate" end="-18" time="0">Conditional</animation>
+                <animation center="200,167" condition="IntegerGreaterThan(Window.Property(direction),1)" effect="rotate" end="-18" time="0">Conditional</animation>
+                <animation center="200,167" condition="IntegerGreaterThan(Window.Property(direction),2)" effect="rotate" end="-18" time="0">Conditional</animation>
+                <animation center="200,167" condition="IntegerGreaterThan(Window.Property(direction),3)" effect="rotate" end="-18" time="0">Conditional</animation>
+                <animation center="200,167" condition="IntegerGreaterThan(Window.Property(direction),4)" effect="rotate" end="-18" time="0">Conditional</animation>
+                <animation center="200,167" condition="IntegerGreaterThan(Window.Property(direction),5)" effect="rotate" end="-18" time="0">Conditional</animation>
+                <animation center="200,167" condition="IntegerGreaterThan(Window.Property(direction),6)" effect="rotate" end="-18" time="0">Conditional</animation>
+                <animation center="200,167" condition="IntegerGreaterThan(Window.Property(direction),7)" effect="rotate" end="-18" time="0">Conditional</animation>
+                <animation center="200,167" condition="IntegerGreaterThan(Window.Property(direction),8)" effect="rotate" end="-18" time="0">Conditional</animation>
+                <animation center="200,167" condition="IntegerGreaterThan(Window.Property(direction),9)" effect="rotate" end="-18" time="0">Conditional</animation>
+                <animation center="200,167" condition="IntegerGreaterThan(Window.Property(direction),10)" effect="rotate" end="-18" time="0">Conditional</animation>
+                <animation center="200,167" condition="IntegerGreaterThan(Window.Property(direction),11)" effect="rotate" end="-18" time="0">Conditional</animation>
+                <animation center="200,167" condition="IntegerGreaterThan(Window.Property(direction),12)" effect="rotate" end="-18" time="0">Conditional</animation>
+                <animation center="200,167" condition="IntegerGreaterThan(Window.Property(direction),13)" effect="rotate" end="-18" time="0">Conditional</animation>
+                <animation center="200,167" condition="IntegerGreaterThan(Window.Property(direction),14)" effect="rotate" end="-18" time="0">Conditional</animation>
+                <animation center="200,167" condition="IntegerGreaterThan(Window.Property(direction),15)" effect="rotate" end="-18" time="0">Conditional</animation>
+                <animation center="200,167" condition="IntegerGreaterThan(Window.Property(direction),16)" effect="rotate" end="-18" time="0">Conditional</animation>
+                <animation center="200,167" condition="IntegerGreaterThan(Window.Property(direction),17)" effect="rotate" end="-18" time="0">Conditional</animation>
+                <animation center="200,167" condition="IntegerGreaterThan(Window.Property(direction),18)" effect="rotate" end="-18" time="0">Conditional</animation>
+                <animation center="200,167" condition="IntegerGreaterThan(Window.Property(direction),19)" effect="rotate" end="-18" time="0">Conditional</animation>
+                <animation center="200,167" condition="IntegerGreaterThan(Window.Property(direction),20)" effect="rotate" end="-18" time="0">Conditional</animation>
+                <colordiffuse>red</colordiffuse>
+            </control>
+        </control>
+        <control type="group">
+            <include>Animation_VisibleChange200</include>
+            <visible>IsEmpty(Window.Property(streetview)) + IntegerGreaterThan(Container(200).NumItems,0)</visible>
+            <animation condition="Control.HasFocus(725)" effect="fade" end="0" start="100" time="280">Conditional</animation>
+            <control id="200" type="list">
+                <width>1920</width>
+                <posy>735</posy>
+                <height>980</height>
+                <orientation>horizontal</orientation>
+                <onup>651</onup>
+                <ondown>651</ondown>
+                <onleft>200</onleft>
+                <onright>200</onright>
+                <itemlayout condition="Stringcompare(Window.Property(ListLayout),0)" height="150" width="600">
+                    <control type="group">
+                        <posy>80</posy>
+                        <control type="image">
+                            <posx>-4</posx>
+                            <width>600</width>
+                            <height>177</height>
+                            <texture>dialogs/dialog_back.png</texture>
+                        </control>
+                        <control type="image">
+                            <posy>15</posy>
+                            <posx>15</posx>
+                            <width>145</width>
+                            <height>145</height>
+                            <aspectratio>keep</aspectratio>
+                            <texture fallback="DefaultPicture.png">$INFO[ListItem.Thumb]</texture>
+                        </control>
+                        <control type="group">
+                            <posx>170</posx>
+                            <visible>!Stringcompare(ListItem.Property(index),Window.Property(index))</visible>
+                            <control type="label">
+                                <posy>15</posy>
+                                <width>345</width>
+                                <height>35</height>
+                                <font>Font_Reg26</font>
+                                <textcolor>white</textcolor>
+                                <label>[COLOR=grey]$INFO[ListItem.Property(sortletter)]: [/COLOR][B]$INFO[ListItem.Property(Name)][/B]</label>
+                            </control>
+                            <control type="label">
+                                <posy>125</posy>
+                                <width>345</width>
+                                <height>35</height>
+                                <font>Font_Reg22_Caps</font>
+                                <textcolor>grey</textcolor>
+                                <label>$INFO[ListItem.Label2]</label>
+                            </control>
+                            <control type="textbox">
+                                <posy>45</posy>
+                                <width>305</width>
+                                <height>81</height>
+                                <font>Font_Reg26</font>
+                                <align>left</align>
+                                <textcolor>grey</textcolor>
+                                <posx>0</posx>
+                                <label>$INFO[ListItem.Property(eventname)]</label>
+                            </control>
+                        </control>
+                        <control type="textbox">
+                            <posx>170</posx>
+                            <posy>50</posy>
+                            <width>345</width>
+                            <height>110</height>
+                            <align>left</align>
+                            <font>Font_Reg31_Caps</font>
+                            <textcolor>white</textcolor>
+                            <label>$ADDON[script.maps.browser 32034]</label>
+                            <visible>Stringcompare(ListItem.Property(index),Window.Property(index))</visible>
+                        </control>
+                    </control>
+                </itemlayout>
+                <focusedlayout condition="Stringcompare(Window.Property(ListLayout),0)" height="150" width="600">
+                    <control type="group">
+                        <posy>80</posy>
+                        <control type="image">
+                            <posx>-4</posx>
+                            <width>600</width>
+                            <height>177</height>
+                            <texture>dialogs/dialog_back.png</texture>
+                        </control>
+                        <control type="image">
+                            <posy>15</posy>
+                            <posx>15</posx>
+                            <width>145</width>
+                            <height>145</height>
+                            <aspectratio>keep</aspectratio>
+                            <texture fallback="DefaultPicture.png">$INFO[ListItem.Thumb]</texture>
+                        </control>
+                        <control type="image">
+                            <posx>160</posx>
+                            <posy>12</posy>
+                            <width>400</width>
+                            <height>150</height>
+                            <texture border="8">views/tripanel/listselect_fo.png</texture>
+                            <include>PanelGlowFade</include>
+                            <visible>Control.HasFocus(200)</visible>
+                        </control>
+                        <control type="group">
+                            <posx>170</posx>
+                            <visible>!Stringcompare(ListItem.Property(index),Window.Property(index))</visible>
+                            <control type="label">
+                                <posy>15</posy>
+                                <width>345</width>
+                                <height>35</height>
+                                <font>Font_Reg26</font>
+                                <textcolor>white</textcolor>
+                                <label>[COLOR=grey]$INFO[ListItem.Property(sortletter)]: [/COLOR][B]$INFO[ListItem.Property(Name)][/B]</label>
+                            </control>
+                            <control type="label">
+                                <posy>125</posy>
+                                <width>345</width>
+                                <height>35</height>
+                                <font>Font_Reg22_Caps</font>
+                                <textcolor>grey</textcolor>
+                                <label>$INFO[ListItem.Label2]</label>
+                            </control>
+                            <control type="textbox">
+                                <posy>45</posy>
+                                <width>305</width>
+                                <height>81</height>
+                                <font>Font_Reg26</font>
+                                <align>left</align>
+                                <textcolor>grey</textcolor>
+                                <posx>0</posx>
+                                <label>$INFO[ListItem.Property(eventname)]</label>
+                            </control>
+                        </control>
+                        <control type="textbox">
+                            <posx>170</posx>
+                            <posy>50</posy>
+                            <width>345</width>
+                            <height>110</height>
+                            <align>left</align>
+                            <font>Font_Reg31_Caps</font>
+                            <textcolor>white</textcolor>
+                            <label>$ADDON[script.maps.browser 32034]</label>
+                            <visible>Stringcompare(ListItem.Property(index),Window.Property(index))</visible>
+                        </control>
+                    </control>
+                </focusedlayout>
+                <itemlayout height="280" width="450" condition="Stringcompare(Window.Property(ListLayout),1)">
+                    <control type="image">
+                        <width>450</width>
+                        <height>270</height>
+                        <aspectratio>scale</aspectratio>
+                        <texture>common/black.png</texture>
+                    </control>
+                    <control type="image">
+                        <posy>5</posy>
+                        <posx>3</posx>
+                        <width>444</width>
+                        <height>260</height>
+                        <aspectratio>scale</aspectratio>
+                        <texture fallback="DefaultPicture.png">$INFO[ListItem.Art(thumb)]</texture>
+                    </control>
+                    <control type="image">
+                        <posy>5</posy>
+                        <width>450</width>
+                        <height>50</height>
+                        <aspectratio>stretch</aspectratio>
+                        <texture>bottom_shadow.png</texture>
+                    </control>
+                    <control type="image">
+                        <posy>190</posy>
+                        <width>450</width>
+                        <height>75</height>
+                        <aspectratio>stretch</aspectratio>
+                        <texture>bottom_shadow2.png</texture>
+                    </control>
+                    <control type="group">
+                        <posx>5</posx>
+                        <control type="label">
+                            <posy>220</posy>
+                            <aligny>top</aligny>
+                            <width>420</width>
+                            <height>35</height>
+                            <font>font12</font>
+                            <textcolor>FFe5e5e5</textcolor>
+                            <label>[COLOR=FFa4a4a4]$INFO[ListItem.Property(sortletter)]: [/COLOR][B]$INFO[ListItem.Property(Name)][/B]</label>
+                        </control>
+                        <control type="group">
+                            <control type="label">
+                                <posy>2</posy>
+                                <width>420</width>
+                                <height>35</height>
+                                <font>font10</font>
+                                <textcolor>FFe5e5e5</textcolor>
+                                <shadowcolor>FF000000</shadowcolor>
+                                <label>[UPPERCASE]$INFO[ListItem.Label2][/UPPERCASE]</label>
+                            </control>
+                            <control type="label">
+                                <posy>80</posy>
+                                <width>420</width>
+                                <height>81</height>
+                                <font>font10</font>
+                                <align>left</align>
+                                <aligny>bottom</aligny>
+                                <shadowcolor>FF000000</shadowcolor>
+                                <textcolor>FFe5e5e5</textcolor>
+                                <label>[UPPERCASE]$INFO[ListItem.Property(eventname)][/UPPERCASE]</label>
+                            </control>
+                            <control type="image">
+                                <posy>100</posy>
+                                <width>180</width>
+                                <height>40</height>
+                                <aspectratio align="center">keep</aspectratio>
+                                <texture>$INFO[ListItem.Property(rating),stars/,.png]</texture>
+                                <colordiffuse>FFe5e5e5</colordiffuse>
+                            </control>
+                        </control>
+                    </control>
+                </itemlayout>
+                <focusedlayout height="200" width="450" condition="Stringcompare(Window.Property(ListLayout),1)">
+                    <control type="image">
+                        <width>450</width>
+                        <height>270</height>
+                        <aspectratio>scale</aspectratio>
+                        <texture>common/black.png</texture>
+                    </control>
+                    <control type="image">
+                        <posy>5</posy>
+                        <posx>3</posx>
+                        <width>444</width>
+                        <height>260</height>
+                        <aspectratio>scale</aspectratio>
+                        <texture fallback="DefaultPicture.png">$INFO[ListItem.Art(thumb)]</texture>
+                    </control>
+                    <control type="image">
+                        <posy>5</posy>
+                        <width>450</width>
+                        <height>50</height>
+                        <aspectratio>stretch</aspectratio>
+                        <texture>bottom_shadow.png</texture>
+                    </control>
+                    <control type="image">
+                        <posy>190</posy>
+                        <width>450</width>
+                        <height>75</height>
+                        <aspectratio>stretch</aspectratio>
+                        <texture>bottom_shadow2.png</texture>
+                    </control>
+                    <control type="group">
+                        <posx>5</posx>
+                        <control type="label">
+                            <posy>220</posy>
+                            <aligny>top</aligny>
+                            <width>420</width>
+                            <height>35</height>
+                            <font>font12</font>
+                            <textcolor>FFe5e5e5</textcolor>
+                            <label>[COLOR=FFa4a4a4]$INFO[ListItem.Property(sortletter)]: [/COLOR][B]$INFO[ListItem.Property(Name)][/B]</label>
+                        </control>
+                        <control type="group">
+                            <control type="label">
+                                <posy>2</posy>
+                                <width>420</width>
+                                <height>35</height>
+                                <font>font10</font>
+                                <textcolor>FFe5e5e5</textcolor>
+                                <shadowcolor>FF000000</shadowcolor>
+                                <label>[UPPERCASE]$INFO[ListItem.Label2][/UPPERCASE]</label>
+                            </control>
+                            <control type="label">
+                                <posy>80</posy>
+                                <width>420</width>
+                                <height>81</height>
+                                <font>font10</font>
+                                <align>left</align>
+                                <aligny>bottom</aligny>
+                                <shadowcolor>FF000000</shadowcolor>
+                                <textcolor>FFe5e5e5</textcolor>
+                                <label>[UPPERCASE]$INFO[ListItem.Property(eventname)][/UPPERCASE]</label>
+                            </control>
+                            <control type="image">
+                                <posy>100</posy>
+                                <width>180</width>
+                                <height>40</height>
+                                <aspectratio align="center">keep</aspectratio>
+                                <texture>$INFO[ListItem.Property(rating),stars/,.png]</texture>
+                                <colordiffuse>FFe5e5e5</colordiffuse>
+                            </control>
+                        </control>
+                    </control>
+                    <control type="image">
+                        <posx>-3</posx>
+                        <posy>0</posy>
+                        <width>456</width>
+                        <height>260</height>
+                        <texture border="8">views/addonwall_select.png</texture>
+                        <colordiffuse>FF0084ff</colordiffuse>
+                        <include>PanelGlowFade</include>
+                        <visible>Control.HasFocus(200)</visible>
+                    </control>
+                </focusedlayout>
+            </control>
+        </control>
+        <control type="group">
+            <posy>980</posy>
+            <control type="group">
+                <posy>20</posy>
+                <animation condition="Control.HasFocus(725)" effect="slide" end="0,200" start="0,0" time="480" tween="quadratic">Conditional</animation>
+                <animation delay="600" effect="slide" end="0,0" start="0,200" time="560" tween="cubic">WindowOpen</animation>
+                <control type="image">
+                    <posy>-7</posy>
+                    <width>1920</width>
+                    <height>135</height>
+                    <texture flipy="true">osd/osd_back.png</texture>
+                </control>
+                <control type="group">
+                                        <posy>7</posy>
+
+                <control id="650" type="grouplist">
+                    <orientation>horizontal</orientation>
+                    <posx>50</posx>
+                    <itemgap>20</itemgap>
+                    <onup>200</onup>
+                    <onleft>652</onleft>
+                    <onright>103</onright>
+                    <control id="112" type="button">
+                        <width>60</width>
+                        <height>60</height>
+                        <texturefocus colordiffuse="FF0084ff">googlemaps/Flag.png</texturefocus>
+                        <texturenofocus colordiffuse="FFBBBBBB">googlemaps/Flag.png</texturenofocus>
+                        <animation center="50,50" effect="zoom" end="100" reversible="false" start="95" time="480" tween="back">Focus</animation>
+                    </control>
+                    <control id="101" type="button">
+                        <width>60</width>
+                        <height>60</height>
+                        <animation center="50,50" effect="zoom" end="100" reversible="false" start="95" time="480" tween="back">Focus</animation>
+                        <texturefocus colordiffuse="FF0084ff">googlemaps/Search.png</texturefocus>
+                        <texturenofocus colordiffuse="FFBBBBBB">googlemaps/Search.png</texturenofocus>
+                    </control>
+                    <control id="102" type="togglebutton">
+                        <texturefocus colordiffuse="FF0084ff">googlemaps/streetview.png</texturefocus>
+                        <texturenofocus colordiffuse="FFBBBBBB">googlemaps/streetview.png</texturenofocus>
+                        <alttexturefocus colordiffuse="FF0084ff">googlemaps/map.png</alttexturefocus>
+                        <alttexturenofocus colordiffuse="FFBBBBBB">googlemaps/map.png</alttexturenofocus>
+                        <usealttexture>!IsEmpty(Window.Property(streetview))</usealttexture>
+                        <animation center="50,50" effect="zoom" end="100" reversible="false" start="95" time="480" tween="back">Focus</animation>
+                        <width>60</width>
+                        <height>60</height>
+                    </control>
+                </control>
+                <control id="651" type="grouplist">
+                    <posx>850</posx>
+                    <orientation>horizontal</orientation>
+                    <itemgap>20</itemgap>
+                    <onleft>102</onleft>
+                    <onup>200</onup>
+                    <onright>652</onright>
+                    <control id="103" type="button">
+                        <width>60</width>
+                        <height>60</height>
+                        <animation center="50,50" effect="zoom" end="100" reversible="false" start="95" time="480" tween="back">Focus</animation>
+                        <texturefocus colordiffuse="FF0084ff">googlemaps/zoomin.png</texturefocus>
+                        <texturenofocus colordiffuse="FFBBBBBB">googlemaps/zoomin.png</texturenofocus>
+                    </control>
+                    <!--
+                    <control type="button" id="104">
+                        <width>60</width>
+                        <height>60</height>
+                        <animation effect="zoom" center="50,50" start="95" end="100" time="480" tween="back" reversible="false">Focus</animation>
+                        <texturefocus colordiffuse="FF0084ff">googlemaps/Navigation.png</texturefocus>
+                        <texturenofocus colordiffuse="FFBBBBBB">googlemaps/Navigation.png</texturenofocus>
+                    </control>-->
+                    <control id="104" type="button">
+                        <texturefocus colordiffuse="FF0084ff">googlemaps/zoomout.png</texturefocus>
+                        <texturenofocus colordiffuse="FFBBBBBB">googlemaps/zoomout.png</texturenofocus>
+                        <animation center="50,50" effect="zoom" end="100" reversible="false" start="95" time="480" tween="back">Focus</animation>
+                        <width>60</width>
+                        <height>60</height>
+                    </control>
+                </control>
+                <control id="652" type="grouplist">
+                    <posx>1370</posx>
+                    <width>500</width>
+                    <orientation>horizontal</orientation>
+                    <align>right</align>
+                    <onleft>104</onleft>
+                    <onup>200</onup>
+                    <onright>112</onright>
+                    <itemgap>20</itemgap>
+                    <control id="126" type="button">
+                        <width>60</width>
+                        <height>60</height>
+                        <animation center="50,50" effect="zoom" end="100" reversible="false" start="95" time="480" tween="back">Focus</animation>
+                        <texturefocus colordiffuse="FF0084ff">googlemaps/hybrid.png</texturefocus>
+                        <texturenofocus colordiffuse="FFBBBBBB">googlemaps/hybrid.png</texturenofocus>
+                        <visible>IsEmpty(Window.Property(streetview))</visible>
+                    </control>
+                    <control id="124" type="button">
+                        <texturefocus colordiffuse="FF0084ff">googlemaps/arrowup.png</texturefocus>
+                        <texturenofocus colordiffuse="FFBBBBBB">googlemaps/arrowup.png</texturenofocus>
+                        <animation center="50,50" effect="zoom" end="100" reversible="false" start="95" time="480" tween="back">Focus</animation>
+                        <width>60</width>
+                        <height>60</height>
+                        <visible>!IsEmpty(Window.Property(streetview))</visible>
+                    </control>
+                    <control id="125" type="button">
+                        <texturefocus colordiffuse="FF0084ff">googlemaps/arrowdown.png</texturefocus>
+                        <texturenofocus colordiffuse="FFBBBBBB">googlemaps/arrowdown.png</texturenofocus>
+                        <animation center="50,50" effect="zoom" end="100" reversible="false" start="95" time="480" tween="back">Focus</animation>
+                        <width>60</width>
+                        <height>60</height>
+                        <visible>!IsEmpty(Window.Property(streetview))</visible>
+                    </control>
+                </control>
+            </control>
+            </control>
+        </control>
+        <control id="725" type="button">
+            <include>HiddenObject</include>
+            <texturenofocus>-</texturenofocus>
+            <font>-</font>
+        </control>
+    </controls>
+</window>

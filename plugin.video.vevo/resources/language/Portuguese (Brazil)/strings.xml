@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+	<string id="30000">Seu email no Facebook</string>
+	<string id="30001">Senha</string>
+
+	<string id="30004">Escolha o Bitrate</string>
+	<string id="30005">288p@564kbps</string>
+	<string id="30006">288p@864kbps</string>
+	<string id="30007">432p@1328kbps</string>
+	<string id="30008">432p@1728kbps</string>
+	<string id="30009">720p@2528kbps</string>
+	<string id="30010">720p@3328kbps</string>
+	<string id="30011">1080p@4392kbps</string>
+	<string id="30012">1080p@5392kbps</string>
+
+	<string id="30014">HTTP Unpause</string>
+	<string id="30015">UnPause Delay</string>
+
+	<string id="30016">Por Página</string>
+	<string id="30017">Reproduzir via Youtube</string>
+	<string id="30018">Latitude (Branco para desativado)</string>
+	<string id="30019">Longitude (Branco para Desativado)</string>
+	<string id="30020">Raio em milhas</string>
+	
+	<string id="30021">Dados do Usuário</string>
+	<string id="30022">Visualização</string>
+	<string id="30023">Streaming</string>
+	
+	<string id="30024">Obter Novo Token</string>
+	
+	<string id="30025">Legendas e Letras (Experimental)</string>
+	<string id="30026">Ativar Cache HTTP</string>
+	<string id="30027">Pasta de Cache</string>
+	
+	<string id="30028">Rick Roll!</string>
+	<string id="30029">Modo RTMP</string>
+     <string id="30031">Modo HLS</string>
+	
+	<string id="30030">Proxy</string>
+	<string id="30040">Proxy IP</string>
+	<string id="30041">Porta</string>
+	<string id="30042">Ativar Proxy</string>
+	<string id="30043">Usuário</string>
+	<string id="30044">Senha</string>
+	
+	<string id="30050">Ativar visualização de sets</string>
+	<string id="30058">Visualização Padrão</string>
+
+	<string id="30051">Miniatura</string>
+	<string id="30052">Media Info</string>
+	<string id="30053">Lista</string>
+</strings>

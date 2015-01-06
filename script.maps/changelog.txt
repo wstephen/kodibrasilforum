@@ -1,0 +1,7 @@
+[B]Version:[/B] 0.1.0          [B]Date:[/B] 2014-08-15
+    Added support for a new type of providers: Panoramic View Provider.
+    Added panoramic view support to the Google provider (Google Street View).
+    Added a new "Panorama" mode to provide panoramic views in certain places.
+
+[B]Version:[/B] 0.0.1          [B]Date:[/B] 2014-08-14
+    Initial beta.

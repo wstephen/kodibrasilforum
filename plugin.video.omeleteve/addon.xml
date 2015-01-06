@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="plugin.video.omeleteve"
+	name="Omeleteve"
+	version="1.0.2"
+	provider-name="kodi.tv">
+  <requires>
+    <import addon="xbmc.python" version="2.13.0"/>
+    <import addon="plugin.video.youtube" version="3.0.0"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource" library="default.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary lang="pt">Omeleteve</summary>
+    <description lang="en">O canal de videos do http://omelete.com.br, o maior site de cultura pop do Brasil, referencia desde 2000! Cinema, Quadrinhos, Games, Musica, Series de TV e Literatura e com a gente mesmo! Assine agora e libere o seu lado nerd .</description>
+    <platform>all</platform>
+  </extension>
+</addon>

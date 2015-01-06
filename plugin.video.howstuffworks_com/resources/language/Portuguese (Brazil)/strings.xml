@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+  <string id="30001">Próxima Página</string>
+  <string id="30002">Todos os Videos</string>
+  <string id="30003">Mais recentes</string>
+  <string id="30004">Mais Assistidos</string>
+  <string id="30005">Top Collections</string>
+  <string id="30006">Categorias</string>
+  <string id="30007">Procurar</string>
+  <string id="30101">Forçar Visualização</string>
+  <string id="30102">ViewID</string>
+  <string id="30103">Autoplay após seg (0=OFF)</string>
+</strings>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<addon id="plugin.video.xbmcbrasil"
+	name="XBMC Brasil Vídeos Tutoriais"
+	version="1.0.2"
+	provider-name="Wanilton">
+  <requires>
+    <import addon="xbmc.python" version="2.1.0"/>
+    <import addon="plugin.video.youtube" version="3.0.0"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource" library="default.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en">Tutoriais do Fórum XBMC Brasil</summary>
+    <description lang="en">Awesome XBMC Brazil forum videos from YouTube.</description>
+    <platform>all</platform>
+  </extension>
+</addon>
