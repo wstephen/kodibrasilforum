@@ -306,11 +306,11 @@
   </extension>
 </addon>
 
-<addon id="repository.kodibrasilforum" name="Kodi Brasil Forum Repository" version="1.0.4" provider-name="Wanilton">
+<addon id="repository.kodibrasilforum" name="Kodi Brasil Forum Repository" version="1.0.5" provider-name="Wanilton">
 	<extension point="xbmc.addon.repository" name="Kodi Brasil Forum Repository">
-		<info compressed="false">https://raw.githubusercontent.com/kodibrasil/kodibrasilforum/master/addons.xml</info>
+		<info>https://raw.githubusercontent.com/kodibrasil/kodibrasilforum/master/addons.xml</info>
 		<checksum>https://raw.githubusercontent.com/kodibrasil/kodibrasilforum/master/addons.xml.md5</checksum>
-		<datadir zip="true">https://raw.githubusercontent.com/kodibrasil/kodibrasilforum/master</datadir>
+		<datadir zip="true">https://raw.githubusercontent.com/kodibrasil/kodibrasilforum/master/repo/</datadir>
 	</extension>
 	<extension point="xbmc.addon.metadata">
 		<summary>Kodi Brazil Forum Repository Addon</summary>
