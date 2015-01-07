@@ -3,8 +3,11 @@ import os
 import xbmc
 import xbmcaddon
 import xbmcplugin
-import buggalo
-buggalo.GMAIL_RECIPIENT = "phil65@kodi.tv"
+try:
+    import buggalo
+    buggalo.GMAIL_RECIPIENT = "phil65@kodi.tv"
+except:
+    pass
 addon = xbmcaddon.Addon()
 addon_version = addon.getAddonInfo('version')
 addon_name = addon.getAddonInfo('name')
