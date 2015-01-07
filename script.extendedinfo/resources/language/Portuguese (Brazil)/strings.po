@@ -216,3 +216,27 @@ msgstr "Ator / Membro do Elenco"
 msgctxt "#32127"
 msgid "Certification"
 msgstr "Certificação"
+
+msgctxt "#32128"
+msgid "Order"
+msgstr "Ordem"
+
+msgctxt "#32129"
+msgid "Your rating"
+msgstr "Sua nota"
+
+msgctxt "#32130"
+msgid "Show lists"
+msgstr "Mostrar Listas"
+
+msgctxt "#32131"
+msgid "Already rated"
+msgstr "Já Avaliada"
+
+msgctxt "#32132"
+msgid "Extras"
+msgstr "Extras"
+
+msgctxt "#32133"
+msgid "Manage"
+msgstr "Administrar"

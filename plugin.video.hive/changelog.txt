@@ -1,0 +1,59 @@
+Version 0.2.3
+- JoKeRzBoX contribution: set preferable (max) resolution and other fixes #14
+- JoKeRzBoX contribution: FIX: the "ask" dialogue where addon asks user what resolution to choose is now ordered (from higher to lower resolution)
+- JoKeRzBoX contribution: FIX: in the "ask" dialogue, if user just closes the dialogue without choosing anything, video would still try to play.
+- JoKeRzBoX contribution: ADD: Settings to configure the max quality/resolution for video and audio (separate) for both premium and free users
+- JoKeRzBoX contribution: ADD: When video plays, title also shows the resolution ( @ )
+- add cloudservice API reference version #s
+- remove isQuickLink (unused)
+- removed playbackType retrieval calls and links to addMediaFile (as a result of isQuickLink removal)
+- refactor: instanstation of service class
+Version 0.2.2
+- JoKeRzBoX contribution: Show friend's logo while browsing list of friends #13
+- JoKeRzBoX contribution: Show Friend's icon/thumbnail while browsing list of friends #12
+- added non-premium/free & premium option to accounts screen
+- added ability to hide unprocessed videos (useful for non-premium / free users) -- default for non-premium
+- filtered out videos only apply to viewing hive and friend's hive (not for search or feed)
+- add ability to default to 240p playback (useful for non-premium / free users) -- default for non-premium
+- added right-click, select "Request Encoding" for non-encoded videos
+Version 0.2.1
+- cosmetic changes
+- added bookmarks
+- added saved searches
+Version 0.2.0
+- Hive out of beta; updated api calls
+- contribution from JoKeRzBoX - This change to library file hive.py adds capacity to play an audio file that does not have HD image (backdrop) and/or thumbnail. This situation happens when the audio file is not recognized by Hive as any known song from an known album
+Version 0.1.9
+- photo support added
+Version 0.1.8
+- scrape music tags
+- change folder display limit to 300
+- don't write STRM if exists
+- support for reverse alphabetical order
+Version 0.1.7
+- support up to 300 friends
+- add latest feeed
+- issue fixed: For quality to user default #2
+- playback=0 for original quality, playback=1 or playback=2 for ask stream
+- issue fixed: Handle special characters in titles of media and folders #8
+Version 0.1.6
+- add build STRM
+- automatic build of STRM support for 1) your hive, 2) your folders, 3) individual files, 4) friend's hive, 5) search results
+Version 0.1.5
+- add fanart support
+- add sorted media list setting (sort folders and media by alphabetical order or default)
+Version 0.1.4
+- add options menu
+- cleanup settings
+- add thumbnail support
+- improved authorization key handling
+- fix for crashreporting
+Version 0.1.3
+- support streaming
+- add search API call
+Version 0.1.2
+- add friend's Hive support
+- add debug logging support
+- add more detail to login errors
+Version 0.1.0
+- Initial version
