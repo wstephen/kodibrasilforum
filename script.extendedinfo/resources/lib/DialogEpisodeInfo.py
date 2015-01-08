@@ -30,10 +30,8 @@ class DialogEpisodeInfo(xbmcgui.WindowXMLDialog):
         self.showname = kwargs.get('tvshow')
         self.episodenumber = kwargs.get('episode')
         self.logged_in = checkLogin()
-        prettyprint(kwargs)
         if self.tmdb_id or self.showname:
             self.episode = GetExtendedEpisodeInfo(self.tmdb_id, self.season, self.episodenumber)
-            prettyprint(self.episode)
             if not self.episode:
                 self.close()
             xbmc.executebuiltin("ActivateWindow(busydialog)")
@@ -41,7 +39,6 @@ class DialogEpisodeInfo(xbmcgui.WindowXMLDialog):
             youtube_thread = Get_Youtube_Vids_Thread(search_string, "", "relevance", 15)
             youtube_thread.start()
             if not "DBID" in self.episode["general"]: # need to add comparing for episodes
-                # Notify("download Poster")
                 poster_thread = Get_ListItems_Thread(Get_File, self.episode["general"]["Poster"])
                 poster_thread.start()
             if not "DBID" in self.episode["general"]:
@@ -54,7 +51,7 @@ class DialogEpisodeInfo(xbmcgui.WindowXMLDialog):
             filter_thread.join()
             self.episode["general"]['ImageFilter'], self.episode["general"]['ImageColor'] = filter_thread.image, filter_thread.imagecolor
         else:
-            Notify("No ID found")
+            Notify(addon.getLocalizedString(32143))
             self.close()
         xbmc.executebuiltin("Dialog.Close(busydialog)")
 
@@ -105,7 +102,7 @@ class DialogEpisodeInfo(xbmcgui.WindowXMLDialog):
             ratings = []
             for i in range(0, 21):
                 ratings.append(str(float(i * 0.5)))
-            rating = xbmcgui.Dialog().select("Enter Rating", ratings)
+            rating = xbmcgui.Dialog().select(addon.getLocalizedString(32129), ratings)
             if rating > -1:
                 rating = float(rating) * 0.5
                 ids = [self.tmdb_id, self.season, self.episode["general"]["episode"]]

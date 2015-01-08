@@ -30,7 +30,6 @@ class DialogSeasonInfo(xbmcgui.WindowXMLDialog):
         self.season = kwargs.get('season')
         self.showname = kwargs.get('tvshow')
         self.logged_in = checkLogin()
-        prettyprint(kwargs)
         if self.tmdb_id or (self.season and self.showname):
             self.season = GetSeasonInfo(self.tmdb_id, self.showname, self.season)
             if not self.season:
@@ -53,7 +52,7 @@ class DialogSeasonInfo(xbmcgui.WindowXMLDialog):
             filter_thread.join()
             self.season["general"]['ImageFilter'], self.season["general"]['ImageColor'] = filter_thread.image, filter_thread.imagecolor
         else:
-            Notify("No ID found")
+            Notify(addon.getLocalizedString(32143))
             self.close()
         xbmc.executebuiltin("Dialog.Close(busydialog)")
 

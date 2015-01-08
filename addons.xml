@@ -86,20 +86,6 @@
 	</extension>
 </addon>
 
-<addon id="plugin.video.hive" version="0.2.3" name="Hive" provider-name="ddurdle">
-    <requires>
-        <import addon="xbmc.python" version="2.1.0"/>
-    </requires>
-    <extension point="xbmc.python.pluginsource" library="default.py">
-        <provides>video audio</provides>
-    </extension>
-    <extension point="xbmc.addon.metadata">
-        <summary>Plays video and music from your Hive (QVIVO service) service</summary>
-        <description>Plays video and music from your Hive cloud service. This addon is not affiliated with QVIVO</description>
-        <platform>all</platform>
-    </extension>
-</addon>
-
 <addon id="plugin.video.howstuffworks_com" name="HowStuffWorks.com" version="2.0.4" provider-name="AddonScriptorDE">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
@@ -320,7 +306,7 @@
 	</extension>
 </addon>
 
-<addon id="script.extendedinfo" name="ExtendedInfo Script" version="1.9.0.3" provider-name="phil65">
+<addon id="script.extendedinfo" name="ExtendedInfo Script" version="2.0.0" provider-name="phil65">
 	<requires>
 		<import addon="xbmc.python" version="2.1.0"/>
 		<import addon="script.module.simplejson" version="2.0.10"/>

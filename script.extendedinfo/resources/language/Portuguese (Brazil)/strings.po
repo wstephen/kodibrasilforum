@@ -240,3 +240,35 @@ msgstr "Extras"
 msgctxt "#32133"
 msgid "Manage"
 msgstr "Administrar"
+
+msgctxt "#32134"
+msgid "Starred movies"
+msgstr "Filmes em que participa"
+
+msgctxt "#32135"
+msgid "Rated movies"
+msgstr "Filmes Impróprios"
+
+msgctxt "#32136"
+msgid "Choose list"
+msgstr "Escolher Lista"
+
+msgctxt "#32137"
+msgid "Enter list name"
+msgstr "Entrar com o nome da lista"
+
+msgctxt "#32138"
+msgid "Delete movie list"
+msgstr "Deletar lista de filme"
+
+msgctxt "#32139"
+msgid "New movie list"
+msgstr "Nova Lista de File"
+
+msgctxt "#32140"
+msgid "For all features enter your TMDB credentials in addon settings. "
+msgstr "Para ter acesso a todos os recursos entre com suas credenciais do TMDB nos ajustes do addon."
+
+msgctxt "#32141"
+msgid "This product uses the TMDb API but is not endorsed or certified by TMDb."
+msgstr "Este script usa a PAI TMDb, mas não é endossado ou certificado pelo TMDb."

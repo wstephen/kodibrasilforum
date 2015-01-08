@@ -284,3 +284,23 @@ msgstr ""
 msgctxt "#32141"
 msgid "This product uses the TMDb API but is not endorsed or certified by TMDb."
 msgstr ""
+
+msgctxt "#32142"
+msgid "Studios"
+msgstr ""
+
+msgctxt "#32143"
+msgid "Could not find item at MovieDB"
+msgstr ""
+
+msgctxt "#32144"
+msgid "Starred TV Shows"
+msgstr ""
+
+msgctxt "#32145"
+msgid "Rated TV Shows"
+msgstr ""
+
+msgctxt "#32146"
+msgid "Search for '%s'"
+msgstr ""
