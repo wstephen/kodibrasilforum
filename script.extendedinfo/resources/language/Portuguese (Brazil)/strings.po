@@ -271,4 +271,60 @@ msgstr "Para ter acesso a todos os recursos entre com suas credenciais do TMDB n
 
 msgctxt "#32141"
 msgid "This product uses the TMDb API but is not endorsed or certified by TMDb."
-msgstr "Este script usa a PAI TMDb, mas não é endossado ou certificado pelo TMDb."
+msgstr "Este script usa a API do TMDb, mas não é endossado ou certificado pelo TMDb."
+
+msgctxt "#32142"
+msgid "Studios"
+msgstr "Estúdios"
+
+msgctxt "#32143"
+msgid "Could not find item at MovieDB"
+msgstr "Não pude localizar o item no MovieDB"
+
+msgctxt "#32144"
+msgid "Starred TV Shows"
+msgstr "Estrelou nos Seriados"
+
+msgctxt "#32145"
+msgid "Rated TV Shows"
+msgstr "Seriados Impróprios"
+
+msgctxt "#32146"
+msgid "Search for '%s'"
+msgstr "Procurar por '%s'"
+
+msgctxt "#32147"
+msgid "Show actor TV Show appearances"
+msgstr "Mostrar aparições do ator no seriado"
+
+msgctxt "#32148"
+msgid "Show TV Show Info"
+msgstr "Mostrar Info do seriado"
+
+msgctxt "#32149"
+msgid "Upper limit"
+msgstr "Limite superior"
+
+msgctxt "#32150"
+msgid "Lower limit"
+msgstr "Limite inferior"
+
+msgctxt "#32151"
+msgid "Choose option"
+msgstr "Escolha opção"
+
+msgctxt "#32152"
+msgid "Networks"
+msgstr "Redes"
+
+msgctxt "#32153"
+msgid "Certification country"
+msgstr "País da Certificação"
+
+msgctxt "#32154"
+msgid "Star"
+msgstr "Estrelar"
+
+msgctxt "#32155"
+msgid "UnStar"
+msgstr "Desestrelar"

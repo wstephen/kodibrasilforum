@@ -304,3 +304,39 @@ msgstr ""
 msgctxt "#32146"
 msgid "Search for '%s'"
 msgstr ""
+
+msgctxt "#32147"
+msgid "Show actor TV Show appearances"
+msgstr ""
+
+msgctxt "#32148"
+msgid "Show TV Show Info"
+msgstr ""
+
+msgctxt "#32149"
+msgid "Upper limit"
+msgstr ""
+
+msgctxt "#32150"
+msgid "Lower limit"
+msgstr ""
+
+msgctxt "#32151"
+msgid "Choose option"
+msgstr ""
+
+msgctxt "#32152"
+msgid "Networks"
+msgstr ""
+
+msgctxt "#32153"
+msgid "Certification country"
+msgstr ""
+
+msgctxt "#32154"
+msgid "Star"
+msgstr ""
+
+msgctxt "#32155"
+msgid "UnStar"
+msgstr ""
