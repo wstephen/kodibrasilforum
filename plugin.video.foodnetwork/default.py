@@ -63,10 +63,10 @@ def getRequest(url):
 def getSources(fanart):
               urlbase   = FNTVBASE % ('/videos/players/food-network-full-episodes.html')
               pg = getRequest(urlbase)
-              cats = re.compile('<option.+?value="(.+?)">(.+?)<').findall(pg) 
-              for caturl, catname in cats:
+              cats = re.compile('<div class="group".+?href="(.+?)".+?data-max="85">(.+?)<.+?src="(.+?)".+?</div>').findall(pg) 
+              for caturl, catname, catimg in cats:
                   catname = catname.strip()
-                  addDir(catname,caturl,'GC',icon ,addonfanart,catname,GENRE_TV,'',False)
+                  addDir(catname,caturl,'GC',catimg ,addonfanart,catname,GENRE_TV,'',False)
 
 def getCats(cat_url):
              pg = getRequest(FNTVBASE % cat_url)

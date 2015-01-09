@@ -47,7 +47,7 @@ class DialogVideoInfo(xbmcgui.WindowXMLDialog):
         elif imdb_id:
             self.MovieId = GetMovieDBID(imdb_id)
         elif self.name:
-            self.MovieId = search_movie(kwargs.get('name'))
+            self.MovieId = search_media(kwargs.get('name'))
         else:
             self.MovieId = ""
         if self.MovieId:
@@ -144,11 +144,15 @@ class DialogVideoInfo(xbmcgui.WindowXMLDialog):
             PopWindowStack()
         elif action in self.ACTION_EXIT_SCRIPT:
             self.close()
-        elif action == xbmcgui.ACTION_CONTEXT_MENU:
-            if focusid == 450:
-                list_id = self.getControl(focusid).getSelectedItem().getProperty("id")
-                context_menu = ContextMenu.ContextMenu(u'script-globalsearch-contextmenu.xml', addon_path, labels=["Add To Account Lists"])
-                context_menu.doModal()
+        # elif action == xbmcgui.ACTION_CONTEXT_MENU:
+        #     if focusid == 450:
+        #         list_id = self.getControl(focusid).getSelectedItem().getProperty("id")
+        #         listitems = ["Add To Account Lists"]
+        #         context_menu = ContextMenu.ContextMenu(u'script-globalsearch-contextmenu.xml', addon_path, labels=listitems)
+        #         context_menu.doModal()
+        #         if context_menu.selection == 0:
+        #             Notify(list_id)
+        #         selection = xbmcgui.Dialog().select(addon.getLocalizedString(32151), listitems)
 
 
     def onClick(self, controlID):
@@ -173,8 +177,8 @@ class DialogVideoInfo(xbmcgui.WindowXMLDialog):
         elif controlID in [350, 1150]:
             AddToWindowStack(self)
             self.close()
-            listitem =xbmcgui.ListItem ('Trailer')
-            listitem.setInfo('video', {'Title': 'Trailer', 'Genre': 'Youtube Video'})
+            listitem = xbmcgui.ListItem(xbmc.getLocalizedString(20410))
+            listitem.setInfo('video', {'Title': xbmc.getLocalizedString(20410), 'Genre': 'Youtube Video'})
             youtube_id = self.getControl(controlID).getSelectedItem().getProperty("youtube_id")
             if youtube_id:
                 self.movieplayer.playYoutubeVideo(youtube_id, self.getControl(controlID).getSelectedItem(), True)
@@ -375,10 +379,6 @@ class DialogVideoInfo(xbmcgui.WindowXMLDialog):
         dialog.doModal()
 
     def ShowManageDialog(self):
-                                # <onclick condition="IsEmpty(Window.Property(movie.DBID))">SetProperty(Dialog.4.Label,Add To Couch Potato)</onclick>
-                                # <onclick condition="IsEmpty(Window.Property(movie.DBID))">SetProperty(Dialog.4.BuiltIn,RunPlugin(plugin://plugin.video.couchpotato_manager/movies/add?imdb_id=$INFO[Window.Property(movie.imdb_id)])||Notification(script.extendedinfo,Added Movie To CouchPota))</onclick>
-                                # <onclick condition="system.hasaddon(script.tvtunes)">SetProperty(Dialog.6.Label,$LOCALIZE[32102])</onclick>
-                                # <onclick condition="system.hasaddon(script.tvtunes)">SetProperty(Dialog.6.BuiltIn,RunScript(script.tvtunes,mode=solo&amp;tvpath=$ESCINFO[Window.Property(movie.FilenameAndPath)]&amp;tvname=$INFO[Window.Property(movie.TVShowTitle)]))</onclick>
                                 # <onclick condition="System.HasAddon(script.libraryeditor) + !IsEmpty(Window.Property(movie.DBID))">SetProperty(Dialog.7.Label,$LOCALIZE[32103])</onclick>
                                 # <onclick condition="System.HasAddon(script.libraryeditor) + !IsEmpty(Window.Property(movie.DBID))">SetProperty(Dialog.7.BuiltIn,RunScript(script.libraryeditor,DBID=$INFO[Window.Property(movie.DBID)]))</onclick>
                                 # <onclick>SetProperty(Dialog.8.Label,ExtendedInfo Settings)</onclick>
@@ -391,11 +391,13 @@ class DialogVideoInfo(xbmcgui.WindowXMLDialog):
                          ["32100", "RunScript(script.artwork.downloader,mode=custom,mediatype=movie,dbid=$INFO[Window.Property(movie.DBID)])"]]
             manage_list += temp_list
         else:
-            temp_list = [["413", "RunScript(script.artwork.downloader,mode=gui,mediatype=movie,dbid=$INFO[Window.Property(movie.DBID)])"],
+            temp_list = [["Add To Couch Potato", "RunPlugin(plugin://plugin.video.couchpotato_manager/movies/add?imdb_id=$INFO[Window.Property(movie.imdb_id)])||Notification(script.extendedinfo,Added Movie To CouchPota))"],
                          ["14061", "RunScript(script.artwork.downloader, mediatype=movie, dbid=$INFO[Window.Property(movie.DBID)])"],
                          ["32101", "RunScript(script.artwork.downloader,mode=custom,mediatype=movie,dbid=$INFO[Window.Property(movie.DBID)],extrathumbs)"],
                          ["32100", "RunScript(script.artwork.downloader,mode=custom,mediatype=movie,dbid=$INFO[Window.Property(movie.DBID)])"]]
             manage_list += temp_list
+        if xbmc.getCondVisibility("system.hasaddon(script.tvtunes)"):
+            manage_list.append(["14061", "RunScript(script.tvtunes,mode=solo&amp;tvpath=$ESCINFO[Window.Property(movie.FilenameAndPath)]&amp;tvname=$INFO[Window.Property(movie.TVShowTitle)])"])
 
 
 class Join_Omdb_Thread(threading.Thread):

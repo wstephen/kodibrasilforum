@@ -101,8 +101,8 @@ def StartInfoActions(infos, params):
         elif info == 'populartvshows':
             data = GetMovieDBTVShows("popular"), "PopularTVShows"
         elif info == 'similarmovies':
-            if params.get("id", ""):
-                MovieId = params.get("id", "")
+            if params.get("id", False):
+                MovieId = params["id"]
             elif int(params.get("dbid", -1)) > -1:
                 MovieId = GetImdbIDFromDatabase("movie", params["dbid"])
                 log("IMDBId from local DB:" + str(MovieId))
@@ -167,20 +167,20 @@ def StartInfoActions(infos, params):
                 if directorid:
                     data = GetDirectorMovies(directorid), "DirectorMovies"
         elif info == 'writermovies':
-            if params.get("writer", False) and not params["writer"].split(" / ")[0] == params["director"].split(" / ")[0]:
+            if params.get("writer", False) and not params["writer"].split(" / ")[0] == params.get("director", "").split(" / ")[0]:
                 writerid = GetPersonID(params["writer"])["id"]
                 if writerid:
                     data = GetDirectorMovies(writerid), "WriterMovies"
         elif info == 'similarmoviestrakt':
-            if (params.get("id", "") or params["dbid"]):
-                if params["dbid"]:
+            if params.get("id", False) or params.get("dbid", False):
+                if params.get("dbid", False):
                     movieid = GetImdbIDFromDatabase("movie", params["dbid"])
                 else:
                     movieid = params.get("id", "")
                 data = GetSimilarTrakt("movie", movieid), "SimilarMovies"
         elif info == 'similartvshowstrakt':
             if (params.get("id", "") or params["dbid"]):
-                if params["dbid"]:
+                if params.get("dbid", False):
                     if params["type"] == "episode":
                         tvshowid = GetImdbIDFromDatabasefromEpisode(params["dbid"])
                     else:
@@ -243,7 +243,7 @@ def StartInfoActions(infos, params):
             data = favourites, "Favourites"
         elif info == 'json':
             data = GetYoutubeVideos(params["feed"]), "RSS"
-        elif info == 'similarlocal' and params["dbid"]:
+        elif info == 'similarlocal' and "dbid" in params:
             data = GetSimilarFromOwnLibrary(params["dbid"]), "SimilarLocalMovies"
         elif info == 'iconpanel':
             data = GetIconPanel(int(self.id)), "IconPanel" + str(self.id)

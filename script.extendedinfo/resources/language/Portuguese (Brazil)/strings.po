@@ -328,3 +328,39 @@ msgstr "Estrelar"
 msgctxt "#32155"
 msgid "UnStar"
 msgstr "Desestrelar"
+
+msgctxt "#32156"
+msgid "Person"
+msgstr "Pessoa"
+
+msgctxt "#32157"
+msgid "Created at"
+msgstr "Criado em"
+
+msgctxt "#32158"
+msgid "Birthday today!"
+msgstr "Nascidos hoje!"
+
+msgctxt "#32159"
+msgid "Language for TheMovieDB requests"
+msgstr "Idioma para requisições ao TheMovieDB"
+
+msgctxt "#32160"
+msgid "TheMovieDB username"
+msgstr "Usuário TheMovieDB"
+
+msgctxt "#32161"
+msgid "TheMovieDB password"
+msgstr "Senha TheMovieDB"
+
+msgctxt "#32162"
+msgid "Include adult actors"
+msgstr "Incluir atores de vídeos adultos"
+
+msgctxt "#32163"
+msgid "Open InfoDialog by default"
+msgstr "Abrir Diálogo de Info por padrão"
+
+msgctxt "#32164"
+msgid "Delete cache"
+msgstr "Deletar cache"

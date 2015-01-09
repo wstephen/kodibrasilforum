@@ -126,20 +126,18 @@ def calculate_age(born):
             base_month = today.month - int(actor_born[1])
             base_day = today.day - int(actor_born[2])
             if base_month < 0:
-                log("one year younger")
                 base_age -= 1
             elif base_month == 0 and base_day < 0:
-                log("one year younger")
                 base_age -= 1
             elif base_month == 0 and base_day == 0:
-                Notify("Birthday Today! Age %i" % base_age)
+                Notify("%s (%i)" % (addon.getLocalizedString(), base_age))
     return ""
 
 
 def PlayTrailer(youtube_id="", listitem=None, popstack=False):
     if not listitem:
-        listitem = xbmcgui.ListItem('Trailer')
-        listitem.setInfo('video', {'Title': 'Trailer', 'Genre': 'Youtube Video'})
+        listitem = xbmcgui.ListItem(xbmc.getLocalizedString(20410))
+        listitem.setInfo('video', {'Title': xbmc.getLocalizedString(20410), 'Genre': 'Youtube Video'})
     import YDStreamExtractor
     YDStreamExtractor.disableDASHVideo(True)
     vid = YDStreamExtractor.getVideoInfo(youtube_id, quality=1)
@@ -178,8 +176,8 @@ class VideoPlayer(xbmc.Player):
 
     def playYoutubeVideo(self, youtube_id="", listitem=None, popstack=True):
         if not listitem:
-            listitem = xbmcgui.ListItem('Trailer')
-            listitem.setInfo('video', {'Title': 'Trailer', 'Genre': 'Youtube Video'})
+            listitem = xbmcgui.ListItem(xbmc.getLocalizedString(20410))
+            listitem.setInfo('video', {'Title': xbmc.getLocalizedString(20410), 'Genre': 'Youtube Video'})
         import YDStreamExtractor
         YDStreamExtractor.disableDASHVideo(True)
         if youtube_id:
@@ -523,7 +521,7 @@ def CompareWithLibrary(onlinelist=[], library_first=True, sortkey=False):
             json_query = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovieDetails", "params": {"properties": ["streamdetails", "resume", "year", "art", "writer", "file"], "movieid":%s }, "id": 1}' % dbid)
             json_query = unicode(json_query, 'utf-8', errors='ignore')
             json_response = simplejson.loads(json_query)
-            if "moviedetails" in json_response["result"] and "Premiered" in online_item:
+            if "moviedetails" in json_response["result"]:
                 local_item = json_response['result']['moviedetails']
                 try:
                     diff = abs(local_item["year"] - int(online_item["Year"]))
@@ -581,6 +579,8 @@ def CompareWithLibrary(onlinelist=[], library_first=True, sortkey=False):
                     local_items.append(online_item)
                 else:
                     remote_items.append(online_item)
+            else:
+                remote_items.append(online_item)
         else:
             remote_items.append(online_item)
     log("compare time: " + str(now - time.time()))
@@ -990,6 +990,8 @@ def CreateListItems(data=None, preload_images=0):
             itempath = ""
             counter = 1
             for (key, value) in result.iteritems():
+                if not value:
+                    continue
                 value = unicode(value)
                 if counter <= preload_images:
                     if value.startswith("http://") and (value.endswith(".jpg") or value.endswith(".png")):

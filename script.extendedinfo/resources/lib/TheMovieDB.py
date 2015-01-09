@@ -28,6 +28,7 @@ logo_sizes = ["w45", "w92", "w154", "w185", "w300", "w500", "original"]
 backdrop_sizes = ["w300", "w780", "w1280", "original"]
 profile_sizes = ["w45", "w185", "h632", "original"]
 still_sizes = ["w92", "w185", "w300", "original"]
+include_adult = str(addon.getSetting("include_adults")).lower()
 
 
 def checkLogin():
@@ -512,7 +513,7 @@ def GetPersonID(person):
     #     selection = xbmcgui.Dialog().select("Select Actor", personlist)
     # else:
     person = persons[0]
-    response = GetMovieDBData("search/person?query=%s&include_adult=%s&" % (urllib.quote_plus(person), addon.getSetting("include_adults")), 30)
+    response = GetMovieDBData("search/person?query=%s&include_adult=%s&" % (urllib.quote_plus(person), include_adult), 30)
     if response and "results" in response:
         if len(response["results"]) > 1:
             names = []
@@ -529,8 +530,8 @@ def GetPersonID(person):
 
 
 def GetKeywordID(keyword):
-    response = GetMovieDBData("search/keyword?query=%s&include_adult=%s&" % (urllib.quote_plus(keyword), addon.getSetting("include_adults")), 30)
-    if response and "results" in response:
+    response = GetMovieDBData("search/keyword?query=%s&include_adult=%s&" % (urllib.quote_plus(keyword), include_adult), 30)
+    if response and "results" in response and response["results"]:
         if len(response["results"]) > 1:
             names = []
             for item in response["results"]:
@@ -780,20 +781,24 @@ def GetExtendedMovieInfo(movieid=None, dbid=None, cache_time=30):
         item.start()
     for item in threads:
         item.join()
-    answer = {"general": CompareWithLibrary([movie])[0],
-              "actors": actor_thread.listitems,
-              "similar": similar_thread.listitems,
-              "lists": HandleTMDBMiscResult(response["lists"]["results"]),
-              "studios": HandleTMDBMiscResult(response["production_companies"]),
-              "releases": HandleTMDBMiscResult(response["releases"]["countries"]),
-              "crew": crew_thread.listitems,
-              "genres": HandleTMDBMiscResult(response["genres"]),
-              "keywords": HandleTMDBMiscResult(response["keywords"]["keywords"]),
-              "reviews": HandleTMDBMiscResult(response["reviews"]["results"]),
-              "videos": videos,
-              "account_states": account_states,
-              "images": poster_thread.listitems,
-              "backdrops": HandleTMDBPeopleImagesResult(response["images"]["backdrops"])}
+    synced_movie = CompareWithLibrary([movie])
+    if synced_movie:
+        answer = {"general": synced_movie[0],
+                  "actors": actor_thread.listitems,
+                  "similar": similar_thread.listitems,
+                  "lists": HandleTMDBMiscResult(response["lists"]["results"]),
+                  "studios": HandleTMDBMiscResult(response["production_companies"]),
+                  "releases": HandleTMDBMiscResult(response["releases"]["countries"]),
+                  "crew": crew_thread.listitems,
+                  "genres": HandleTMDBMiscResult(response["genres"]),
+                  "keywords": HandleTMDBMiscResult(response["keywords"]["keywords"]),
+                  "reviews": HandleTMDBMiscResult(response["reviews"]["results"]),
+                  "videos": videos,
+                  "account_states": account_states,
+                  "images": poster_thread.listitems,
+                  "backdrops": HandleTMDBPeopleImagesResult(response["images"]["backdrops"])}
+    else:
+        answer = []
     return answer
 
 
@@ -901,12 +906,12 @@ def GetMovieLists(list_id):
 
 
 def GetMoviesWithKeyword(keyword_id):
-    response = GetMovieDBData("discover/movie?sort_by=release_date.desc&vote_count.gte=10&with_keywords=%s&language=%s&include_adult=%s&" % (str(keyword_id), addon.getSetting("LanguageID"), addon.getSetting("include_adults")), 30)
+    response = GetMovieDBData("discover/movie?sort_by=release_date.desc&vote_count.gte=10&with_keywords=%s&language=%s&include_adult=%s&" % (str(keyword_id), addon.getSetting("LanguageID"), include_adult), 30)
     return HandleTMDBMovieResult(response["results"], False, None)
 
 
 def GetMoviesWithGenre(genre_id):
-    response = GetMovieDBData("discover/movie?sort_by=release_date.desc&vote_count.gte=5&with_genres=%s&language=%s&include_adult=%s&" % (str(genre_id), addon.getSetting("LanguageID"), addon.getSetting("include_adults")), 30)
+    response = GetMovieDBData("discover/movie?sort_by=release_date.desc&vote_count.gte=5&with_genres=%s&language=%s&include_adult=%s&" % (str(genre_id), addon.getSetting("LanguageID"), include_adult), 30)
     return HandleTMDBMovieResult(response["results"], False, None)
 
 def GetTVShowsWithGenre(genre_id):
@@ -920,7 +925,7 @@ def GetTVShowsFromNetwork(network_id):
 
 def GetMoviesWithCertification(country, rating):
     response = GetMovieDBData("discover/movie?sort_by=release_date.desc&vote_count.gte=10&certification_country=%s&certification=%s&language=%s&include_adult=%s&" %
-                              (country, str(rating), addon.getSetting("LanguageID"), addon.getSetting("include_adults")), 30)
+                              (country, str(rating), addon.getSetting("LanguageID"), include_adult), 30)
     return HandleTMDBMovieResult(response["results"], False, None)
 
 
@@ -984,8 +989,8 @@ def GetMovieKeywords(movie_id):
 def GetSimilarMovies(movie_id):
     response = GetMovieDBData("movie/%s?append_to_response=account_states,alternative_titles,credits,images,keywords,releases,videos,translations,similar,reviews,lists,rating&include_image_language=en,null,%s&language=%s&" %
                               (movie_id, addon.getSetting("LanguageID"), addon.getSetting("LanguageID")), 30)
-    if "similar_movies" in response:
-        return HandleTMDBMovieResult(response["similar_movies"]["results"])
+    if "similar" in response:
+        return HandleTMDBMovieResult(response["similar"]["results"])
     else:
         log("No JSON Data available")
 
@@ -1044,26 +1049,26 @@ def GetDirectorMovies(person_id):
         log("No JSON Data available")
 
 
-def search_movie(medianame, year=''):
-    log('TMDB API search criteria: Title[''%s''] | Year[''%s'']' % (medianame, year))
-    medianame = urllib.quote_plus(medianame.encode('utf8', 'ignore'))
-    response = GetMovieDBData("search/movie?query=%s+%s&language=%s&include_adult=%s&" % (medianame, year, addon.getSetting("LanguageID"), addon.getSetting("include_adults")), 1)
+def search_media(media_name=None, year='', media_type="movie"):
+    log('TMDB API search criteria: Title[''%s''] | Year[''%s'']' % (media_name, year))
+    media_name = urllib.quote_plus(media_name.encode('utf8', 'ignore'))
     tmdb_id = ''
-    try:
-        if response == "Empty":
-            tmdb_id = ''
+    if media_name:
+        response = GetMovieDBData("search/%s?query=%s+%s&language=%s&include_adult=%s&" % (media_type, media_name, year, addon.getSetting("LanguageID"), include_adult), 1)
+        try:
+            if response == "Empty":
+                tmdb_id = ''
+            else:
+                for item in response['results']:
+                    if item['id']:
+                        tmdb_id = item['id']
+                        break
+        except Exception as e:
+            log(e)
+        if tmdb_id == '':
+            log('TMDB API search found no ID')
         else:
-            for item in response['results']:
-                if item['id']:
-                    tmdb_id = item['id']
-                    log(tmdb_id)
-                    break
-    except Exception as e:
-        log(e)
-    if tmdb_id == '':
-        log('TMDB API search found no ID')
-    else:
-        log('TMDB API search found ID: %s' % tmdb_id)
+            log('TMDB API search found ID: %s' % tmdb_id)
     return tmdb_id
 
 
