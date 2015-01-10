@@ -364,3 +364,7 @@ msgstr "Abrir Diálogo de Info por padrão"
 msgctxt "#32164"
 msgid "Delete cache"
 msgstr "Deletar cache"
+
+msgctxt "#32165"
+msgid "Add to CouchPotato"
+msgstr Adicionar para CouchPotato""
