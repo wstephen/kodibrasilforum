@@ -20,7 +20,21 @@
                 <height>10</height>
             </control>
             <control type="label" id="30002">
-                <posx>-20000</posx>
+                <posx>-2000</posx>
+                <posy>-2000</posy>
+                <label>-</label>
+                <width>100</width>
+                <height>10</height>
+            </control>
+            <control type="label" id="30003">
+                <posx>-2000</posx>
+                <posy>-2000</posy>
+                <label>-</label>
+                <width>100</width>
+                <height>10</height>
+            </control>
+            <control type="label" id="30009">
+                <posx>-2000</posx>
                 <posy>-2000</posy>
                 <label>-</label>
                 <width>100</width>
@@ -29,7 +43,7 @@
             
             <!-- Regular Controls -->
             <control type="group">
-                <visible>!substring(Control.GetLabel(30002),label2) + !substring(Control.GetLabel(30001),thumb)</visible>
+                <visible>!substring(Control.GetLabel(30002),label2) + !substring(Control.GetLabel(30001),thumb) + !substring(Control.GetLabel(30003),thumb)</visible>
                 <posx>-30</posx>
                 <posy>0</posy>
                 <control type="image">
@@ -99,7 +113,7 @@
             
             <!-- Control for Label2 -->
             <control type="group">
-                <visible>substring(Control.GetLabel(30002),label2) + !substring(Control.GetLabel(30001),thumb)</visible>
+                <visible>substring(Control.GetLabel(30002),label2) + !substring(Control.GetLabel(30001),thumb) + !substring(Control.GetLabel(30003),thumb)</visible>
                 <posx>-30</posx>
                 <posy>0</posy>
                 <control type="image">
@@ -214,7 +228,7 @@
                     <textcolor>white</textcolor>
                     <align>left</align>
                 </control>
-                <control type="panel" id="30052">
+                <control type="list" id="30052">
                     <posx>20</posx>
                     <posy>3</posy>
                     <width>640</width>
@@ -308,6 +322,180 @@
                     </focusedlayout>
                 </control>
             </control>
+            <!-- Control for Thumbs2 -->
+            <control type="group">
+                <visible>substring(Control.GetLabel(30003),thumb)</visible>
+                <posx>0</posx>
+                <posy>450</posy>
+                <control type="image">
+                    <posx>0</posx>
+                    <posy>0</posy>
+                    <width>1330</width>
+                    <height>230</height>
+ 					<texture diffuse="underlay-diffuse.png" border="0,10,0,10">underlay.png</texture>
+                </control>
+                <control type="label" id="30010">
+                    <posx>40</posx>
+                    <posy>10</posy>
+                    <label>32020</label>
+                    <width>400</width>
+                    <height>40</height>
+                    <font>font18</font>
+                    <aligny>center</aligny>
+                    <textcolor>white</textcolor>
+                    <align>left</align>
+                </control>
+                <control type="wraplist" id="30053">
+                    <posx>12</posx>
+                    <posy>18</posy>
+                    <width>1260</width>
+                    <height>195</height>
+					<orientation>horizontal</orientation>
+                    <scrolltime>200</scrolltime>
+                    <viewtype label="list3">list</viewtype>
+					<focusposition>3</focusposition>
+                    <itemlayout height="180" width="180">
+                        <control type="image">
+                            <posx>7</posx>
+                            <posy>17</posy>
+                            <width>160</width>
+                            <height>160</height>
+							<aspectratio>keep</aspectratio>
+							<texture diffuse="video-diffuse.png" background="true">$INFO[ListItem.Thumb]</texture>
+                            <info>Listitem.Thumb</info>
+                        </control>
+                    </itemlayout>
+                    <focusedlayout height="180" width="180">
+                        <control type="image">
+                            <posx>7</posx>
+                            <posy>17</posy>
+                            <width>160</width>
+                            <height>160</height>
+                            <texture diffuse="video-diffuse.png">video-gold.png</texture>
+							<aspectratio>keep</aspectratio>
+							<animation effect="fade" start="20" end="100" time="500" pulse="true" condition="true">Conditional</animation>
+							<animation type="focus">
+								<effect type="zoom" start="100" end="142" center="auto" time="200" reversible="false"/>
+							</animation>
+							<animation type="unfocus">
+								<effect type="zoom" start="142" end="100" center="auto" time="200" reversible="false"/>
+							</animation>
+                        </control>
+                        <control type="label">
+                            <posx>-162</posx>
+                            <posy>0</posy>
+                            <width>500</width>
+                            <height>20</height>
+                            <font>font12</font>
+                            <aligny>top</aligny>
+                            <textcolor>blue</textcolor>
+                            <shadowcolor>black</shadowcolor>
+                            <align>center</align>
+                            <info>ListItem.Label</info>
+                        </control>
+                        <control type="image">
+                            <posx>7</posx>
+                            <posy>17</posy>
+                            <width>160</width>
+                            <height>160</height>
+							<texture diffuse="video-diffuse.png" background="true">$INFO[ListItem.Thumb]</texture>
+							<aspectratio>keep</aspectratio>
+							<animation type="focus">
+								<effect type="zoom" start="100" end="136" center="auto" time="200" reversible="false"/>
+							</animation>
+							<animation type="unfocus">
+								<effect type="zoom" start="136" end="100" center="auto" time="200" reversible="false"/>
+							</animation>
+                            <info>Listitem.Thumb</info>
+                        </control>
+                        <control type="label">
+                            <posx>-162</posx>
+                            <posy>165</posy>
+                            <width>500</width>
+                            <height>22</height>
+                            <font>font14</font>
+                            <aligny>center</aligny>
+                            <textcolor>lightblue</textcolor>
+                            <shadowcolor>black</shadowcolor>
+                            <align>center</align>
+                            <label>[I]$INFO[ListItem.Label2][/I]</label>
+                        </control>
+                    </focusedlayout>
+                </control>
+            </control>
+            <!-- Control for Analog Clock -->
+			<control type="group">
+				<animation effect="slide" start="280,0" end="0,0" time="300" tween="quadratic" easing="out">Visible</animation>
+				<animation effect="slide" start="0,0" end="280,0" time="300" tween="quadratic" easing="in">WindowClose</animation>
+                <visible>substring(Control.GetLabel(30009),analogclock)</visible>
+				<posx>1020</posx>
+				<posy>010</posy>
+				<width>51</width>
+				<height>51</height>
+				<control type="image">
+					<description>Clock Panel</description>
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>250</width>
+					<height>250</height>
+					<texture>clockx/clock-night2.png</texture>
+				</control>
+				<control type="image">
+					<description>Clock Second</description>
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>250</width>
+					<height>250</height>
+					<texture>clockx/seconds/$INFO[System.Time(ss)].png</texture>
+				</control>
+				<control type="image">
+					<description>Clock Minute</description>
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>250</width>
+					<height>250</height>
+					<texture>clockx/minutes/$INFO[System.Time(mm)].png</texture>
+				</control>
+				<control type="image">
+					<description>Clock Hour 1</description>
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>250</width>
+					<height>250</height>
+					<texture>clockx/hours/$INFO[System.Time(hh)].png</texture>
+					<visible>StringCompare(System.Time(mm),00)|StringCompare(System.Time(mm),01)|StringCompare(System.Time(mm),02)|StringCompare(System.Time(mm),03)|StringCompare(System.Time(mm),04)|StringCompare(System.Time(mm),05)|StringCompare(System.Time(mm),06)|StringCompare(System.Time(mm),07)|StringCompare(System.Time(mm),08)|StringCompare(System.Time(mm),09)|StringCompare(System.Time(mm),10)|StringCompare(System.Time(mm),11)|StringCompare(System.Time(mm),12)|StringCompare(System.Time(mm),13)|StringCompare(System.Time(mm),14)</visible>
+				</control>
+				<control type="image">
+					<description>Clock Hour 2</description>
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>250</width>
+					<height>250</height>
+					<texture>clockx/hours/$INFO[System.Time(hh)]-.png</texture>
+					<visible>StringCompare(System.Time(mm),15)|StringCompare(System.Time(mm),16)|StringCompare(System.Time(mm),17)|StringCompare(System.Time(mm),18)|StringCompare(System.Time(mm),19)|StringCompare(System.Time(mm),20)|StringCompare(System.Time(mm),21)|StringCompare(System.Time(mm),22)|StringCompare(System.Time(mm),23)|StringCompare(System.Time(mm),24)|StringCompare(System.Time(mm),25)|StringCompare(System.Time(mm),26)|StringCompare(System.Time(mm),27)|StringCompare(System.Time(mm),28)|StringCompare(System.Time(mm),29)</visible>
+				</control>
+				<control type="image">
+					<description>Clock Hour 3</description>
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>250</width>
+					<height>250</height>
+					<texture>clockx/hours/$INFO[System.Time(hh)]+.png</texture>
+					<visible>StringCompare(System.Time(mm),30)|StringCompare(System.Time(mm),31)|StringCompare(System.Time(mm),32)|StringCompare(System.Time(mm),33)|StringCompare(System.Time(mm),34)|StringCompare(System.Time(mm),35)|StringCompare(System.Time(mm),36)|StringCompare(System.Time(mm),37)|StringCompare(System.Time(mm),38)|StringCompare(System.Time(mm),39)|StringCompare(System.Time(mm),40)|StringCompare(System.Time(mm),41)|StringCompare(System.Time(mm),42)|StringCompare(System.Time(mm),43)|StringCompare(System.Time(mm),44)</visible>
+				</control>
+				<control type="image">
+					<description>Clock Hour 4</description>
+					<posx>0</posx>
+					<posy>0</posy>
+					<width>250</width>
+					<height>250</height>
+					<texture>clockx/hours/$INFO[System.Time(hh)]++.png</texture>
+					<visible>StringCompare(System.Time(mm),45)|StringCompare(System.Time(mm),46)|StringCompare(System.Time(mm),47)|StringCompare(System.Time(mm),48)|StringCompare(System.Time(mm),49)|StringCompare(System.Time(mm),50)|StringCompare(System.Time(mm),51)|StringCompare(System.Time(mm),52)|StringCompare(System.Time(mm),53)|StringCompare(System.Time(mm),54)|StringCompare(System.Time(mm),55)|StringCompare(System.Time(mm),56)|StringCompare(System.Time(mm),57)|StringCompare(System.Time(mm),58)|StringCompare(System.Time(mm),59)</visible>
+				</control>
+			</control>
+
+
+
         </control>
     </controls>
 </window>

@@ -117,6 +117,7 @@ def WaitForVideoEnd():
 
 
 def calculate_age(born):
+    base_age = ""
     if born and born is not None:
         log(born)
         today = datetime.date.today()
@@ -130,8 +131,8 @@ def calculate_age(born):
             elif base_month == 0 and base_day < 0:
                 base_age -= 1
             elif base_month == 0 and base_day == 0:
-                Notify("%s (%i)" % (addon.getLocalizedString(), base_age))
-    return ""
+                Notify("%s (%i)" % (addon.getLocalizedString(32158), base_age))
+    return base_age
 
 
 def PlayTrailer(youtube_id="", listitem=None, popstack=False):
@@ -526,7 +527,8 @@ def CompareWithLibrary(onlinelist=[], library_first=True, sortkey=False):
                 try:
                     diff = abs(local_item["year"] - int(online_item["Year"]))
                     if diff > 1:
-                        break
+                        remote_items.append(online_item)
+                        continue
                 except:
                     pass
                 if (local_item['resume']['position'] and local_item['resume']['total']) > 0:

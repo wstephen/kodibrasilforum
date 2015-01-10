@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <settings>
-    <setting id="viewmode" type="enum" label="Select ViewMode" default="0" values="Thumbnail (default)|Single|Double" />
+	<category label="32001">
+		<setting id="viewmode" type="enum" label="Select ViewMode" default="0" values="Thumbnail (default)|Single|Double|Thumbnail (Movie Mode)" />
+	</category>
+	<category label="32002">
+		<setting id="analogclock" type="bool" label="32003" default="false" />
+	</category>
 </settings>
