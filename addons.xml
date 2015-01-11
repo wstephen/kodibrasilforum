@@ -1,5 +1,27 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addons>
+<addon id="plugin.program.advanced.launcher" name="Advanced Launcher" version="2.5.8" provider-name="Angelscry">
+    <requires>
+        <import addon="xbmc.python" version="2.1.0"/>
+        <import addon="script.module.simplejson" version="2.0.9"/>
+    </requires>
+    <extension point="xbmc.python.pluginsource" library="addon.py">
+        <provides>executable</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <platform>all</platform>
+        <disclaimer>For Kodi Helix/Gotham/Frodo/Eden/Dharma</disclaimer>
+        <summary lang="de">Beliebige Anwendungen aus Kodi starten.</summary>
+        <summary lang="en">Start any applications from Kodi.</summary>
+        <summary lang="fr">Lancer n'importer quelle application depuis Kodi.</summary>
+        <summary lang="fi">KÃ¤ynnistÃ¤Ã¤ sovelluksia Kodi:stÃ¤</summary>
+        <description lang="de">Advanced Launcher erlaubt das Starten beliebiger Linux, Windows und OS X Anwendungen (mit oder ohne Kommandozeile) direkt aus der Kodi OberflÃ¤che. Advanced Launcher erlaubt weiterhin das Editieren, Herunterladen und Verwalten der Metadaten (Informationen und Bilder) fÃ¼r diese Anwendungen aus dem Internet.</description>
+        <description lang="en">Advanced Launcher allows you to start any Linux, Windows and OS X applications (with command line support or not) directly from the Kodi GUI. Advanced Launcher also give you the possibility to edit, download (from Internet resources) and manage all the meta-data (informations and images) related to these applications.</description>
+        <description lang="fr">Advanced Launcher permet de lancer toutes les applications Linux, Windows and OS X (avec support des lignes de commandes ou non) directement depuis l'interface de Kodi. Advanced Launcher offre Ã©galement la possibilitÃ© de modifier, tÃ©lÃ©charger (depuis les ressoures web) et de gÃ©rer toues les meta-donÃ©es (informations et images) relatives Ã  ces applications.</description>
+        <description lang="fi">Advanced Launcherilla voit kÃ¤ynnistÃ¤Ã¤ Kodi:n kÃ¤yttÃ¶liittymÃ¤stÃ¤ mitÃ¤ tahansa sovelluksia. KÃ¤ynnistettÃ¤vistÃ¤ sovelluksista voi hakea tietoja ja kuvia Internet-tietokannoista.</description>
+    </extension>
+</addon>
+
 <addon id="plugin.video.foodnetwork"
        name="Food Network"
        version="2.1.5"
