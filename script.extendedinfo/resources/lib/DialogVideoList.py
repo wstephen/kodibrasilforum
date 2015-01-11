@@ -47,10 +47,12 @@ class DialogVideoList(xbmcgui.WindowXMLDialog):
         self.page = 1
         self.totalpages = 1
         self.totalitems = 0
+        self.filter_label = ""
         self.mode = kwargs.get("mode", "filter")
         self.sort = kwargs.get('sort', "popularity")
         self.sort_label = kwargs.get('sort_label', "Popularity")
         self.order = kwargs.get('order', "desc")
+        self.logged_in = checkLogin()
         self.filters = kwargs.get('filters', [])
         if self.listitem_list:
             self.listitems = CreateListItems(self.listitem_list)
@@ -65,7 +67,7 @@ class DialogVideoList(xbmcgui.WindowXMLDialog):
         self.windowid = xbmcgui.getCurrentWindowDialogId()
         self.window = xbmcgui.Window(self.windowid)
         self.window.setProperty("WindowColor", self.color)
-        self.update_list()
+        self.update_ui()
         xbmc.sleep(200)
         xbmc.executebuiltin("SetFocus(500)")
 
@@ -79,13 +81,13 @@ class DialogVideoList(xbmcgui.WindowXMLDialog):
         elif action == xbmcgui.ACTION_CONTEXT_MENU:
             if focusid == 500:
                 item_id = self.getControl(focusid).getSelectedItem().getProperty("id")
-                listitems = [xbmc.getLocalizedString(14076), addon.getLocalizedString(32113), addon.getLocalizedString(32107)]
+                listitems = [addon.getLocalizedString(32113)]
+                if self.logged_in:
+                    listitems += [xbmc.getLocalizedString(14076), addon.getLocalizedString(32107)]
                 # context_menu = ContextMenu.ContextMenu(u'DialogContextMenu.xml', addon_path, labels=listitems)
                 # context_menu.doModal()
                 selection = xbmcgui.Dialog().select(addon.getLocalizedString(32151), listitems)
                 if selection == 0:
-                    ChangeFavStatus(item_id, self.type, "true")
-                elif selection == 1:
                     ratings = []
                     for i in range(0, 21):
                         ratings.append(str(float(i * 0.5)))
@@ -95,7 +97,9 @@ class DialogVideoList(xbmcgui.WindowXMLDialog):
                         RateMedia(self.type, item_id, rating)
                         xbmc.sleep(2000)
                         self.update_content(force=True)
-                        self.update_list()
+                        self.update_ui()
+                elif selection == 1:
+                    ChangeFavStatus(item_id, self.type, "true")
                 elif selection == 2:
                     xbmc.executebuiltin("ActivateWindow(busydialog)")
                     listitems = [addon.getLocalizedString(32139)]
@@ -117,7 +121,7 @@ class DialogVideoList(xbmcgui.WindowXMLDialog):
                         ChangeListStatus(account_lists[index - 1]["id"], item_id, True)
                         # xbmc.sleep(2000)
                         # self.update_content(force=True)
-                        # self.update_list()
+                        # self.update_ui()
 
     def onClick(self, controlID):
         if controlID in [500]:
@@ -137,14 +141,14 @@ class DialogVideoList(xbmcgui.WindowXMLDialog):
         elif controlID == 5001:
             self.get_sort_type()
             self.update_content()
-            self.update_list()
+            self.update_ui()
         elif controlID == 5002:
             self.get_genre()
             self.update_content()
-            self.update_list()
+            self.update_ui()
         elif controlID == 5003:
             dialog = xbmcgui.Dialog()
-            ret = dialog.yesno(heading="Choose Mode", line1=addon.getLocalizedString(32106), nolabel=addon.getLocalizedString(32150), yeslabel=addon.getLocalizedString(32149))
+            ret = dialog.yesno(heading=addon.getLocalizedString(32151), line1=addon.getLocalizedString(32106), nolabel=addon.getLocalizedString(32150), yeslabel=addon.getLocalizedString(32149))
             result = xbmcgui.Dialog().input(xbmc.getLocalizedString(345), "", type=xbmcgui.INPUT_NUMERIC)
             if result:
                 if ret:
@@ -156,42 +160,80 @@ class DialogVideoList(xbmcgui.WindowXMLDialog):
                     value = "%s-01-01" % result
                     label = " > " + result
                 if self.type == "tv":
-                    self.add_filter("first_air_date_year.%s" % order, value, xbmc.getLocalizedString(20416), label)
+                    self.add_filter("first_air_date.%s" % order, value, xbmc.getLocalizedString(20416), label)
                 else:
                     self.add_filter("primary_release_date.%s" % order, value, xbmc.getLocalizedString(345), label)
                 self.mode = "filter"
                 self.page = 1
                 self.update_content()
-                self.update_list()
+                self.update_ui()
+        # elif controlID == 5011:
+        #     dialog = xbmcgui.Dialog()
+        #     ret = True
+        #     if not self.type == "tv":
+        #         ret = dialog.yesno(heading=addon.getLocalizedString(32151), line1=addon.getLocalizedString(32106), nolabel=addon.getLocalizedString(32150), yeslabel=addon.getLocalizedString(32149))
+        #     result = xbmcgui.Dialog().input(xbmc.getLocalizedString(32112), "", type=xbmcgui.INPUT_NUMERIC)
+        #     if result:
+        #         if ret:
+        #             order = "lte"
+        #             label = " < " + result
+        #         else:
+        #             order = "gte"
+        #             label = " > " + result
+        #         self.add_filter("vote_average.%s" % order, float(result) / 10.0, addon.getLocalizedString(32112), label)
+        #         self.mode = "filter"
+        #         self.page = 1
+        #         self.update_content()
+        #         self.update_ui()
+        elif controlID == 5012:
+            dialog = xbmcgui.Dialog()
+            ret = True
+            if not self.type == "tv":
+                ret = dialog.yesno(heading=addon.getLocalizedString(32151), line1=addon.getLocalizedString(32106), nolabel=addon.getLocalizedString(32150), yeslabel=addon.getLocalizedString(32149))
+            result = xbmcgui.Dialog().input(xbmc.getLocalizedString(32111), "", type=xbmcgui.INPUT_NUMERIC)
+            if result:
+                if ret:
+                    order = "lte"
+                    label = " < " + result
+                else:
+                    order = "gte"
+                    label = " > " + result
+                self.add_filter("vote_count.%s" % order, result, addon.getLocalizedString(32111), label)
+                self.mode = "filter"
+                self.page = 1
+                self.update_content()
+                self.update_ui()
+
+
         elif controlID == 5004:
             if self.order == "asc":
                 self.order = "desc"
             else:
                 self.order = "asc"
             self.update_content()
-            self.update_list()
+            self.update_ui()
         elif controlID == 5005:
             self.filters = []
             self.page = 1
             self.mode = "filter"
             self.update_content()
-            self.update_list()
+            self.update_ui()
         elif controlID == 5006:
             self.get_certification()
             self.update_content()
-            self.update_list()
+            self.update_ui()
         elif controlID == 5008:
             self.get_actor()
             self.update_content()
-            self.update_list()
+            self.update_ui()
         elif controlID == 5009:
             self.get_keyword()
             self.update_content()
-            self.update_list()
+            self.update_ui()
         elif controlID == 5010:
             self.get_company()
             self.update_content()
-            self.update_list()
+            self.update_ui()
         elif controlID == 5007:
             self.filters = []
             self.page = 1
@@ -201,7 +243,7 @@ class DialogVideoList(xbmcgui.WindowXMLDialog):
             else:
                 self.type = "tv"
             self.update_content()
-            self.update_list()
+            self.update_ui()
         elif controlID == 6000:
             result = xbmcgui.Dialog().input(xbmc.getLocalizedString(16017), "", type=xbmcgui.INPUT_ALPHANUM)
             if result and result > -1:
@@ -210,38 +252,45 @@ class DialogVideoList(xbmcgui.WindowXMLDialog):
                 self.filters = []
                 self.page = 1
                 self.update_content()
-                self.update_list()
+                self.update_ui()
         elif controlID == 7000:
             if self.type == "tv":
-                listitems = [addon.getLocalizedString(32144), addon.getLocalizedString(32145)]
+                listitems = [addon.getLocalizedString(32145)]  # rated tv
+                if self.logged_in:
+                    listitems.append(addon.getLocalizedString(32144))   # starred tv
             else:
-                listitems = [addon.getLocalizedString(32134), addon.getLocalizedString(32135)]
+                listitems = [addon.getLocalizedString(32135)]  # rated movies
+                if self.logged_in:
+                    listitems.append(addon.getLocalizedString(32134))   # starred movies
             xbmc.executebuiltin("ActivateWindow(busydialog)")
-            account_lists = GetAccountLists()
-            for item in account_lists:
-                listitems.append("%s (%i)" % (item["name"], item["item_count"]))
+            if self.logged_in:
+                account_lists = GetAccountLists()
+                for item in account_lists:
+                    listitems.append("%s (%i)" % (item["name"], item["item_count"]))
             xbmc.executebuiltin("Dialog.Close(busydialog)")
-            index = xbmcgui.Dialog().select("Choose List", listitems)
+            index = xbmcgui.Dialog().select(addon.getLocalizedString(32136), listitems)
             if index == -1:
                 pass
-            elif index == 0:
+            elif index == 0 and self.logged_in:
                 self.mode = "favorites"
                 self.sort = "created_at"
                 self.sort_label = addon.getLocalizedString(32157)
                 self.filters = []
                 self.page = 1
                 self.update_content()
-                self.update_list()
-            elif index == 1:
+                self.update_ui()
+            elif index == 1 or (index == 0 and not self.logged_in):
                 self.mode = "rating"
                 self.sort = "created_at"
                 self.sort_label = addon.getLocalizedString(32157)
                 self.filters = []
                 self.page = 1
                 self.update_content()
-                self.update_list()
+                self.update_ui()
             else:
                 xbmc.executebuiltin("ActivateWindow(busydialog)")
+               # offset = len(listitems) - len(account_lists)
+               # Notify(str(offset))
                 listitems = GetMoviesFromList(account_lists[index - 2]["id"])
                 xbmc.executebuiltin("Dialog.Close(busydialog)")
                 self.close()
@@ -252,13 +301,21 @@ class DialogVideoList(xbmcgui.WindowXMLDialog):
         if controlID == 600:
             if self.page < self.totalpages:
                 self.page += 1
-                self.update_content()
-                self.update_list()
+            else:
+                self.page = 1
+            xbmc.executebuiltin("ActivateWindow(busydialog)")
+            self.update_content()
+            self.update_ui()
+            xbmc.executebuiltin("Dialog.Close(busydialog)")
         if controlID == 700:
             if self.page > 1:
                 self.page -= 1
-                self.update_content()
-                self.update_list()
+            # else:
+            #     self.page = self.totalpages
+            xbmc.executebuiltin("ActivateWindow(busydialog)")
+            self.update_content()
+            self.update_ui()
+            xbmc.executebuiltin("Dialog.Close(busydialog)")
 
     def get_sort_type(self):
         listitems = []
@@ -317,6 +374,8 @@ class DialogVideoList(xbmcgui.WindowXMLDialog):
         for item in self.filters:
             filter_list.append("%s=%s" % (item["type"], item["id"]))
         self.filter_url = "&".join(filter_list)
+        if self.filter_url:
+            self.filter_url += "&"
 
     def set_filter_label(self):
         filter_list = []
@@ -332,7 +391,7 @@ class DialogVideoList(xbmcgui.WindowXMLDialog):
         for item in response["genres"]:
             id_list.append(item["id"])
             label_list.append(item["name"])
-        index = xbmcgui.Dialog().select("Choose Genre", label_list)
+        index = xbmcgui.Dialog().select(addon.getLocalizedString(32151), label_list)
         if index > -1:
             # return "with_genres=" + str(id_list[index])
             self.add_filter("with_genres", str(id_list[index]), xbmc.getLocalizedString(135), str(label_list[index]))
@@ -396,7 +455,7 @@ class DialogVideoList(xbmcgui.WindowXMLDialog):
             for item in response[country]:
                 label = "%s  -  %s" % (item["certification"], item["meaning"])
                 cert_list.append(label)
-            index = xbmcgui.Dialog().select("Choose Certification", cert_list)
+            index = xbmcgui.Dialog().select(addon.getLocalizedString(32151), cert_list)
             if index > -1:
             # return "with_genres=" + str(id_list[index])
                 cert = cert_list[index].split("  -  ")[0]
@@ -419,7 +478,7 @@ class DialogVideoList(xbmcgui.WindowXMLDialog):
         # for item in (self.page - 1) * 2:
         #     xbmc.executebuiltin("Down")
 
-    def update_list(self):
+    def update_ui(self):
         self.getControl(500).reset()
         self.getControl(500).addItems(self.listitems)
         self.window.setProperty("TotalPages", str(self.totalpages))
@@ -428,10 +487,29 @@ class DialogVideoList(xbmcgui.WindowXMLDialog):
         self.window.setProperty("Type", translations[self.type])
         self.window.setProperty("Filter_Label", self.filter_label)
         self.window.setProperty("Sort_Label", self.sort_label)
+        if self.page == self.totalpages:
+            self.window.clearProperty("ArrowDown")
+        else:
+            self.window.setProperty("ArrowDown", "True")
+        if self.page > 1:
+            self.window.setProperty("ArrowUp", "True")
+        else:
+            self.window.clearProperty("ArrowUp")
         if self.order == "asc":
             self.window.setProperty("Order_Label", xbmc.getLocalizedString(584))
         else:
             self.window.setProperty("Order_Label", xbmc.getLocalizedString(585))
+        if self.type == "tv":
+            self.window.getControl(5006).setVisible(False)
+            self.window.getControl(5008).setVisible(False)
+            self.window.getControl(5009).setVisible(False)
+            self.window.getControl(5010).setVisible(False)
+        else:
+            self.window.getControl(5006).setVisible(True)
+            self.window.getControl(5008).setVisible(True)
+            self.window.getControl(5009).setVisible(True)
+            self.window.getControl(5010).setVisible(True)
+
 
     def fetch_data(self, force=False):
         sortby = self.sort + "." + self.order
@@ -450,16 +528,16 @@ class DialogVideoList(xbmcgui.WindowXMLDialog):
             url = "account/%s/favorite/%s?language=%s&page=%i&session_id=%s&sort_by=%s&" % (get_account_info(), temp, addon.getSetting("LanguageID"), self.page, get_session_id(), sortby)
             self.filter_label = starred
         elif self.mode == "rating":
-            if addon.getSetting("tmdb_username"):
+            if self.logged_in:
                 session_id_string = "session_id=" + get_session_id()
+                url = "account/%s/rated/%s?language=%s&page=%i&%s&sort_by=%s&" % (get_account_info(), temp, addon.getSetting("LanguageID"), self.page, session_id_string, sortby)
             else:
-                session_id_string = "guest_session_id=" + get_guest_session_id()
-            url = "account/%s/rated/%s?language=%s&page=%i&%s&sort_by=%s&" % (get_account_info(), temp, addon.getSetting("LanguageID"), self.page, session_id_string, sortby)
+                url = "guest_session/%s/rated_movies?language=%s&" % (get_guest_session_id(), addon.getSetting("LanguageID"))
             self.filter_label = rated
         else:
             self.set_filter_url()
             self.set_filter_label()
-            url = "discover/%s?sort_by=%s&%s&language=%s&page=%i&include_adult=%s&" % (self.type, sortby, self.filter_url, addon.getSetting("LanguageID"), self.page, include_adult)
+            url = "discover/%s?sort_by=%s&%slanguage=%s&page=%i&include_adult=%s&" % (self.type, sortby, self.filter_url, addon.getSetting("LanguageID"), self.page, include_adult)
         if force:
             response = GetMovieDBData(url, 0)
         else:
