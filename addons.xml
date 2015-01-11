@@ -328,6 +328,62 @@
 	</extension>
 </addon>
 
+<addon id="script.cdartmanager"
+       name="cdART Manager"
+       version="4.0.5"
+       provider-name="Giftie">
+  <requires>
+    <import addon="xbmc.addon" version="12.0.0"/>
+    <import addon="xbmc.json" version="6.6.0"/>
+    <import addon="xbmc.python" version="2.15.0"/>
+    <import addon="script.module.pil" version="1.1.7"/>
+    <import addon="script.module.simplejson" version="3.3.0"/>
+  </requires>
+  <extension point="xbmc.python.script"
+             library="default.py">
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <language></language>
+    <platform>all</platform>
+    <summary>cdART Manager</summary>
+    <summary lang="hu">CD-kÃ©p kezelÅ‘</summary>
+    <description>With this script you are able to manage your cdARTs. You can download cdARTs from fanart.tv, Backup your cdARTs, View and even delete your local cdARTs </description>
+    <description lang="hu">A programmal kÃ¶nnyen kezelheted a CD lemez kÃ©peidet (CDArts). LetÃ¶ltheted vele Å‘ket az fanart.tv-rÃ³l, biztonsÃ¡gi mÃ¡solatot kÃ©szÃ­thetsz rÃ³luk, megnÃ©zheted Ã©s mÃ©g tÃ¶rÃ¶lheted is a gÃ©peden lÃ©vÅ‘ lemezkÃ©peket.</description>
+    <description lang="de">Mit diesem Programm verwaltet man seine cdARTs. Man kann cdARTs von fanart.tv.com herunterladen, ein Backup von seinen cdARTs erstellen, cdARTS anzeigen und lokale cdARTs lÃ¶schen.</description>
+    <description lang="nl">Met dit script kun je je cdARTs beheren. Je kunt cdARTs downloaden van fanart.tv, een backup maken, cdARTs bekijken en je eigen cdARTS verwijderen.</description>
+    <description lang="it">Con questo script puoi gestire le tue cdART. Potrai scaricare le cdART dal sito fanart.tv, fare un backup delle tue cdART, visualizzare ed anche cancellare le cdART memorizzate in locale</description>
+    <description lang="pt">Este script permite que vocÃª gerencie seus cdARTs. VocÃª poderÃ¡ baixar cdARTs do site fanart.tv, efetuar backup, Visualizar e atÃ© apagar seus cdARTs armazenados localmente.</description>
+    <description lang="es">Con este script serÃ¡s capaz de administrar tus cdARTs. Puedes descargar cdARTs desde fanart.tv, Respaldar tus cdARTs, Ver e incluso Borrar tus cdARTs locales.</description>
+    <website></website>
+    <source>https://github.com/Giftie/script.cdartmanager</source>
+    <forum>http://forum.xbmc.org/showthread.php?tid=77031</forum>
+    <email></email>
+  </extension>
+</addon>
+
+<addon id="script.cinema.experience"
+     name="Cinema Experience"
+  version="4.0.13"
+  provider-name="Giftie">
+    <requires>
+        <import addon="xbmc.python" version="2.12.0"/>
+        <import addon="script.module.simplejson" version="3.3.0"/>
+    </requires>
+    <extension point="xbmc.python.script" library="addon.py"/>
+    <extension point="xbmc.service" library="service.py" start="login"/>
+    <extension point="xbmc.addon.metadata">
+        <platform>all</platform>
+        <summary>Re-create a full movie theater experience.</summary>
+        <disclaimer>This work is licensed under a Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License *see license.txt</disclaimer>
+        <description>Play trailers, slideshows, intro videos, outro videos: To re-create a movie theater experience in the comfort of your home.</description>
+        <description lang="es">Reproduce Avances, presentaciones, videos de intro, videos de outro: Para recrear una experiencia como si estuvieses en una sala de Cine en la comodidad de tu casa.</description>
+        <website></website>
+        <source>https://github.com/Giftie/script.cinema.experience</source>
+        <forum>http://forum.xbmc.org/showthread.php?tid=87563</forum>
+        <email></email>
+    </extension>
+</addon>
+
 <addon id="script.extendedinfo" name="ExtendedInfo Script" version="2.0.1" provider-name="phil65">
 	<requires>
 		<import addon="xbmc.python" version="2.1.0"/>

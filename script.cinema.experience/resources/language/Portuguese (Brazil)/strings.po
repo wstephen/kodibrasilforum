@@ -1,0 +1,859 @@
+# XBMC Media Center language file
+# Translators:
+# sabrahcadaver <sabrahcadaver@gmail.com>, 2013
+# Wanilton Campos <>, 2013
+msgid ""
+msgstr ""
+"Project-Id-Version: xbmcbrasil\n"
+"Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
+"POT-Creation-Date: 2013-05-10 12:53+0000\n"
+"PO-Revision-Date: 2013-09-11 13:35+0000\n"
+"Last-Translator: Wanilton Campos <>\n"
+"Language-Team: Portuguese (Brazil) (http://www.transifex.com/projects/p/xbmcbrasil/language/pt_BR/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: pt_BR\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+
+msgctxt "#32000"
+msgid "Cinema Experience"
+msgstr "Cinema Experience"
+
+msgctxt "#32002"
+msgid "nuka1195, Giftie, ackbarr"
+msgstr "nuka1195, Giftie, ackbarr"
+
+msgctxt "#32100"
+msgid "Movie Trailers"
+msgstr "Trailers de Filmes"
+
+msgctxt "#32101"
+msgid "None"
+msgstr "Nenhum"
+
+msgctxt "#32102"
+msgid "1 Trailer"
+msgstr "1 Trailer"
+
+msgctxt "#32103"
+msgid "2 Trailers"
+msgstr "2 Trailers"
+
+msgctxt "#32104"
+msgid "3 Trailers"
+msgstr "3 Trailers"
+
+msgctxt "#32105"
+msgid "4 Trailers"
+msgstr "4 Trailers"
+
+msgctxt "#32106"
+msgid "5 Trailers"
+msgstr "5 Trailers"
+
+msgctxt "#32107"
+msgid "10 Trailers"
+msgstr "10 Trailers"
+
+msgctxt "#32110"
+msgid "- Trailer Scraper"
+msgstr "- Buscar Trailers em:"
+
+msgctxt "#32111"
+msgid "Apple Movie Trailers (database)"
+msgstr "Trailers de Filmes Apple (Banco de Dados)"
+
+msgctxt "#32112"
+msgid "Apple Movie Trailers (newest)"
+msgstr "Trailers de Filmes Apple (Novos)"
+
+msgctxt "#32113"
+msgid "Local Folder"
+msgstr "Pasta Local"
+
+msgctxt "#32114"
+msgid "XBMC Movie Library"
+msgstr "Biblioteca de Filmes do XBMC"
+
+msgctxt "#32120"
+msgid "   - Database Path"
+msgstr "   - Caminho para o banco de dados"
+
+msgctxt "#32130"
+msgid "   - Folder"
+msgstr "   - Pasta"
+
+msgctxt "#32140"
+msgid "   - Limit Trailers by MPAA Rating of Movie"
+msgstr "  - Limitar Trailers Pela Classificação Indicativa do Filme"
+
+msgctxt "#32141"
+msgid "   - Limit Trailers by Genre of Movie"
+msgstr "   - Limitar Trailers Pelo Gênero do Filme"
+
+msgctxt "#32150"
+msgid "   - MPAA Rating Limit for Trailers"
+msgstr "   - Limite de Classificação Etária para Filmes"
+
+msgctxt "#32160"
+msgid "   - Select Trailers from Newest Genre only"
+msgstr "   - Habilitar Trailer Somente por Gêneros Novos"
+
+msgctxt "#32170"
+msgid "   - Preferred Trailer Quality"
+msgstr "    - Qualidade de Vídeo Preferida"
+
+msgctxt "#32171"
+msgid "Standard"
+msgstr "Padrão (360p)"
+
+msgctxt "#32172"
+msgid "480p"
+msgstr "480p"
+
+msgctxt "#32173"
+msgid "720p"
+msgstr "720p"
+
+msgctxt "#32174"
+msgid "1080p"
+msgstr "1080p"
+
+msgctxt "#32180"
+msgid "      - Select only 720p/1080p Trailers"
+msgstr "      - Buscar Trailers Somente com 720p/1080p"
+
+msgctxt "#32185"
+msgid "- Trailer play mode"
+msgstr "- Modo de Reprodução"
+
+msgctxt "#32186"
+msgid "Stream"
+msgstr "Internet (Stream)"
+
+msgctxt "#32187"
+msgid "Download"
+msgstr "Download"
+
+msgctxt "#32188"
+msgid "Downioad Folder"
+msgstr "Pasta para Download"
+
+msgctxt "#32190"
+msgid "- Select only unwatched Trailers"
+msgstr " - Selecionar apenas Trailers Não-vistos"
+
+msgctxt "#32191"
+msgid "   - Reset Trailers watched status"
+msgstr "   - Resetar Estatus de Trailers Vistos"
+
+msgctxt "#32195"
+msgid "- Coming Attractions Intro"
+msgstr "Próximas Atrações - Antes do Filme"
+
+msgctxt "#32196"
+msgid "   - File"
+msgstr "   - Arquivo"
+
+msgctxt "#32197"
+msgid "   - Folder"
+msgstr "   - Pasta"
+
+msgctxt "#32198"
+msgid "- Coming Attractions Outro"
+msgstr "Próximas Atrações - Depois do Filme"
+
+msgctxt "#32200"
+msgid "Duration(in Minutes)"
+msgstr "Duração (Em Minutos)"
+
+msgctxt "#32201"
+msgid "None"
+msgstr "Nenhum"
+
+msgctxt "#32202"
+msgid "2 min"
+msgstr "2 Minutos"
+
+msgctxt "#32203"
+msgid "5 min"
+msgstr "5 Minutos"
+
+msgctxt "#32204"
+msgid "10 min"
+msgstr "10 Minutos"
+
+msgctxt "#32205"
+msgid "15 min"
+msgstr "15 Minutos"
+
+msgctxt "#32206"
+msgid "20 min"
+msgstr "20 Minutos"
+
+msgctxt "#32207"
+msgid "30 min"
+msgstr "30 Minutos"
+
+msgctxt "#32208"
+msgid "45 min"
+msgstr "45 Minutos"
+
+msgctxt "#32210"
+msgid "- Slides Folder"
+msgstr "- Pasta dos Slides"
+
+msgctxt "#32211"
+msgid "Trivia Mode"
+msgstr "Modo Trivia"
+
+msgctxt "#32212"
+msgid "Slide Show"
+msgstr "Apresentação de Slides"
+
+msgctxt "#32213"
+msgid "Movie Quiz Script"
+msgstr "Script do Quiz do Filme"
+
+msgctxt "#32214"
+msgid "Automatic"
+msgstr "Automático"
+
+msgctxt "#32215"
+msgid "Manual"
+msgstr "Manual"
+
+msgctxt "#32216"
+msgid "Movie Quiz Script Question Limit"
+msgstr "Limite de Perguntas Para o Quiz do Filme"
+
+msgctxt "#32217"
+msgid "Movie Quiz Script Mode"
+msgstr "Modo do Quiz do Filme"
+
+msgctxt "#32220"
+msgid "- Show each Still Slide for(in Seconds)"
+msgstr "- Apresentar cada Still Slide por (em Segundos)"
+
+msgctxt "#32221"
+msgid "- Show each Question Slide for(in Seconds)"
+msgstr "- Apresentar cada Slide de Questão por (em Segundos)"
+
+msgctxt "#32222"
+msgid "- Show each Answer Slide for(in Seconds)"
+msgstr "- Apresentar cada Slide de Resposta por (em Segundos)"
+
+msgctxt "#32223"
+msgid "- Show each Clue Slide for(in Seconds)"
+msgstr "- Apresentar cada Slide de Dicas por (em Segundos)"
+
+msgctxt "#32230"
+msgid "- Music"
+msgstr "- Música"
+
+msgctxt "#32231"
+msgid "- Play Music During Trivia Slideshow"
+msgstr "- Tocar Música Durante os Slides"
+
+msgctxt "#32232"
+msgid "   - Adjust Volume During Slideshow?"
+msgstr "   - Ajustar Volume Durante Slides"
+
+msgctxt "#32240"
+msgid "      - Music Volume (% of Max Volume)"
+msgstr "      - Music Volume (% of Max Volume)"
+
+msgctxt "#32241"
+msgid "      - Fade Volume After Slideshow?"
+msgstr "      - Efeito Fade Após Slides ?"
+
+msgctxt "#32242"
+msgid "         - Fade Time(in seconds)"
+msgstr "         - Tempo do Efeito Fade (em segundos)"
+
+msgctxt "#32243"
+msgid "Music File/Playlist"
+msgstr "Arquivo de Música/Playlist"
+
+msgctxt "#32244"
+msgid "Music Folder"
+msgstr "Pasta das Músicas"
+
+msgctxt "#32250"
+msgid "- Outro Video"
+msgstr " - Vídeo de Encerramento"
+
+msgctxt "#32260"
+msgid "- Outro Music"
+msgstr " - Musica de Encerramento"
+
+msgctxt "#32270"
+msgid "- Select only unwatched Slides"
+msgstr "- Selecionar Apenas Slides Não-vistos"
+
+msgctxt "#32271"
+msgid "   - Reset Slides watched status"
+msgstr "   - Resetar Slides Vistos"
+
+msgctxt "#32280"
+msgid "- Intro Video"
+msgstr "- Video de Introdução"
+
+msgctxt "#32281"
+msgid "None"
+msgstr "Nenhum"
+
+msgctxt "#32282"
+msgid "Single Video"
+msgstr "Um Único Video"
+
+msgctxt "#32283"
+msgid "1 Random Video"
+msgstr "1 Video Aleatório"
+
+msgctxt "#32284"
+msgid "2 Random Videos"
+msgstr "2 Videos Aleatórios"
+
+msgctxt "#32285"
+msgid "3 Random Videos"
+msgstr "3 Videos Aleatórios"
+
+msgctxt "#32286"
+msgid "4 Random Videos"
+msgstr "4 Videos Aleatórios"
+
+msgctxt "#32287"
+msgid "5 Random Videos"
+msgstr "5 Videos Aleatórios"
+
+msgctxt "#32288"
+msgid "   - Video File"
+msgstr "   - Arquivo de Video"
+
+msgctxt "#32289"
+msgid "   - Video Folder"
+msgstr "   -  Pasta dos Videos"
+
+msgctxt "#32290"
+msgid "- Limit Trivia by Rating of Movie [I](requires slides.xml) [/I]"
+msgstr "- Limitar Trivia por Classificação Indicativa do Filme [I](Requer slides.xml) [/I]"
+
+msgctxt "#32291"
+msgid "- Rating Limit for Trivia [I](requires slides.xml) [/I]"
+msgstr "- Classificação Etária do Trivia [I](Requer slides.xml) [/I]"
+
+msgctxt "#32300"
+msgid "Movie Ratings Folder"
+msgstr "Pasta dos Videos de Classificação Indicativa"
+
+msgctxt "#32301"
+msgid "Enable Rating Video"
+msgstr "Habilitar Video de Classificação Indicativa"
+
+msgctxt "#32320"
+msgid "Feature Presentation Intro"
+msgstr "Vídeo de Abertura (Antes do Filme)"
+
+msgctxt "#32321"
+msgid "None"
+msgstr "Nenhum"
+
+msgctxt "#32322"
+msgid "Single Video/Playlist"
+msgstr "Um Único Vídeo/Playlist"
+
+msgctxt "#32323"
+msgid "1 Random Video"
+msgstr "1 Video Aleatorio"
+
+msgctxt "#32324"
+msgid "2 Random Videos"
+msgstr "2 Videos Aleatórios "
+
+msgctxt "#32325"
+msgid "3 Random Videos"
+msgstr "3 Videos Aleatórios "
+
+msgctxt "#32326"
+msgid "4 Random Videos"
+msgstr "4 Videos Aleatórios "
+
+msgctxt "#32327"
+msgid "5 Random Videos"
+msgstr "5 Videos Aleatórios "
+
+msgctxt "#32330"
+msgid "Feature Presentation Outro"
+msgstr "Video de Encerramento (Depois do Filme)"
+
+msgctxt "#32340"
+msgid "- File"
+msgstr "- Arquivo"
+
+msgctxt "#32350"
+msgid "- Folder"
+msgstr "- Pasta"
+
+msgctxt "#32360"
+msgid "Audio Format Folder"
+msgstr "Pasta dos Formatos de Audio"
+
+msgctxt "#32361"
+msgid "Enable Audio Format Video"
+msgstr "Habilitar Video do Formato de Audio do Filme"
+
+msgctxt "#32370"
+msgid "Movie Theatre Intro Clips"
+msgstr "Clipes de Introdução - Antes do Filme"
+
+msgctxt "#32380"
+msgid "Movie Theatre Outro Clips"
+msgstr "Clipes de Encerramento - Depois do Filme"
+
+msgctxt "#32390"
+msgid "Movie Coundown Video File"
+msgstr "Arquivo de Vídeo do Contador"
+
+msgctxt "#32391"
+msgid "Movie Coundown Video Folder"
+msgstr "Pasta dos Videos de Contador"
+
+msgctxt "#32392"
+msgid "Movie Coundown Video"
+msgstr "Vídeo de Contagem Regressiva "
+
+msgctxt "#32400"
+msgid "Run script before videos start"
+msgstr "Habilitar Scripts Antes dos videos Iniciarem"
+
+msgctxt "#32401"
+msgid "Disable Auto Refresh Setting"
+msgstr "Desabilitar Atualização Automatica"
+
+msgctxt "#32402"
+msgid "  - Re-Enable Auto Refresh For Movie"
+msgstr "- Reabilitar Atualização Para Filmes"
+
+msgctxt "#32403"
+msgid "Enable Output to VoxCommando"
+msgstr "Habilitar Saida para o VoxCommando"
+
+msgctxt "#32404"
+msgid "Enable Pre-Eden"
+msgstr "Habilitar Pre-Eden"
+
+msgctxt "#32410"
+msgid "Number Of Features"
+msgstr "Numero de Apresentações"
+
+msgctxt "#32411"
+msgid "1 Feature"
+msgstr "1 Apresentação"
+
+msgctxt "#32412"
+msgid "2 Features"
+msgstr "2 Apresentações"
+
+msgctxt "#32413"
+msgid "3 Features"
+msgstr "3 Apresentações"
+
+msgctxt "#32414"
+msgid "4 Features"
+msgstr "4 Apresentações"
+
+msgctxt "#32415"
+msgid "5 Features"
+msgstr "5 Apresentações"
+
+msgctxt "#32418"
+msgid "Intermission Video(s)"
+msgstr "Video(s) de Intervalo do Filme"
+
+msgctxt "#32419"
+msgid "Intermission Video File"
+msgstr "Video do Intervalo do FIlme"
+
+msgctxt "#32420"
+msgid "Intermission Video Folder"
+msgstr "Pasta dos Videos de Intervalo do Filme"
+
+msgctxt "#32430"
+msgid "Insert Audio Format Video"
+msgstr "Inserir Video do Formato do Aúdio"
+
+msgctxt "#32440"
+msgid "Insert Rating Video"
+msgstr "Inserir Video de Classificação Etária"
+
+msgctxt "#32445"
+msgid "Enable Queue Instructions"
+msgstr "Habilitar Instruções de Fila"
+
+msgctxt "#32500"
+msgid "Choosing random trailers..."
+msgstr "Escolhendo Videos Aleatórios..."
+
+msgctxt "#32510"
+msgid "Randomizing trivia slideshow..."
+msgstr "Randomizando Slides..."
+
+msgctxt "#32511"
+msgid "Building Music Playlist..."
+msgstr "Construindo Playlist de Música..."
+
+msgctxt "#32520"
+msgid "Setting up playlist..."
+msgstr "Configurando Playlist..."
+
+msgctxt "#32530"
+msgid "Resetting watched trivia slides list..."
+msgstr "Resetando Lista de Slides Vistos..."
+
+msgctxt "#32531"
+msgid "Watched trivia slides list reset!"
+msgstr "Lista de Slides Vistos Resetada!"
+
+msgctxt "#32532"
+msgid "Resetting watched trivia slides list failed!"
+msgstr "Falha ao Resetar Lista de Slides Vistos!"
+
+msgctxt "#32540"
+msgid "Resetting watched trailers list..."
+msgstr "Resetando Lista de Trailers Vistos!"
+
+msgctxt "#32541"
+msgid "Watched trailers list reset!"
+msgstr "Lista de Trailers Vistos Resetada!"
+
+msgctxt "#32542"
+msgid "Resetting watched trailers list failed!"
+msgstr "Falha ao Resetar Lista de Trailers Vistos!"
+
+msgctxt "#32543"
+msgid "Queued - "
+msgstr "Na Fila - "
+
+msgctxt "#32544"
+msgid "Script Canceled"
+msgstr "Script Cancelado"
+
+msgctxt "#32545"
+msgid "Script Exiting"
+msgstr "Script Saindo"
+
+msgctxt "#32546"
+msgid "Press 'Q' or '0'(ZERO) to Queue Movie(s)"
+msgstr "Pressione 'Q' ou '0' Para Coloca o(s) Filme(s) Em Fila"
+
+msgctxt "#32600"
+msgid "Coming Attractions Intro"
+msgstr "Próximas Atrações - Antes do Filme"
+
+msgctxt "#32601"
+msgid "Feature Presentation Intro"
+msgstr "Vídeo de Apresentação"
+
+msgctxt "#32602"
+msgid "Feature Presentation Outro"
+msgstr "Video de Encerramento"
+
+msgctxt "#32603"
+msgid "MPAA Rating"
+msgstr "Classificação Etária"
+
+msgctxt "#32604"
+msgid "Cinema Experience"
+msgstr "Cinema Experience"
+
+msgctxt "#32605"
+msgid "Movie Trailer"
+msgstr "Trailers de Filmes"
+
+msgctxt "#32606"
+msgid "Audio Format"
+msgstr "Formato do Audio"
+
+msgctxt "#32607"
+msgid "Movie Theater Intro"
+msgstr "Vídeo de Introdução"
+
+msgctxt "#32608"
+msgid "Coming Attractions Outro"
+msgstr "Próximas Atrações - Depois do Filme"
+
+msgctxt "#32609"
+msgid "Trivia Intro"
+msgstr "Introdução da trivia"
+
+msgctxt "#32610"
+msgid "Trivia Outro"
+msgstr "Encerramento da trivia"
+
+msgctxt "#32611"
+msgid "Countdown"
+msgstr "Contador"
+
+msgctxt "#32612"
+msgid "Intermission"
+msgstr "Intervalo"
+
+msgctxt "#32613"
+msgid "Script Start"
+msgstr "Começo do Script"
+
+msgctxt "#32614"
+msgid "Script End"
+msgstr "Fim do Script"
+
+msgctxt "#32615"
+msgid "Trivia"
+msgstr "Trivia"
+
+msgctxt "#32616"
+msgid "Movie"
+msgstr "Filme"
+
+msgctxt "#32617"
+msgid "Movie Theatre Outro"
+msgstr "Video de Encerramento"
+
+msgctxt "#32618"
+msgid "Pause"
+msgstr "Pause"
+
+msgctxt "#32619"
+msgid "Resume"
+msgstr "Retome"
+
+msgctxt "#32700"
+msgid "Version"
+msgstr "Versão"
+
+msgctxt "#32701"
+msgid "This version of %s requires an"
+msgstr "Esta versão de %s requer um"
+
+msgctxt "#32702"
+msgid "XBMC revision of %s or greater to run."
+msgstr "XBMC revision of %s or greater to run."
+
+msgctxt "#32703"
+msgid "Please update your XBMC."
+msgstr "Por Favor, atualize a sua versão do XBMC"
+
+msgctxt "#32800"
+msgid "Movie Trailers"
+msgstr "Trailers de Filmes"
+
+msgctxt "#32801"
+msgid "Trivia Slideshow"
+msgstr "Apresentação de Slides de Trivia"
+
+msgctxt "#32802"
+msgid "Special Videos"
+msgstr "Videos Especiais"
+
+msgctxt "#32803"
+msgid "Feature Presentation"
+msgstr "Vídeo de Apresentação"
+
+msgctxt "#32804"
+msgid "Miscellaneous"
+msgstr "Miscelânea"
+
+msgctxt "#32805"
+msgid "Home Automation"
+msgstr "Automação Residencial"
+
+msgctxt "#32900"
+msgid "[B]When Multiple Videos are Involved[/B] - Trigger only once"
+msgstr "[B]Quando Vários Vídeos estão envolvidos[/B] - Iniciar Uma Única Vez"
+
+msgctxt "#32901"
+msgid "Trigger at start of the Script"
+msgstr "Iniciar no Começo do Script"
+
+msgctxt "#32902"
+msgid "Trigger at start of the Trivia Intro(s)"
+msgstr "Iniciar no começo da introdução da trivia"
+
+msgctxt "#32903"
+msgid "Trigger at start of the Trivia"
+msgstr "Iniciar no começo da trivia"
+
+msgctxt "#32904"
+msgid "Trigger at start of the Trivia Outro(s)"
+msgstr "Inicia no fim da Trivia(s)"
+
+msgctxt "#32905"
+msgid "Trigger at start of the Coming Attraction Intro(s)"
+msgstr "Inicia no Começo da(s) Proxima(s) Atração(ões)"
+
+msgctxt "#32906"
+msgid "Trigger at start of the Trailer(s)"
+msgstr "Inicia no Começo do(s) Trailer(s)"
+
+msgctxt "#32907"
+msgid "Trigger at start of the Coming Attraction Outro(s)"
+msgstr "Inicia no fim da(s) Próxima(s) Atração(ões)"
+
+msgctxt "#32908"
+msgid "Trigger at start of the Movie Theatre Intro(s)"
+msgstr "Dispare ao iniciar o Movie Theatre Intro(s)"
+
+msgctxt "#32909"
+msgid "Trigger at start of the Countdown Video(s)"
+msgstr "Dispare ao iniciar o(s) vídeo(s) de countdown"
+
+msgctxt "#32910"
+msgid "Trigger at start of the MPAA Rating Video"
+msgstr "Dispare ao iniciar o vídeo de classificação indicativa"
+
+msgctxt "#32911"
+msgid "Trigger at start of the Audio Format Video"
+msgstr "Dispare ao iniciar o vídeo de formato de áudio"
+
+msgctxt "#32912"
+msgid "Trigger at start of the Feature Presentation Intro(s)"
+msgstr "Dispare ao iniciar o vídeo do Feature Presentation Intro(s)"
+
+msgctxt "#32913"
+msgid "Trigger at start of the Movie(s)"
+msgstr "Dispare ao iniciar o(s) filme(s)"
+
+msgctxt "#32914"
+msgid "Trigger at start of the Intermission Video(s)"
+msgstr "Iniciar no Começo dos Videos de Intervalo"
+
+msgctxt "#32915"
+msgid "Trigger at start of the Feature Presentation Outro(s)"
+msgstr "Dispare ao iniciar o vídeo Feature Presentation Outro(s)"
+
+msgctxt "#32916"
+msgid "Trigger at start of the Movie Theatre Outro(s)"
+msgstr "Iniciar no Começo dos Videos de Intervalo"
+
+msgctxt "#32917"
+msgid "Trigger at end of the Script"
+msgstr "Iniciar no fim do Script"
+
+msgctxt "#32918"
+msgid "Trigger when paused"
+msgstr "Iniciar Quando Pausado"
+
+msgctxt "#32919"
+msgid "Trigger when resumed"
+msgstr "Iniciar Quando resumido"
+
+msgctxt "#32920"
+msgid "Enable the Home Automation Script"
+msgstr "Habilitar Script de Automação Residencial"
+
+msgctxt "#32921"
+msgid ""
+"Must use Trivia Slide Show as well to provide time for script to download "
+"trailer(s)"
+msgstr "Requer o uso Do Show dos Slides (Para prover tempo para o script fazer o download dos Trailers)"
+
+msgctxt "#32922"
+msgid "Override Play button - Very Experimental(may not work for everyone)"
+msgstr "Substituir o Botão Play - Muito Experimental (Pode não Funcionar Para Todos )"
+
+msgctxt "#32923"
+msgid "   - Skip trailers that use the YouTube Plug-in"
+msgstr "  - Ignorar Trailers que usam o Plugin do Youtube"
+
+msgctxt "#32924"
+msgid "Enable 3D Movie Integration"
+msgstr "Ativar integração de Filmes 3D"
+
+msgctxt "#32925"
+msgid "3D Movie filename tags"
+msgstr "Tags em nome de arquivos para filmes 3D"
+
+msgctxt "#32926"
+msgid "3D Movie Intro"
+msgstr "3D Filmes Intro"
+
+msgctxt "#32927"
+msgid "3D Movie Intro Video(s)"
+msgstr "Filme 3D Video(s) Intro"
+
+msgctxt "#32928"
+msgid "3D Movie Intro Video File"
+msgstr "Filme 3D Arquivo Vídeo Intro"
+
+msgctxt "#32929"
+msgid "3D Movie Intro Video Folder"
+msgstr "Filme 3d Pasta de Vídeo Intro"
+
+msgctxt "#32930"
+msgid "Enable 3D Movie Trailers if 3D Movie is played"
+msgstr "Ativar Trailers de Filmes 3D se Filme 3D for reproduzido"
+
+msgctxt "#32931"
+msgid "3D Movie Trailer Folder"
+msgstr "Pasta de Trailer de Filmes 3D"
+
+msgctxt "#32932"
+msgid "3D Trailer"
+msgstr "Trailer 3D"
+
+msgctxt "#32933"
+msgid "Trigger at start of the 3D Movie Intro(s)"
+msgstr "Disparar ao iniciar intro(s) de Filme(s) 3D"
+
+msgctxt "#32934"
+msgid "Trigger at start of the 3D Trailer(s)"
+msgstr "Disparar ao iniciar Trailer(s) 3D"
+
+msgctxt "#32935"
+msgid "3D Movie Outro"
+msgstr "Filmes 3D Outro"
+
+msgctxt "#32936"
+msgid "3D Movie Outro Video(s)"
+msgstr "Filme 3D Outro(s) Vídeo(s)"
+
+msgctxt "#32937"
+msgid "3D Movie Outro Video File"
+msgstr "Arquivo Vídeo Filme 3D Outro"
+
+msgctxt "#32938"
+msgid "3D Movie Outro Video Folder"
+msgstr "Pasta Vídeo Filme 3D Outro"
+
+msgctxt "#32939"
+msgid "Trigger at start of the 3D Outro(s)"
+msgstr "Disparar ao iniciar 3D Outro(s)"
+
+msgctxt "#32940"
+msgid "3D Movie Intro Video(s)"
+msgstr "Vídeo(s) Intro Filme 3D"
+
+msgctxt "#32941"
+msgid "3D Videos Intros/Outros"
+msgstr "Vídeos 3D Intros/Outros"
+
+msgctxt "#32942"
+msgid "3D Replacement Videos - Play 3D equivalent Videos"
+msgstr "Substituir Vídeos 3D - Reproduzir vídeos 3D equivalente"
+
+msgctxt "#32943"
+msgid "With the above enabled, if a 3D Movie is played,"
+msgstr "Se estiver ativo acima, e se um filme 3D for reproduzido,"
+
+msgctxt "#32944"
+msgid "the following videos will play (based on your selections)"
+msgstr "os seguintes vídeos irão ser reproduzidos (baseado em suas seleções)"
+
+msgctxt "#32945"
+msgid "(based on your selections)"
+msgstr "(baseado em suas seleções)"
+
+msgctxt "#32946"
+msgid "Separate tags with '|'(pipe) and include spaces if required"
+msgstr "separe tags com '|'(pipe) e inclua espaços se requerido"
