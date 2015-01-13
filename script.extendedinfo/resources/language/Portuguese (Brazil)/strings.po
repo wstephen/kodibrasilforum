@@ -372,3 +372,7 @@ msgstr Adicionar para CouchPotato""
 msgctxt "#32167"
 msgid "Reviews"
 msgstr "Avaliações"
+
+msgctxt "#32168"
+msgid "Releases"
+msgstr "Lançamentos"

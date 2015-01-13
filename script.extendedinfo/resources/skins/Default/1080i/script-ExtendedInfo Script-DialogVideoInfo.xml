@@ -171,8 +171,11 @@
                                 </control>
                             </control>
                             <control type="group" id="20000">
+                                <posx>0</posx>
+                                <posy>0</posy>
                                 <visible>!StringCompare(Window.Property(type),season)</visible>
                                 <width>280</width>
+                                <height>400</height>
                                 <control type="radiobutton" id="6001">
                                     <label>$ADDON[script.extendedinfo 32129]</label>
                                     <textureradioonfocus colordiffuse="grey">-</textureradioonfocus>
@@ -203,15 +206,17 @@
                                     <radioheight>44</radioheight>
                                 </control>
                                 <control type="label">
-                                    <label>$INFO[Window.Property(movie.rated)]</label>
                                     <posx>0</posx>
+                                    <posy>40</posy>
                                     <align>center</align>
                                     <aligny>center</aligny>
-                                    <posy>-285</posy>
-                                    <heigth>30</heigth>
-                                    <font>font30_title</font>
+                                    <height>30</height>
                                     <width>280</width>
+                                    <textoffsetx>0</textoffsetx>
+                                    <textoffsety>0</textoffsety>
+                                    <font>font30_title</font>
                                     <textcolor>grey</textcolor>
+                                    <label>$INFO[Window.Property(movie.rated)]</label>
                                 </control>
                             </control>
                             <control type="radiobutton" id="6003">
@@ -573,6 +578,8 @@
                                 </control>
                                 <!--Subtitle flags-->
                                 <control type="grouplist" id="12000">
+                                    <posx>0</posx>
+                                    <posy>0</posy>
                                     <animation effect="fade" start="100" end="80" time="40" condition="true">Conditional</animation>
                                     <width>600</width>
                                     <height>25</height>
@@ -1092,12 +1099,13 @@
                                             <visible>!IsEmpty(ListItem.Year)</visible>
                                         </control>
                                         <control type="label">
+                                            <posx>5</posx>
                                             <posy>310</posy>
-                                            <width>54</width>
+                                            <width>84</width>
                                             <height>25</height>
                                             <font>font10</font>
                                             <aligny>center</aligny>
-                                            <align>center</align>
+                                            <align>left</align>
                                             <label>$INFO[ListItem.Year]</label>
                                         </control>
                                         <control type="image">
@@ -1177,12 +1185,13 @@
                                             <visible>!IsEmpty(ListItem.Year)</visible>
                                         </control>
                                         <control type="label">
+                                            <posx>5</posx>
                                             <posy>310</posy>
-                                            <width>54</width>
+                                            <width>84</width>
                                             <height>25</height>
                                             <font>font10</font>
                                             <aligny>center</aligny>
-                                            <align>center</align>
+                                            <align>left</align>
                                             <label>$INFO[ListItem.Year]</label>
                                         </control>
                                         <control type="textbox">
@@ -1283,12 +1292,13 @@
                                             <visible>!IsEmpty(ListItem.Year)</visible>
                                         </control>
                                         <control type="label">
+                                            <posx>5</posx>
                                             <posy>310</posy>
-                                            <width>54</width>
+                                            <width>84</width>
                                             <height>25</height>
                                             <font>font10</font>
                                             <aligny>center</aligny>
-                                            <align>center</align>
+                                            <align>left</align>
                                             <label>$INFO[ListItem.Year]</label>
                                         </control>
                                         <control type="image">
@@ -1359,12 +1369,13 @@
                                             <visible>!IsEmpty(ListItem.Year)</visible>
                                         </control>
                                         <control type="label">
+                                            <posx>5</posx>
                                             <posy>310</posy>
-                                            <width>54</width>
+                                            <width>84</width>
                                             <height>25</height>
                                             <font>font10</font>
                                             <aligny>center</aligny>
-                                            <align>center</align>
+                                            <align>left</align>
                                             <label>$INFO[ListItem.Year]</label>
                                         </control>
                                         <control type="textbox">
@@ -1916,7 +1927,7 @@
                             <height>25</height>
                             <aligny>center</aligny>
                             <font>font14</font>
-                            <label>Releases</label>
+                            <label>$ADDON[script.extendedinfo 32168]</label>
                         </control>
                         <control type="image">
                             <posx>0</posx>
