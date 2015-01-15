@@ -115,7 +115,7 @@ def StartInfoActions(infos, params):
                 CompanyId = SearchforCompany(params["studio"])[0]["id"]
                 data = GetCompanyInfo(CompanyId), "StudioInfo"
         elif info == 'set':
-            if params.get("dbid", False) and not "show" in str(params["type"]):
+            if params.get("dbid", False) and not "show" in str(params.get("type", "")):
                 name = GetMovieSetName(params["dbid"])
                 if name:
                     params["setid"] = SearchForSet(name)
@@ -181,7 +181,7 @@ def StartInfoActions(infos, params):
         elif info == 'similartvshowstrakt':
             if (params.get("id", "") or params["dbid"]):
                 if params.get("dbid", False):
-                    if params["type"] == "episode":
+                    if params.get("type") == "episode":
                         tvshowid = GetImdbIDFromDatabasefromEpisode(params["dbid"])
                     else:
                         tvshowid = GetImdbIDFromDatabase("tvshow", params["dbid"])

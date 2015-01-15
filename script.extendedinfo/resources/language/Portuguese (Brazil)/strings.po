@@ -369,6 +369,10 @@ msgctxt "#32165"
 msgid "Add to CouchPotato"
 msgstr Adicionar para CouchPotato""
 
+msgctxt "#32166"
+msgid "Add to SickBeard"
+msgstr "Adicionar para o SickBeard"
+
 msgctxt "#32167"
 msgid "Reviews"
 msgstr "Avaliações"
