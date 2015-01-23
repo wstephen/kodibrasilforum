@@ -1,5 +1,26 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addons>
+<addon id="plugin.audio.spotlight" version="SPOTLIGHT_VERSION" name="Spotlight" provider-name="Dariusz Biskup">
+    <requires>
+        <import addon="xbmc.python" version="2.1.0"/>
+    </requires>
+    <extension point="xbmc.python.pluginsource" library="ui_addon.py">
+        <provides>audio</provides>
+    </extension>
+    <extension point="xbmc.service"
+             library="server_addon.py" start="startup">
+	</extension>
+    <extension point="xbmc.service"
+             library="login_addon.py" start="login">
+	</extension>
+    <extension point="xbmc.addon.metadata">
+        <platform>all</platform>
+        <summary>Spotlight</summary>
+        <description>Spotify add-on for XBMC using native XBMC menus. It allows searching for tracks, listing: playlists, artist albums, album tracks, starred tracks and playing and queueing tracks, albums etc. It can be operated via mobile client like Yatse.</description>
+        <disclaimer>It requires a Spotify Premium account.</disclaimer>
+    </extension>
+</addon>
+
 <addon id="plugin.program.advanced.launcher" name="Advanced Launcher" version="2.5.8" provider-name="Angelscry">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
@@ -20,31 +41,6 @@
         <description lang="fr">Advanced Launcher permet de lancer toutes les applications Linux, Windows and OS X (avec support des lignes de commandes ou non) directement depuis l'interface de Kodi. Advanced Launcher offre Ã©galement la possibilitÃ© de modifier, tÃ©lÃ©charger (depuis les ressoures web) et de gÃ©rer toues les meta-donÃ©es (informations et images) relatives Ã  ces applications.</description>
         <description lang="fi">Advanced Launcherilla voit kÃ¤ynnistÃ¤Ã¤ Kodi:n kÃ¤yttÃ¶liittymÃ¤stÃ¤ mitÃ¤ tahansa sovelluksia. KÃ¤ynnistettÃ¤vistÃ¤ sovelluksista voi hakea tietoja ja kuvia Internet-tietokannoista.</description>
     </extension>
-</addon>
-
-<addon id="plugin.video.foodnetwork"
-       name="Food Network"
-       version="2.1.5"
-       provider-name="t1m">
-  <requires>
-    <import addon="xbmc.python" version="2.1.0"/>
-  </requires>
-  <extension point="xbmc.python.pluginsource"
-            library="default.py">
-        <provides>video</provides>
-  </extension>
-  <extension point="xbmc.addon.metadata">
-    <summary lang="en">Food Network Video Addon</summary>
-    <description lang="en">Play videos from the Food Network</description>
-    <disclaimer lang="en">Feel free to use this script. For information visit the wiki.</disclaimer>
-    <platform>all</platform>
-    <language>en</language>
-    <license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
-    <forum></forum>
-    <website>www.foodnetwork.com</website>
-    <email></email>
-    <source>https://github.com/learningit/plugin.video.foodnetwork/</source>
-  </extension>
 </addon>
 
 <addon id="plugin.video.xbmcbrasil"
@@ -106,25 +102,6 @@
 		<description language="pt">Globo.tv no XBMC</description>
 		<platform>all</platform>
 	</extension>
-</addon>
-
-<addon id="plugin.video.howstuffworks_com" name="HowStuffWorks.com" version="2.0.4" provider-name="AddonScriptorDE">
-    <requires>
-        <import addon="xbmc.python" version="2.1.0"/>
-    </requires>
-    <extension point="xbmc.python.pluginsource" library="default.py">
-        <provides>video</provides>
-    </extension>
-    <extension point="xbmc.addon.metadata">
-        <platform>all</platform>
-        <summary lang="en">Learn How Everything Works!</summary>
-        <language>en</language>
-        <description lang="en">Learn How Everything Works!</description>
-        <website>http://www.howstuffworks.com</website>
-        <source>https://github.com/AddonScriptorDE/plugin.video.howstuffworks_com</source>
-        <forum>http://forum.xbmc.org/showthread.php?tid=137984</forum>
-        <email>AddonScriptorDE at yahoo dot de</email>
-    </extension>
 </addon>
 
 <addon id="plugin.video.japaonossodecadadia"
