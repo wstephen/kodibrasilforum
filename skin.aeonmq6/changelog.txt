@@ -1,0 +1,9 @@
+[B][COLOR=FFFF8C00]ALPHA BUILD 1.3.0 - RELEASE DATE 0/00/2015[/COLOR][/B]
+Added: New layout for Music Visualization - Available in OSD settings.
+Improved: New Weather Window. Forecast up to 16 days.
+
+[B][COLOR=FFFF8C00]ALPHA BUILD 1.2.0 - RELEASE DATE 1/25/2015[/COLOR][/B]
+Various fixes.
+
+[B][COLOR=FFFF8C00]ALPHA BUILD 1.1.0 - RELEASE DATE 1/23/2015[/COLOR][/B]
+First alpha build.
