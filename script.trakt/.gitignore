@@ -1,0 +1,5 @@
+*.pyc
+*.pyo
+.DS*
+.pylint_rc
+/.idea
