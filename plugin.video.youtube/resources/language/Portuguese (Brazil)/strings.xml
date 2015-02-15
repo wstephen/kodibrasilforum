@@ -6,10 +6,14 @@
     <string id="30002">Senha</string>
 
     <string id="30010">Qualidade do Vídeo</string>
-    <string id="30011">SD</string>
-	<string id="30012">HD</string>
-	<string id="30013">Full HD</string>
-    <string id="30014">Ultra HD</string>
+    <string id="30011">480p</string>
+	<string id="30012">720p (HD)</string>
+	<string id="30013">1080p (HD)</string>
+    <string id="30014">2160p (4k)</string>
+    <string id="30015">4320p (8k)</string>
+    <string id="30016">240p</string>
+    <string id="30017">360p</string>
+	
     <string id="30020">Permitir 3D</string>
     <string id="30021">Mostrar Fanart</string>
     <string id="30022">Itens por página</string>
@@ -21,6 +25,11 @@
     <string id="30028">Vista: Videos</string>
 	<string id="30030">Executar assistente de configuração</string>
     <string id="30031">Avançado</string>
+	<string id="30032">Visualização: Seriados</string>
+    <string id="30033">Visualização: Músicas</string>
+    <string id="30034">Visualiação: Artistas</string>
+    <string id="30035">Visualização: Álbuns</string>
+    <string id="30036">Suportar player alternativo</string>
 
     <!-- Kodimon Common -->
     <string id="30100">Favoritos</string>
@@ -41,8 +50,9 @@
     <string id="30115">Confirmar remover</string>
     <string id="30116">Apagar "%s"?</string>
     <string id="30117">Remover "%s"?</string>
-    <string id="30118">Apagar</string>
+    <string id="30118">Deletar</string>
 	<string id="30119">Por favor aguarde...</string>
+	<string id="30120">Limpar</string>
 
     <!-- YouTube -->
     <string id="30500">Canais</string>
@@ -84,4 +94,7 @@
     <string id="30536">Atualizando Playlist...</string>
     <string id="30537">Reproduzir daqui</string>
     <string id="30538">Vídeos Não Curtidos</string>
+	<string id="30539">Ao Vivo</string>
+    <string id="30540">Reproduzir com...</string>
+    <string id="30541">Mostrar nome do canal na descrição</string>
 </strings>
