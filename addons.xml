@@ -21,10 +21,7 @@
     </extension>
 </addon>
 
-<addon id="plugin.video.xbmcbrasil"
-	name="XBMC Brasil Videos Tutoriais"
-	version="1.0.2"
-	provider-name="Wanilton">
+<addon id="plugin.video.xbmcbrasil"	name="XBMC Brasil Videos Tutoriais"	version="1.0.3"	provider-name="Wanilton">
   <requires>
     <import addon="xbmc.python" version="2.1.0"/>
     <import addon="plugin.video.youtube" version="3.0.0"/>
@@ -172,10 +169,7 @@
   </extension>
 </addon>
 
-<addon id="plugin.video.PortadosFundos"
-	name="Porta dos Fundos"
-	version="1.0.0"
-	provider-name="wanilton">
+<addon id="plugin.video.PortadosFundos"	name="Porta dos Fundos"	version="1.0.1"	provider-name="wanilton">
   <requires>
     <import addon="xbmc.python" version="2.1.0"/>
     <import addon="plugin.video.youtube" version="3.0.0"/>
