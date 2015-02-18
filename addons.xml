@@ -21,21 +21,6 @@
     </extension>
 </addon>
 
-<addon id="plugin.video.xbmcbrasil"	name="XBMC Brasil Videos Tutoriais"	version="1.0.3"	provider-name="Wanilton">
-  <requires>
-    <import addon="xbmc.python" version="2.1.0"/>
-    <import addon="plugin.video.youtube" version="3.0.0"/>
-  </requires>
-  <extension point="xbmc.python.pluginsource" library="default.py">
-    <provides>video</provides>
-  </extension>
-  <extension point="xbmc.addon.metadata">
-    <summary lang="en">Tutoriais do FÃ³rum XBMC Brasil</summary>
-    <description lang="en">Awesome XBMC Brazil forum videos from YouTube.</description>
-    <platform>all</platform>
-  </extension>
-</addon>
-
 <addon id="plugin.video.globo.com"
 		name="Globo.com"
 		version="0.1.5.1.1"
@@ -165,21 +150,6 @@
   <extension point="xbmc.addon.metadata">
     <summary lang="en">Pipocando</summary>
     <description lang="en">Pipocando e um programa pra quem curte filmes, series, games e ziquizira.</description>
-    <platform>all</platform>
-  </extension>
-</addon>
-
-<addon id="plugin.video.PortadosFundos"	name="Porta dos Fundos"	version="1.0.1"	provider-name="wanilton">
-  <requires>
-    <import addon="xbmc.python" version="2.1.0"/>
-    <import addon="plugin.video.youtube" version="3.0.0"/>
-  </requires>
-  <extension point="xbmc.python.pluginsource" library="default.py">
-    <provides>video</provides>
-  </extension>
-  <extension point="xbmc.addon.metadata">
-    <summary lang="en">Porta dos Fundos</summary>
-    <description lang="en">VÃ­deos do Canal Porta dos Fundos no Youtube.</description>
     <platform>all</platform>
   </extension>
 </addon>
