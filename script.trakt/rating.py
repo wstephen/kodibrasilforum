@@ -1,31 +1,34 @@
 # -*- coding: utf-8 -*-
-"""Module used to launch rating dialogues and send ratings to trakt"""
+"""Module used to launch rating dialogues and send ratings to Trakt"""
 
 import xbmc
 import xbmcaddon
 import xbmcgui
 import utilities as utils
 import globals
+import logging
+
+logger = logging.getLogger(__name__)
 
 __addon__ = xbmcaddon.Addon("script.trakt")
 
 def ratingCheck(media_type, summary_info, watched_time, total_time, playlist_length):
 	"""Check if a video should be rated and if so launches the rating dialog"""
-	utils.Debug("[Rating] Rating Check called for '%s'" % media_type);
+	logger.debug("Rating Check called for '%s'" % media_type);
 	if not utils.getSettingAsBool("rate_%s" % media_type):
-		utils.Debug("[Rating] '%s' is configured to not be rated." % media_type)
+		logger.debug("'%s' is configured to not be rated." % media_type)
 		return
-	if summary_info is None:
-		utils.Debug("[Rating] Summary information is empty, aborting.")
+	if summary_info is None or 'user' not in summary_info:
+		logger.debug("Summary information is empty, aborting.")
 		return
 	watched = (watched_time / total_time) * 100
 	if watched >= utils.getSettingAsFloat("rate_min_view_time"):
 		if (playlist_length <= 1) or utils.getSettingAsBool("rate_each_playlist_item"):
 			rateMedia(media_type, summary_info)
 		else:
-			utils.Debug("[Rating] Rate each playlist item is disabled.")
+			logger.debug("Rate each playlist item is disabled.")
 	else:
-		utils.Debug("[Rating] '%s' does not meet minimum view time for rating (watched: %0.2f%%, minimum: %0.2f%%)" % (media_type, watched, utils.getSettingAsFloat("rate_min_view_time")))
+		logger.debug("'%s' does not meet minimum view time for rating (watched: %0.2f%%, minimum: %0.2f%%)" % (media_type, watched, utils.getSettingAsFloat("rate_min_view_time")))
 
 def rateMedia(media_type, summary_info, unrate=False, rating=None):
 	"""Launches the rating dialog"""
@@ -34,7 +37,7 @@ def rateMedia(media_type, summary_info, unrate=False, rating=None):
 
 	s = utils.getFormattedItemName(media_type, summary_info)
 
-	utils.Debug("[Rating] Summary Info %s" % (summary_info))
+	logger.debug("Summary Info %s" % summary_info)
 
 	if unrate:
 		rating = None
@@ -43,38 +46,38 @@ def rateMedia(media_type, summary_info, unrate=False, rating=None):
 			rating = 0
 
 		if not rating is None:
-			utils.Debug("[Rating] '%s' is being unrated." % s)
+			logger.debug("'%s' is being unrated." % s)
 			__rateOnTrakt(rating, media_type, summary_info, unrate=True)
 		else:
-			utils.Debug("[Rating] '%s' has not been rated, so not unrating." % s)
+			logger.debug("'%s' has not been rated, so not unrating." % s)
 
 		return
 
 	rerate = utils.getSettingAsBool('rate_rerate')
 	if not rating is None:
 		if summary_info['user']['ratings']['rating'] == 0:
-			utils.Debug("[Rating] Rating for '%s' is being set to '%d' manually." % (s, rating))
+			logger.debug("Rating for '%s' is being set to '%d' manually." % (s, rating))
 			__rateOnTrakt(rating, media_type, summary_info)
 		else:
 			if rerate:
 				if not summary_info['user']['ratings']['rating'] == rating:
-					utils.Debug("[Rating] Rating for '%s' is being set to '%d' manually." % (s, rating))
+					logger.debug("Rating for '%s' is being set to '%d' manually." % (s, rating))
 					__rateOnTrakt(rating, media_type, summary_info)
 				else:
-					utils.notification(utils.getString(1353), s)
-					utils.Debug("[Rating] '%s' already has a rating of '%d'." % (s, rating))
+					utils.notification(utils.getString(32043), s)
+					logger.debug("'%s' already has a rating of '%d'." % (s, rating))
 			else:
-				utils.notification(utils.getString(1351), s)
-				utils.Debug("[Rating] '%s' is already rated." % s)
+				utils.notification(utils.getString(32041), s)
+				logger.debug("'%s' is already rated." % s)
 		return
 
 	if summary_info['user']['ratings'] and summary_info['user']['ratings']['rating']:
 		if not rerate:
-			utils.Debug("[Rating] '%s' has already been rated." % s)
-			utils.notification(utils.getString(1351), s)
+			logger.debug("'%s' has already been rated." % s)
+			utils.notification(utils.getString(32041), s)
 			return
 		else:
-			utils.Debug("[Rating] '%s' is being re-rated." % s)
+			logger.debug("'%s' is being re-rated." % s)
 	
 	xbmc.executebuiltin('Dialog.Close(all, true)')
 
@@ -83,7 +86,6 @@ def rateMedia(media_type, summary_info, unrate=False, rating=None):
 		__addon__.getAddonInfo('path'),
 		media_type=media_type,
 		media=summary_info,
-		rating_type='advanced',
 		rerate=rerate
 	)
 
@@ -101,12 +103,12 @@ def rateMedia(media_type, summary_info, unrate=False, rating=None):
 		else:
 			__rateOnTrakt(rating, gui.media_type, gui.media)
 	else:
-		utils.Debug("[Rating] Rating dialog was closed with no rating.")
+		logger.debug("Rating dialog was closed with no rating.")
 
 	del gui
 
 def __rateOnTrakt(rating, media_type, media, unrate=False):
-	utils.Debug("[Rating] Sending rating (%s) to trakt.tv" % rating)
+	logger.debug("Sending rating (%s) to Trakt.tv" % rating)
 
 	params = {}
 	
@@ -147,16 +149,15 @@ def __rateOnTrakt(rating, media_type, media, unrate=False):
 		data = globals.traktapi.removeRating(root)
 
 	if data:
-		utils.Debug("data rate: %s" % data)
 		s = utils.getFormattedItemName(media_type, media)
 		if 'not_found' in data and not data['not_found']['movies'] and not data['not_found']['episodes'] and not data['not_found']['shows']:
 
 			if not unrate:
-				utils.notification(utils.getString(1350), s)
+				utils.notification(utils.getString(32040), s)
 			else:
-				utils.notification(utils.getString(1352), s)
+				utils.notification(utils.getString(32042), s)
 		else:
-			utils.notification(utils.getString(1354), s)
+			utils.notification(utils.getString(32044), s)
 
 class RatingDialog(xbmcgui.WindowXMLDialog):
 	buttons = {
@@ -173,33 +174,30 @@ class RatingDialog(xbmcgui.WindowXMLDialog):
 	}
 
 	focus_labels = {
-		11030: 1315,
-		11031: 1316,
-		11032: 1317,
-		11033: 1318,
-		11034: 1319,
-		11035: 1320,
-		11036: 1321,
-		11037: 1322,
-		11038: 1323,
-		11039: 1314
+		11030: 32028,
+		11031: 32029,
+		11032: 32030,
+		11033: 32031,
+		11034: 32032,
+		11035: 32033,
+		11036: 32034,
+		11037: 32035,
+		11038: 32036,
+		11039: 32027
 	}
 
-	def __init__(self, xmlFile, resourcePath, forceFallback=False, media_type=None, media=None, rating_type=None, rerate=False):
+	def __init__(self, xmlFile, resourcePath, forceFallback=False, media_type=None, media=None, rerate=False):
 		self.media_type = media_type
 		self.media = media
-		self.rating_type = rating_type
 		self.rating = None
 		self.rerate = rerate
-		self.default_advanced = utils.getSettingAsInt('rating_default_advanced')
+		self.default_rating = utils.getSettingAsInt('rating_default')
 
 	def onInit(self):
-		self.getControl(10015).setVisible(self.rating_type == 'advanced')
-
 		s = utils.getFormattedItemName(self.media_type, self.media)
 		self.getControl(10012).setLabel(s)
 
-		rateID = 11029 + self.default_advanced
+		rateID = 11029 + self.default_rating
 		if self.rerate and self.media['user']['ratings'] and int(self.media['user']['ratings']['rating']) > 0:
 			rateID = 11029 + int(self.media['user']['ratings']['rating'])
 		self.setFocus(self.getControl(rateID))
@@ -216,11 +214,11 @@ class RatingDialog(xbmcgui.WindowXMLDialog):
 			if self.rerate:
 				if self.media['user']['ratings'] and self.media['user']['ratings']['rating'] == self.buttons[controlID]:
 					if utils.isMovie(self.media_type):
-						s = utils.getString(1325)
+						s = utils.getString(32037)
 					elif utils.isShow(self.media_type):
-						s = utils.getString(1326)
+						s = utils.getString(32038)
 					elif utils.isEpisode(self.media_type):
-						s = utils.getString(1327)
+						s = utils.getString(32039)
 					else:
 						pass
 

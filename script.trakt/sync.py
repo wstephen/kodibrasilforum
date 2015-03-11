@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 
+import copy
 import xbmc
 import xbmcgui
 import utilities
-from utilities import Debug, notification
+import logging
+from utilities import notification
 
 progress = xbmcgui.DialogProgress()
+logger = logging.getLogger(__name__)
 
 class Sync():
+
 
 	def __init__(self, show_progress=False, run_silent=False, library="all", api=None):
 		self.traktapi = api
@@ -15,17 +19,17 @@ class Sync():
 		self.run_silent = run_silent
 		self.library = library
 		if self.show_progress and self.run_silent:
-			Debug("[Sync] Sync is being run silently.")
+			logger.debug("Sync is being run silently.")
 		self.sync_on_update = utilities.getSettingAsBool('sync_on_update')
 		self.notify = utilities.getSettingAsBool('show_sync_notifications')
 		self.notify_during_playback = not (xbmc.Player().isPlayingVideo() and utilities.getSettingAsBool("hide_notifications_playback"))
 
 	def __isCanceled(self):
 		if self.show_progress and not self.run_silent and progress.iscanceled():
-			Debug("[Sync] Sync was canceled by user.")
+			logger.debug("Sync was canceled by user.")
 			return True
 		elif xbmc.abortRequested:
-			Debug('Kodi abort requested')
+			logger.debug('Kodi abort requested')
 			return True
 		else:
 			return False
@@ -37,213 +41,337 @@ class Sync():
 
 	''' begin code for episode sync '''
 	def __kodiLoadShows(self):
-		self.__updateProgress(1, line1=utilities.getString(1480), line2=utilities.getString(1481))
+		self.__updateProgress(1, line1=utilities.getString(32094), line2=utilities.getString(32095))
 
-		Debug("[Episodes Sync] Getting show data from Kodi")
+		logger.debug("[Episodes Sync] Getting show data from Kodi")
 		data = utilities.kodiJsonRequest({'jsonrpc': '2.0', 'method': 'VideoLibrary.GetTVShows', 'params': {'properties': ['title', 'imdbnumber', 'year']}, 'id': 0})
-		if not data:
-			Debug("[Episodes Sync] Kodi json request was empty.")
-			return None
+		if data['limits']['total'] == 0:
+			logger.debug("[Episodes Sync] Kodi json request was empty.")
+			return None, None
 
 		tvshows = utilities.kodiRpcToTraktMediaObjects(data)
-		Debug("[Episode Sync] Shows finished %s" % tvshows)
+		logger.debug("[Episode Sync] Getting shows from kodi finished %s" % tvshows)
 
 		if tvshows is None:
-			return None
-		self.__updateProgress(2, line2=utilities.getString(1482))
-		result = {'shows': []}
+			return None, None
+		self.__updateProgress(2, line2=utilities.getString(32096))
+		resultCollected = {'shows': []}
+		resultWatched = {'shows': []}
 		i = 0
 		x = float(len(tvshows))
-		Debug("[Episodes Sync] Getting episode data from Kodi")
+		logger.debug("[Episodes Sync] Getting episode data from Kodi")
 		for show_col1 in tvshows:
+			i += 1
+			y = ((i / x) * 8) + 2
+			self.__updateProgress(int(y), line2=utilities.getString(32097) % (i, x))
 
 			show = {'title': show_col1['title'], 'ids': {}, 'year': show_col1['year'], 'seasons': []}
 
 			if 'ids' in show_col1 and 'tvdb' in show_col1['ids']:
 				show['ids'] = {'tvdb': show_col1['ids']['tvdb']}
 
-			data = utilities.kodiJsonRequest({'jsonrpc': '2.0', 'method': 'VideoLibrary.GetEpisodes', 'params': {'tvshowid': show_col1['tvshowid'], 'properties': ['season', 'episode', 'playcount', 'uniqueid', 'lastplayed', 'file', 'dateadded']}, 'id': 0})
+			data = utilities.kodiJsonRequest({'jsonrpc': '2.0', 'method': 'VideoLibrary.GetEpisodes', 'params': {'tvshowid': show_col1['tvshowid'], 'properties': ['season', 'episode', 'playcount', 'uniqueid', 'lastplayed', 'file', 'dateadded', 'runtime']}, 'id': 0})
 			if not data:
-				Debug("[Episodes Sync] There was a problem getting episode data for '%s', aborting sync." % show['title'])
-				return None
+				logger.debug("[Episodes Sync] There was a problem getting episode data for '%s', aborting sync." % show['title'])
+				return None, None
 			elif 'episodes' not in data:
-				Debug("[Episodes Sync] '%s' has no episodes in Kodi." % show['title'])
+				logger.debug("[Episodes Sync] '%s' has no episodes in Kodi." % show['title'])
 				continue
-
-			seasons = utilities.kodiRpcToTraktMediaObjects(data)
-
-			show['seasons'] = seasons
 
 			if 'tvshowid' in show_col1:
 				del(show_col1['tvshowid'])
-			result['shows'].append(show)
 
-			i += 1
-			y = ((i / x) * 8) + 2
-			self.__updateProgress(int(y), line2=utilities.getString(1483) % (i+1, x))
+			showWatched = copy.deepcopy(show)
+			data2 = copy.deepcopy(data)
+			show['seasons'] = utilities.kodiRpcToTraktMediaObjects(data)
 
-		self.__updateProgress(10, line2=utilities.getString(1484))
-		return result
+			showWatched['seasons'] = utilities.kodiRpcToTraktMediaObjects(data2, 'watched')
+
+			resultCollected['shows'].append(show)
+			resultWatched['shows'].append(showWatched)
+
+		self.__updateProgress(10, line2=utilities.getString(32098))
+		return resultCollected, resultWatched
 
 	def __traktLoadShows(self):
-		self.__updateProgress(10, line1=utilities.getString(1485), line2=utilities.getString(1486))
+		self.__updateProgress(10, line1=utilities.getString(32099), line2=utilities.getString(32100))
 
-		Debug('[Episodes Sync] Getting episode collection from trakt.tv')
-		traktShows = {}
-		traktShows = self.traktapi.getShowsCollected(traktShows)
+		logger.debug('[Episodes Sync] Getting episode collection from Trakt.tv')
+		try:
+			traktShowsCollected = {}
+			traktShowsCollected = self.traktapi.getShowsCollected(traktShowsCollected)
+			traktShowsCollected = traktShowsCollected.items()
 
-		self.__updateProgress(12, line2=utilities.getString(1487))
-		traktShows = self.traktapi.getShowsWatched(traktShows)
-		traktShows = traktShows.items()
-		if not isinstance(traktShows, list):
-			Debug("[Episodes Sync] Invalid trakt.tv show list, possible error getting data from trakt, aborting trakt.tv collection update.")
-			return False
+			self.__updateProgress(12, line2=utilities.getString(32101))
+			traktShowsWatched = {}
+			traktShowsWatched = self.traktapi.getShowsWatched(traktShowsWatched)
+			traktShowsWatched = traktShowsWatched.items()
+		except Exception:
+			logger.debug("[Episodes Sync] Invalid Trakt.tv show list, possible error getting data from Trakt, aborting Trakt.tv collection update.")
+			return False, False
 
 		i = 0
-		x = float(len(traktShows))
-		shows = {'shows': []}
-		for key, show in traktShows:
+		x = float(len(traktShowsCollected))
+		showsCollected = {'shows': []}
+		for key, show in traktShowsCollected:
+			i += 1
+			y = ((i / x) * 20) + 6
+			self.__updateProgress(int(y), line2=utilities.getString(32102) % (i, x))
+
 			#will keep the data in python structures - just like the KODI response
-			show = show.to_info()
+			show = show.to_dict()
 			
-			shows['shows'].append(show)
-			i += 1
-			y = ((i / x) * 20) + 12
-			self.__updateProgress(int(y), line2=utilities.getString(1488) % (i+1, x))
-
-		self.__updateProgress(32, line2=utilities.getString(1489))
-
-		return shows
-
-	def __traktRemoveEpisodes(self, shows):
-		if len(shows['shows']) == 0:
-			self.__updateProgress(48, line1=utilities.getString(1445), line2=utilities.getString(1496))
-			Debug('[Episodes Sync] trakt.tv episode collection is clean')
-			return
-
-		Debug("[Episodes Sync] %i show(s) will have episodes removed from trakt.tv collection." % len(shows['shows']))
-		for show in shows['shows']:
-			Debug("[Episodes Sync] Episodes removed: %s" % self.__getShowAsString(show, short=True))
-
-		self.__updateProgress(33, line1=utilities.getString(1445), line2=utilities.getString(1497) % self.__countEpisodes(shows['shows']), line3=" ")
-
-		Debug("[trakt][traktRemoveEpisodes] Shows to remove %s" % shows)
-		result = self.traktapi.removeFromCollection(shows)
-		Debug("[trakt][traktRemoveEpisodes] Result %s" % result)
-
-		self.__updateProgress(48, line2=utilities.getString(1498) % self.__countEpisodes(shows['shows']), line3=" ")
-
-	def __traktUpdateEpisodes(self, shows):
-		if len(shows['shows']) == 0:
-			self.__updateProgress(65, line1=utilities.getString(1438), line2=utilities.getString(1492))
-			Debug("[Episodes Sync] trakt.tv episode playcounts are up to date.")
-			return
-
-		Debug("[Episodes Sync] %i show(s) are missing playcounts on trakt.tv" % len(shows['shows']))
-		for show in shows['shows']:
-			Debug("[Episodes Sync] Episodes updated: %s" % self.__getShowAsString(show, short=True))
-
-		self.__updateProgress(49, line1=utilities.getString(1438), line2=utilities.getString(1439) % (len(shows['shows'])), line3=" ")
+			showsCollected['shows'].append(show)
 
 		i = 0
-		x = float(len(shows['shows']))
-		for show in shows['shows']:
-			if self.__isCanceled():
+		x = float(len(traktShowsWatched))
+		showsWatched = {'shows': []}
+		for key, show in traktShowsWatched:
+			i += 1
+			y = ((i / x) * 26) + 6
+			self.__updateProgress(int(y), line2=utilities.getString(32102) % (i, x))
+
+			#will keep the data in python structures - just like the KODI response
+			show = show.to_dict()
+
+			showsWatched['shows'].append(show)
+
+		self.__updateProgress(32, line2=utilities.getString(32103))
+
+		return showsCollected, showsWatched
+
+	def __traktLoadShowsPlaybackProgress(self):
+		if utilities.getSettingAsBool('trakt_episode_playback') and not self.__isCanceled():
+			self.__updateProgress(10, line1=utilities.getString(1485), line2=utilities.getString(32119))
+
+			logger.debug('[Playback Sync] Getting playback progress from Trakt.tv')
+			try:
+				traktProgressShows = self.traktapi.getEpisodePlaybackProgress()
+			except Exception:
+				logger.debug("[Playback Sync] Invalid Trakt.tv progress list, possible error getting data from Trakt, aborting Trakt.tv playback update.")
+				return False
+
+			i = 0
+			x = float(len(traktProgressShows))
+			showsProgress = {'shows': []}
+			for show in traktProgressShows:
+				i += 1
+				y = ((i / x) * 20) + 6
+				self.__updateProgress(int(y), line2=utilities.getString(32120) % (i, x))
+
+				#will keep the data in python structures - just like the KODI response
+				show = show.to_dict()
+
+				showsProgress['shows'].append(show)
+
+			self.__updateProgress(32, line2=utilities.getString(32121))
+
+			return showsProgress
+
+	def __addEpisodesToTraktCollection(self, kodiShows, traktShows):
+		if utilities.getSettingAsBool('add_episodes_to_trakt') and not self.__isCanceled():
+			addTraktShows = copy.deepcopy(traktShows)
+			addKodiShows = copy.deepcopy(kodiShows)
+
+			tmpTraktShowsAdd = self.__compareShows(addKodiShows, addTraktShows)
+			traktShowsAdd = copy.deepcopy(tmpTraktShowsAdd)
+			self.sanitizeShows(traktShowsAdd)
+			#logger.debug("traktShowsAdd %s" % traktShowsAdd)
+
+			if len(traktShowsAdd['shows']) == 0:
+				self.__updateProgress(48, line1=utilities.getString(32068), line2=utilities.getString(32104))
+				logger.debug("[Episodes Sync] Trakt.tv episode collection is up to date.")
+				return
+			logger.debug("[Episodes Sync] %i show(s) have episodes (%d) to be added to your Trakt.tv collection." % (len(traktShowsAdd['shows']), self.__countEpisodes(traktShowsAdd)))
+			for show in traktShowsAdd['shows']:
+				logger.debug("[Episodes Sync] Episodes added: %s" % self.__getShowAsString(show, short=True))
+
+			self.__updateProgress(33, line1=utilities.getString(32068), line2=utilities.getString(32067) % (len(traktShowsAdd['shows'])), line3=" ")
+
+			#split episode list into chunks of 50
+			chunksize = 1
+			chunked_episodes = utilities.chunks(traktShowsAdd['shows'], chunksize)
+			errorcount = 0
+			i = 0
+			x = float(len(traktShowsAdd['shows']))
+			for chunk in chunked_episodes:
+				if self.__isCanceled():
+					return
+				i += 1
+				y = ((i / x) * 16) + 33
+				self.__updateProgress(int(y), line2=utilities.getString(32069) % ((i)*chunksize if (i)*chunksize < x else x, x))
+
+				request = {'shows': chunk}
+				logger.debug("[traktAddEpisodes] Shows to add %s" % request)
+				try:
+					self.traktapi.addToCollection(request)
+				except Exception as ex:
+					message = utilities.createError(ex)
+					logging.fatal(message)
+					errorcount += 1
+
+			logger.debug("[traktAddEpisodes] Finished with %d error(s)" % errorcount)
+			self.__updateProgress(49, line2=utilities.getString(32105) % self.__countEpisodes(traktShowsAdd))
+
+	def __deleteEpisodesFromTraktCollection(self, traktShows, kodiShows):
+		if utilities.getSettingAsBool('clean_trakt_episodes') and not self.__isCanceled():
+			removeTraktShows = copy.deepcopy(traktShows)
+			removeKodiShows = copy.deepcopy(kodiShows)
+
+			traktShowsRemove = self.__compareShows(removeTraktShows, removeKodiShows)
+			self.sanitizeShows(traktShowsRemove)
+
+			if len(traktShowsRemove['shows']) == 0:
+				self.__updateProgress(65, line1=utilities.getString(32077), line2=utilities.getString(32110))
+				logger.debug('[Episodes Sync] Trakt.tv episode collection is clean, no episodes to remove.')
 				return
 
-			s = { 'shows': [show]}
-			Debug("[trakt][traktUpdateEpisodes] Shows to update %s" % s)
-			result = self.traktapi.addToHistory(s)
-			Debug("[trakt][traktUpdateEpisodes] Result %s" % result)
+			logger.debug("[Episodes Sync] %i show(s) will have episodes removed from Trakt.tv collection." % len(traktShowsRemove['shows']))
+			for show in traktShowsRemove['shows']:
+				logger.debug("[Episodes Sync] Episodes removed: %s" % self.__getShowAsString(show, short=True))
 
-			epCount = self.__countEpisodes([show])
-			title = show['title'].encode('utf-8', 'ignore')
+			self.__updateProgress(50, line1=utilities.getString(32077), line2=utilities.getString(32111) % self.__countEpisodes(traktShowsRemove), line3=" ")
 
-			i += 1
-			y = ((i / x) * 16) + 49
-			self.__updateProgress(int(y), line2=title, line3=utilities.getString(1440) % epCount)
+			logger.debug("[traktRemoveEpisodes] Shows to remove %s" % traktShowsRemove)
+			try:
+				self.traktapi.removeFromCollection(traktShowsRemove)
+			except Exception as ex:
+				message = utilities.createError(ex)
+				logging.fatal(message)
 
-		self.__updateProgress(65, line2="%i %s" % (len(shows['shows']), utilities.getString(1439)))
+			self.__updateProgress(65, line2=utilities.getString(32112) % self.__countEpisodes(traktShowsRemove), line3=" ")
 
-	def __kodiUpdateEpisodes(self, shows):
-		if len(shows['shows']) == 0:
-			self.__updateProgress(82, line1=utilities.getString(1441), line2=utilities.getString(1493))
-			Debug("[Episodes Sync] Kodi episode playcounts are up to date.")
-			return
+	def __addEpisodesToTraktWatched(self, kodiShows, traktShows):
+		if utilities.getSettingAsBool('trakt_episode_playcount') and not self.__isCanceled():
+			updateTraktTraktShows = copy.deepcopy(traktShows)
+			updateTraktKodiShows = copy.deepcopy(kodiShows)
 
-		Debug("[Episodes Sync] %i show(s) shows are missing playcounts on Kodi" % len(shows['shows']))
-		for s in ["%s" % self.__getShowAsString(s, short=True) for s in shows['shows']]:
-			Debug("[Episodes Sync] Episodes updated: %s" % s)
+			traktShowsUpdate = self.__compareShows(updateTraktKodiShows, updateTraktTraktShows, watched=True)
+			self.sanitizeShows(traktShowsUpdate)
+			#logger.debug("traktShowsUpdate %s" % traktShowsUpdate)
 
-		episodes = []
-		for show in shows['shows']:
-			for season in show['seasons']:
-				for episode in season['episodes']:
-					episodes.append({'episodeid': episode['ids']['episodeid'], 'playcount': 1})
-
-		#split episode list into chunks of 50
-		chunksize = 50
-		chunked_episodes = utilities.chunks([{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": episodes[i], "id": i} for i in range(len(episodes))], chunksize)
-		i = 0
-		x = float(len(chunked_episodes))
-		for chunk in chunked_episodes:
-			if self.__isCanceled():
+			if len(traktShowsUpdate['shows']) == 0:
+				self.__updateProgress(82, line1=utilities.getString(32071), line2=utilities.getString(32106))
+				logger.debug("[Episodes Sync] Trakt.tv episode playcounts are up to date.")
 				return
 
-			Debug("[Episodes Sync] chunk %s" % str(chunk))
-			result = utilities.kodiJsonRequest(chunk)
-			Debug("[Episodes Sync] result %s" % str(result))
+			logger.debug("[Episodes Sync] %i show(s) are missing playcounts on Trakt.tv" % len(traktShowsUpdate['shows']))
+			for show in traktShowsUpdate['shows']:
+				logger.debug("[Episodes Sync] Episodes updated: %s" % self.__getShowAsString(show, short=True))
 
-			i += 1
-			y = ((i / x) * 16) + 66
-			self.__updateProgress(int(y), line2=utilities.getString(1494) % ((i+1)*chunksize, x))
+			self.__updateProgress(66, line1=utilities.getString(32071), line2=utilities.getString(32070) % (len(traktShowsUpdate['shows'])), line3="")
+			errorcount = 0
+			i = 0
+			x = float(len(traktShowsUpdate['shows']))
+			for show in traktShowsUpdate['shows']:
+				if self.__isCanceled():
+					return
+				epCount = self.__countEpisodes([show])
+				title = show['title'].encode('utf-8', 'ignore')
+				i += 1
+				y = ((i / x) * 16) + 66
+				self.__updateProgress(int(y), line2=title, line3=utilities.getString(32073) % epCount)
 
-		self.__updateProgress(82, line2=utilities.getString(1495) % len(episodes))
+				s = {'shows': [show]}
+				logger.debug("[traktUpdateEpisodes] Shows to update %s" % s)
+				try:
+					self.traktapi.addToHistory(s)
+				except Exception as ex:
+					message = utilities.createError(ex)
+					logging.fatal(message)
+					errorcount += 1
 
-	def __traktAddEpisodes(self, shows):
-		if len(shows['shows']) == 0:
-			self.__updateProgress(98, line1=utilities.getString(1435), line2=utilities.getString(1490))
-			Debug("[Episodes Sync] trakt.tv episode collection is up to date.")
-			return
-		Debug("[Episodes Sync] %i show(s) have episodes (%d) to be added to your trakt.tv collection." % (len(shows['shows']), self.__countEpisodes(shows['shows'])))
-		for show in shows['shows']:
-			Debug("[Episodes Sync] Episodes added: %s" % self.__getShowAsString(show, short=True))
+			logger.debug("[traktUpdateEpisodes] Finished with %d error(s)" % errorcount)
+			self.__updateProgress(82, line2=utilities.getString(32072) % (len(traktShowsUpdate['shows'])), line3="")
 
-		self.__updateProgress(82, line1=utilities.getString(1435), line2=utilities.getString(1436) % (0, len(shows['shows'])), line3=" ")
+	def __addEpisodesToKodiWatched(self, traktShows, kodiShows, kodiShowsCollected):
+		if utilities.getSettingAsBool('kodi_episode_playcount') and not self.__isCanceled():
+			updateKodiTraktShows = copy.deepcopy(traktShows)
+			updateKodiKodiShows = copy.deepcopy(kodiShows)
 
-		#split episode list into chunks of 50
-		chunksize = 1
-		chunked_episodes = utilities.chunks(shows['shows'], chunksize)
-		i = 0
-		x = float(len(chunked_episodes))
-		for chunk in chunked_episodes:
-			if self.__isCanceled():
+			kodiShowsUpadate = self.__compareShows(updateKodiTraktShows, updateKodiKodiShows, watched=True, restrict=True, collected=kodiShowsCollected)
+
+			if len(kodiShowsUpadate['shows']) == 0:
+				self.__updateProgress(98, line1=utilities.getString(32074), line2=utilities.getString(32107))
+				logger.debug("[Episodes Sync] Kodi episode playcounts are up to date.")
 				return
-			request = {'shows': chunk}
-			Debug("[trakt][traktAddEpisodes] Shows to add %s" % request)
-			result = self.traktapi.addToCollection(request)
-			Debug("[trakt][traktAddEpisodes] Result %s" % result)
 
-			i += 1
-			y = ((i / x) * 16) + 82
-			self.__updateProgress(int(y), line2=utilities.getString(1436) % ((i+1)*chunksize, x))
+			logger.debug("[Episodes Sync] %i show(s) shows are missing playcounts on Kodi" % len(kodiShowsUpadate['shows']))
+			for s in ["%s" % self.__getShowAsString(s, short=True) for s in kodiShowsUpadate['shows']]:
+				logger.debug("[Episodes Sync] Episodes updated: %s" % s)
 
-		self.__updateProgress(98, line2=utilities.getString(1491) % self.__countEpisodes(shows['shows']))
+			#logger.debug("kodiShowsUpadate: %s" % kodiShowsUpadate)
+			episodes = []
+			for show in kodiShowsUpadate['shows']:
+				for season in show['seasons']:
+					for episode in season['episodes']:
+						episodes.append({'episodeid': episode['ids']['episodeid'], 'playcount': episode['plays'], "lastplayed": utilities.convertUtcToDateTime(episode['last_watched_at'])})
 
-	def __countEpisodes(self, shows, watched=False, collection=True, all=False):
+			#split episode list into chunks of 50
+			chunksize = 50
+			chunked_episodes = utilities.chunks([{"jsonrpc": "2.0", "method": "VideoLibrary.SetEpisodeDetails", "params": episodes[i], "id": i} for i in range(len(episodes))], chunksize)
+			i = 0
+			x = float(len(episodes))
+			for chunk in chunked_episodes:
+				if self.__isCanceled():
+					return
+				i += 1
+				y = ((i / x) * 16) + 82
+				self.__updateProgress(int(y), line2=utilities.getString(32108) % ((i)*chunksize if (i)*chunksize < x else x, x))
+
+				logger.debug("[Episodes Sync] chunk %s" % str(chunk))
+				result = utilities.kodiJsonRequest(chunk)
+				logger.debug("[Episodes Sync] result %s" % str(result))
+
+			self.__updateProgress(98, line2=utilities.getString(32109) % len(episodes))
+
+	def __addEpisodeProgressToKodi(self, traktShows, kodiShows):
+		if utilities.getSettingAsBool('trakt_episode_playback') and traktShows and not self.__isCanceled():
+			updateKodiTraktShows = copy.deepcopy(traktShows)
+			updateKodiKodiShows = copy.deepcopy(kodiShows)
+			kodiShowsUpadate = self.__compareShows(updateKodiTraktShows, updateKodiKodiShows, restrict=True, playback=True)
+
+			if len(kodiShowsUpadate['shows']) == 0:
+				self.__updateProgress(98, line1=utilities.getString(1441), line2=utilities.getString(32129))
+				logger.debug("[Episodes Sync] Kodi episode playbacks are up to date.")
+				return
+
+			logger.debug("[Episodes Sync] %i show(s) shows are missing playbacks on Kodi" % len(kodiShowsUpadate['shows']))
+			for s in ["%s" % self.__getShowAsString(s, short=True) for s in kodiShowsUpadate['shows']]:
+				logger.debug("[Episodes Sync] Episodes updated: %s" % s)
+
+			episodes = []
+			for show in kodiShowsUpadate['shows']:
+				for season in show['seasons']:
+					for episode in season['episodes']:
+						episodes.append({'episodeid': episode['ids']['episodeid'], 'progress': episode['progress'], 'runtime': episode['runtime']})
+
+			#need to calculate the progress in int from progress in percent from Trakt
+			#split episode list into chunks of 50
+			chunksize = 50
+			chunked_episodes = utilities.chunks([{"jsonrpc": "2.0", "id": i, "method": "VideoLibrary.SetEpisodeDetails", "params": {"episodeid":episodes[i]['episodeid'], "resume": {"position": episodes[i]['runtime']/100.0*episodes[i]['progress']}}} for i in range(len(episodes))], chunksize)
+			i = 0
+			x = float(len(episodes))
+			for chunk in chunked_episodes:
+				if self.__isCanceled():
+					return
+				i += 1
+				y = ((i / x) * 16) + 82
+				self.__updateProgress(int(y), line2=utilities.getString(32130) % ((i)*chunksize if (i)*chunksize < x else x, x))
+
+				utilities.kodiJsonRequest(chunk)
+
+			self.__updateProgress(98, line2=utilities.getString(32131) % len(episodes))
+
+	def __countEpisodes(self, shows, collection=True):
 		count = 0
 		if 'shows' in shows:
 			shows = shows['shows']
 		for show in shows:
-			if all:
-				for s in show['seasons']:
-					count += len(show['seasons'][s])
-			else:
-				for seasonKey in show['seasons']:
-					if 'seasons' in show:
-						for episodeKey in seasonKey['episodes']:
-							if 'watched' in episodeKey and not episodeKey['watched'] == watched:
-								continue
+			for seasonKey in show['seasons']:
+				if seasonKey is not None and 'episodes' in seasonKey:
+					for episodeKey in seasonKey['episodes']:
+						if episodeKey is not None:
 							if 'collected' in episodeKey and not episodeKey['collected'] == collection:
 								continue
 							if 'number' in episodeKey and episodeKey['number']:
@@ -268,379 +396,558 @@ class Sync():
 		else:
 			return "%s [tvdb: No id] - %s" % (show['title'], ", ".join(p))
 
-	def __getEpisodes(self, seasons, watched=False):
+	def __getEpisodes(self, seasons):
 		data = {}
 		for season in seasons:
 			episodes = {}
 			for episode in season['episodes']:
-				if watched and 'watched' in episode and episode['watched'] == 0:
-						continue
-				elif 'collected' in episode and episode['collected'] == 0:
-						continue
 				episodes[episode['number']] = episode
 			data[season['number']] = episodes
 
 		return data
 
-	def __compareShows(self, shows_col1, shows_col2, watched=False, restrict=False):
+	#always return shows_col1 if you have enrich it, but don't return shows_col2
+	def __compareShows(self, shows_col1, shows_col2, watched=False, restrict=False, collected=False, playback=False):
 		shows = []
 		for show_col1 in shows_col1['shows']:
-			show_col2 = utilities.findMediaObject(show_col1, shows_col2['shows'])
+			if show_col1:
+				show_col2 = utilities.findMediaObject(show_col1, shows_col2['shows'])
+				#logger.debug("show_col1 %s" % show_col1)
+				#logger.debug("show_col2 %s" % show_col2)
 
-			if show_col2:
-				season_diff = {}
-				# format the data to be easy to compare trakt and KODI data
-				season_col1 = self.__getEpisodes(show_col1['seasons'], watched)
-				season_col2 = self.__getEpisodes(show_col2['seasons'], watched)
-				for season in season_col1:
-					a = season_col1[season]
-					if season in season_col2:
-						b = season_col2[season]
-						diff = list(set(a).difference(set(b)))
-						if len(diff) > 0:
-							if restrict:
-								# get all the episodes that we have in Kodi, watched or not
-								_seasons = self.__getEpisodes(show_col2['seasons'], False)
-								t = list(set(_seasons[season]).intersection(set(diff)))
+				if show_col2:
+					season_diff = {}
+					# format the data to be easy to compare Trakt and KODI data
+					season_col1 = self.__getEpisodes(show_col1['seasons'])
+					season_col2 = self.__getEpisodes(show_col2['seasons'])
+					for season in season_col1:
+						a = season_col1[season]
+						if season in season_col2:
+							b = season_col2[season]
+							diff = list(set(a).difference(set(b)))
+							if playback:
+								t = list(set(a).intersection(set(b)))
 								if len(t) > 0:
 									eps = {}
 									for ep in t:
-										eps[ep] = _seasons[season][ep]
+										eps[ep] = a[ep]
+										if 'episodeid' in season_col2[season][ep]['ids']:
+											if 'ids' in eps:
+												eps[ep]['ids']['episodeid'] = season_col2[season][ep]['ids']['episodeid']
+											else:
+												eps[ep]['ids'] = {'episodeid': season_col2[season][ep]['ids']['episodeid']}
+										eps[ep]['runtime'] = season_col2[season][ep]['runtime']
 									season_diff[season] = eps
-							else:
-								eps = {}
-								for ep in diff:
-									eps[ep] = a[ep]
-								season_diff[season] = eps
-					else:
-						if not restrict:
-							if len(a) > 0:
-								season_diff[season] = a
-				if len(season_diff) > 0:
-					show = {'title': show_col1['title'], 'ids' : {'tvdb': show_col1['ids']['tvdb']}, 'year': show_col1['year'], 'seasons': []}
-					for seasonKey in season_diff:
-						episodes = []
-						for episodeKey in season_diff[seasonKey]:
-							episodes.append(season_diff[seasonKey][episodeKey])
-						show['seasons'].append({ 'number': seasonKey, 'episodes': episodes })
-					if 'imdb' in show_col2 and show_col2['imdb']:
-						show['ids']['imdb'] = show_col2['imdb']
-					if 'tvshowid' in show_col2:
-						show['tvshowid'] = show_col2['tvshowid']
-					shows.append(show)
-			else:
-				if not restrict:
-					if self.__countEpisodes([show_col1], watched=watched) > 0:
+							elif len(diff) > 0:
+								if restrict:
+									# get all the episodes that we have in Kodi, watched or not - update kodi
+									collectedShow = utilities.findMediaObject(show_col1, collected['shows'])
+									#logger.debug("collected %s" % collectedShow)
+									collectedSeasons = self.__getEpisodes(collectedShow['seasons'])
+									t = list(set(collectedSeasons[season]).intersection(set(diff)))
+									if len(t) > 0:
+										eps = {}
+										for ep in t:
+											eps[ep] = a[ep]
+											if 'episodeid' in collectedSeasons[season][ep]['ids']:
+												if 'ids' in eps:
+													eps[ep]['ids']['episodeid'] = collectedSeasons[season][ep]['ids']['episodeid']
+												else:
+													eps[ep]['ids'] = {'episodeid': collectedSeasons[season][ep]['ids']['episodeid']}
+										season_diff[season] = eps
+								else:
+									eps = {}
+									for ep in diff:
+										eps[ep] = a[ep]
+									if len(eps) > 0:
+										season_diff[season] = eps
+						else:
+							if not restrict:
+								if len(a) > 0:
+									season_diff[season] = a
+					#logger.debug("season_diff %s" % season_diff)
+					if len(season_diff) > 0:
+						#logger.debug("Season_diff")
 						show = {'title': show_col1['title'], 'ids': {}, 'year': show_col1['year'], 'seasons': []}
 						if 'tvdb' in show_col1['ids']:
-							show['ids'] = show_col1['ids']['tvdb']
-						for seasonKey in show_col1['seasons']:
+							show['ids'] = {'tvdb': show_col1['ids']['tvdb']}
+						for seasonKey in season_diff:
 							episodes = []
-							for episodeKey in seasonKey['episodes']:
-								if watched == episodeKey['watched']:
-									episodes.append(episodeKey)
-									
-							show['seasons'].append({ 'number': seasonKey['number'], 'episodes': episodes })
-
-						if 'tvshowid' in show_col1:
-							del(show_col1['tvshowid'])
+							for episodeKey in season_diff[seasonKey]:
+								episodes.append(season_diff[seasonKey][episodeKey])
+							show['seasons'].append({ 'number': seasonKey, 'episodes': episodes })
+						if 'imdb' in show_col2 and show_col2['imdb']:
+							show['ids']['imdb'] = show_col2['imdb']
+						if 'tvshowid' in show_col2:
+							show['tvshowid'] = show_col2['tvshowid']
+						#logger.debug("show %s" % show)
 						shows.append(show)
+				else:
+					if not restrict:
+						if self.__countEpisodes([show_col1]) > 0:
+							show = {'title': show_col1['title'], 'ids': {}, 'year': show_col1['year'], 'seasons': []}
+							if 'tvdb' in show_col1['ids']:
+								show['ids'] = {'tvdb': show_col1['ids']['tvdb']}
+							for seasonKey in show_col1['seasons']:
+								episodes = []
+								for episodeKey in seasonKey['episodes']:
+									if watched and (episodeKey['watched'] == 1):
+										episodes.append(episodeKey)
+									elif not watched:
+										episodes.append(episodeKey)
+								if len(episodes) > 0:
+									show['seasons'].append({ 'number': seasonKey['number'], 'episodes': episodes })
+
+							if 'tvshowid' in show_col1:
+								del(show_col1['tvshowid'])
+							if self.__countEpisodes([show]) > 0:
+								shows.append(show)
 		result = { 'shows': shows}
 		return result
 
 	def __syncEpisodes(self):
 		if not self.show_progress and self.sync_on_update and self.notify and self.notify_during_playback:
-			notification('%s %s' % (utilities.getString(1400), utilities.getString(1406)), utilities.getString(1420)) #Sync started
+			notification('%s %s' % (utilities.getString(32045), utilities.getString(32050)), utilities.getString(32061)) #Sync started
 		if self.show_progress and not self.run_silent:
-			progress.create("%s %s" % (utilities.getString(1400), utilities.getString(1406)), line1=" ", line2=" ", line3=" ")
+			progress.create("%s %s" % (utilities.getString(32045), utilities.getString(32050)), line1=" ", line2=" ", line3=" ")
 
-		kodiShows = self.__kodiLoadShows()
-		if not isinstance(kodiShows, list) and not kodiShows:
-			Debug("[Episodes Sync] Kodi show list is empty, aborting tv show Sync.")
+		kodiShowsCollected, kodiShowsWatched = self.__kodiLoadShows()
+		if not isinstance(kodiShowsCollected, list) and not kodiShowsCollected:
+			logger.debug("[Episodes Sync] Kodi collected show list is empty, aborting tv show Sync.")
+			if self.show_progress and not self.run_silent:
+				progress.close()
+			return
+		if not isinstance(kodiShowsWatched, list) and not kodiShowsWatched:
+			logger.debug("[Episodes Sync] Kodi watched show list is empty, aborting tv show Sync.")
 			if self.show_progress and not self.run_silent:
 				progress.close()
 			return
 
-		traktShows = self.__traktLoadShows()
-		if not isinstance(traktShows['shows'], list):
-			Debug("[Episodes Sync] Error getting trakt.tv show list, aborting tv show sync.")
+		traktShowsCollected, traktShowsWatched = self.__traktLoadShows()
+		if not traktShowsCollected:
+			logger.debug("[Episodes Sync] Error getting Trakt.tv collected show list, aborting tv show sync.")
+			if self.show_progress and not self.run_silent:
+				progress.close()
+			return
+		if not traktShowsWatched:
+			logger.debug("[Episodes Sync] Error getting Trakt.tv watched show list, aborting tv show sync.")
 			if self.show_progress and not self.run_silent:
 				progress.close()
 			return
 
-		if utilities.getSettingAsBool('clean_trakt_episodes') and not self.__isCanceled():
-			traktShowsRemove = self.__compareShows(traktShows, kodiShows)
-			self.__traktRemoveEpisodes(traktShowsRemove)
+		#we need a correct runtime for episodes until we have that this is commented out
+		#traktShowsProgress = self.__traktLoadShowsPlaybackProgress()
 		
-		if utilities.getSettingAsBool('trakt_episode_playcount') and not self.__isCanceled():
-			traktShowsUpdate = self.__compareShows(kodiShows, traktShows, watched=True)
-			Debug("traktShowsUpdate %s" % traktShowsUpdate)
-			self.__traktUpdateEpisodes(traktShowsUpdate)
+		self.__addEpisodesToTraktCollection(kodiShowsCollected, traktShowsCollected)
 
-		if utilities.getSettingAsBool('kodi_episode_playcount') and not self.__isCanceled():
-			kodiShowsUpadate = self.__compareShows(traktShows, kodiShows, watched=True, restrict=True)
-			self.__kodiUpdateEpisodes(kodiShowsUpadate)
+		self.__deleteEpisodesFromTraktCollection(traktShowsCollected, kodiShowsCollected)
 
-		if utilities.getSettingAsBool('add_episodes_to_trakt') and not self.__isCanceled():
-			traktShowsAdd = self.__compareShows(kodiShows, traktShows)
-			Debug("traktShowsAdd %s" % traktShowsAdd)
-			self.__traktAddEpisodes(traktShowsAdd)
+		self.__addEpisodesToTraktWatched(kodiShowsWatched, traktShowsWatched)
+
+		self.__addEpisodesToKodiWatched(traktShowsWatched, kodiShowsWatched, kodiShowsCollected)
+
+		#we need a correct runtime for episodes until we have that this is commented out
+		#self.__addEpisodeProgressToKodi(traktShowsProgress, kodiShowsCollected)
 
 		if not self.show_progress and self.sync_on_update and self.notify and self.notify_during_playback:
-			notification('%s %s' % (utilities.getString(1400), utilities.getString(1406)), utilities.getString(1421)) #Sync complete
+			notification('%s %s' % (utilities.getString(32045), utilities.getString(32050)), utilities.getString(32062)) #Sync complete
 
-		if not self.__isCanceled() and self.show_progress and not self.run_silent:
-			self.__updateProgress(100, line1=" ", line2=utilities.getString(1442), line3=" ")
+		if self.show_progress and not self.run_silent:
+			self.__updateProgress(100, line1=" ", line2=utilities.getString(32075), line3=" ")
 			progress.close()
 
-		Debug("[Episodes Sync] Shows on trakt.tv (%d), shows in Kodi (%d)." % (len(traktShows['shows']), len(kodiShows['shows'])))
+		logger.debug("[Episodes Sync] Shows on Trakt.tv (%d), shows in Kodi (%d)." % (len(traktShowsCollected['shows']), len(kodiShowsCollected['shows'])))
 
-		Debug("[Episodes Sync] Episodes on trakt.tv (%d), episodes in Kodi (%d)." % (self.__countEpisodes(traktShows), self.__countEpisodes(kodiShows)))
-		Debug("[Episodes Sync] Complete.")
+		logger.debug("[Episodes Sync] Episodes on Trakt.tv (%d), episodes in Kodi (%d)." % (self.__countEpisodes(traktShowsCollected), self.__countEpisodes(kodiShowsCollected)))
+		logger.debug("[Episodes Sync] Complete.")
+
+	@staticmethod
+	def sanitizeShows(shows):
+		# do not remove watched_at and collected_at may cause problems between the 4 sync types (would probably have to deepcopy etc)
+		for show in shows['shows']:
+			for season in show['seasons']:
+				for episode in season['episodes']:
+					if 'collected' in episode:
+						del episode['collected']
+					if 'watched' in episode:
+						del episode['watched']
+					if 'season' in episode:
+						del episode['season']
+					if 'plays' in episode:
+						del episode['plays']
+					if 'ids' in episode and 'episodeid' in episode['ids']:
+						del episode['ids']['episodeid']
 
 	''' begin code for movie sync '''
 	def __kodiLoadMovies(self):
-		self.__updateProgress(1, line2=utilities.getString(1460))
+		self.__updateProgress(1, line2=utilities.getString(32079))
 
-		Debug("[Movies Sync] Getting movie data from Kodi")
-		data = utilities.kodiJsonRequest({'jsonrpc': '2.0', 'id': 0, 'method': 'VideoLibrary.GetMovies', 'params': {'properties': ['title', 'imdbnumber', 'year', 'playcount', 'lastplayed', 'file', 'dateadded']}})
-		if not data:
-			Debug("[Movies Sync] Kodi JSON request was empty.")
+		logger.debug("[Movies Sync] Getting movie data from Kodi")
+		data = utilities.kodiJsonRequest({'jsonrpc': '2.0', 'id': 0, 'method': 'VideoLibrary.GetMovies', 'params': {'properties': ['title', 'imdbnumber', 'year', 'playcount', 'lastplayed', 'file', 'dateadded', 'runtime']}})
+		if data['limits']['total'] == 0:
+			logger.debug("[Movies Sync] Kodi JSON request was empty.")
 			return
 
 		kodi_movies = utilities.kodiRpcToTraktMediaObjects(data)
 
-		self.__updateProgress(10, line2=utilities.getString(1461))
+		self.__updateProgress(10, line2=utilities.getString(32080))
 
 		return kodi_movies
 
 	def __traktLoadMovies(self):
-		self.__updateProgress(10, line2=utilities.getString(1462))
+		self.__updateProgress(10, line1=utilities.getString(32079), line2=utilities.getString(32081))
 
-		Debug("[Movies Sync] Getting movie collection from trakt.tv")
+		logger.debug("[Movies Sync] Getting movie collection from Trakt.tv")
+
 		traktMovies = {}
 		traktMovies = self.traktapi.getMoviesCollected(traktMovies)
 
-		self.__updateProgress(21, line2=utilities.getString(1463))
+		self.__updateProgress(17, line2=utilities.getString(32082))
 		traktMovies = self.traktapi.getMoviesWatched(traktMovies)
 		traktMovies = traktMovies.items()
-		if not isinstance(traktMovies, list):
-			Debug("[Movies Sync] Invalid trakt.tv movie list, possible error getting data from trakt, aborting trakt.tv collection update.")
-			return False
 
-		self.__updateProgress(32, line2=utilities.getString(1466))
+		self.__updateProgress(24, line2=utilities.getString(32083))
 		movies = []
 		for key, movie in traktMovies:
-			movie = movie.to_info()
+			movie = movie.to_dict()
 			
 			movies.append(movie)
 
 		return movies
 
-	def __traktRemoveMovies(self, movies):
-		if len(movies) == 0:
-			self.__updateProgress(48, line2=utilities.getString(1474))
-			Debug("[Movies Sync] trakt.tv movie collection is clean, no movies to remove.")
-			return
+	def __traktLoadMoviesPlaybackProgress(self):
+		if utilities.getSettingAsBool('trakt_movie_playback') and not self.__isCanceled():
+			self.__updateProgress(25, line2=utilities.getString(32122))
 
-		titles = ", ".join(["%s" % (m['title']) for m in movies])
-		Debug("[Movies Sync] %i movie(s) will be removed from trakt.tv collection." % len(movies))
-		Debug("[Movies Sync] Movies removed: %s" % titles)
+			logger.debug('[Movies Sync] Getting playback progress from Trakt.tv')
+			try:
+				traktProgressMovies = self.traktapi.getMoviePlaybackProgress()
+			except Exception:
+				logger.debug("[Movies Sync] Invalid Trakt.tv playback progress list, possible error getting data from Trakt, aborting Trakt.tv playback update.")
+				return False
 
-		self.__updateProgress(33, line2=utilities.getString(1444) % len(movies))
+			i = 0
+			x = float(len(traktProgressMovies))
+			moviesProgress = {'movies': []}
+			for movie in traktProgressMovies:
+				i += 1
+				y = ((i / x) * 25) + 11
+				self.__updateProgress(int(y), line2=utilities.getString(32123) % (i, x))
 
-		for movie in movies:
-			del(movie['collected_at'])
+				#will keep the data in python structures - just like the KODI response
+				movie = movie.to_dict()
 
-		moviesToRemove = {'movies': movies}
+				moviesProgress['movies'].append(movie)
 
-		self.traktapi.removeFromCollection(moviesToRemove)
+			self.__updateProgress(36, line2=utilities.getString(32124))
 
-		self.__updateProgress(48, line2=utilities.getString(1475) % len(movies))
+			return moviesProgress
 
-	def __traktUpdateMovies(self, movies):
-		if len(movies) == 0:
-			self.__updateProgress(65, line2=utilities.getString(1469))
-			Debug("[Movies Sync] trakt.tv movie playcount is up to date")
-			return
+	def __addMoviesToTraktCollection(self, kodiMovies, traktMovies):
+		if utilities.getSettingAsBool('add_movies_to_trakt') and not self.__isCanceled():
+			addTraktMovies = copy.deepcopy(traktMovies)
+			addKodiMovies = copy.deepcopy(kodiMovies)
 
-		titles = ", ".join(["%s" % (m['title']) for m in movies])
-		Debug("[Movies Sync] %i movie(s) playcount will be updated on trakt.tv" % len(movies))
-		Debug("[Movies Sync] Movies updated: %s" % titles)
+			traktMoviesToAdd = self.__compareMovies(addKodiMovies, addTraktMovies)
+			self.sanitizeMovies(traktMoviesToAdd)
+			logger.debug("[Movies Sync] Compared movies, found %s to add." % len(traktMoviesToAdd))
 
-		self.__updateProgress(49, line2=utilities.getString(1428) % len(movies))
-		# Send request to update playcounts on trakt.tv
-		chunksize = 200
-		chunked_movies = utilities.chunks([movie for movie in movies], chunksize)
-		i = 0
-		x = float(len(chunked_movies))
-		for chunk in chunked_movies:
-			if self.__isCanceled():
+			if len(traktMoviesToAdd) == 0:
+				self.__updateProgress(48, line2=utilities.getString(32084))
+				logger.debug("[Movies Sync] Trakt.tv movie collection is up to date.")
 				return
-			params = {'movies': chunk}
-			self.traktapi.addToHistory(params)
 
-			i += 1
-			y = ((i / x) * 16) + 49
-			self.__updateProgress(int(y), line2=utilities.getString(1478) % ((i+1)*chunksize, x))
+			titles = ", ".join(["%s" % (m['title']) for m in traktMoviesToAdd])
+			logger.debug("[Movies Sync] %i movie(s) will be added to Trakt.tv collection." % len(traktMoviesToAdd))
+			logger.debug("[Movies Sync] Movies to add : %s" % titles)
 
-		self.__updateProgress(65, line2=utilities.getString(1470) % len(movies))
+			self.__updateProgress(37, line2=utilities.getString(32063) % len(traktMoviesToAdd))
 
-	def __kodiUpdateMovies(self, movies):
-		if len(movies) == 0:
-			self.__updateProgress(82, line2=utilities.getString(1471))
-			Debug("[Movies Sync] Kodi movie playcount is up to date.")
-			return
-		
-		Debug("[Movies Sync] %i movie(s) playcount will be updated in Kodi" % len(movies))
+			moviesToAdd = {'movies': traktMoviesToAdd}
+			#logger.debug("Movies to add: %s" % moviesToAdd)
+			try:
+				self.traktapi.addToCollection(moviesToAdd)
+			except Exception as ex:
+				message = utilities.createError(ex)
+				logging.fatal(message)
 
-		self.__updateProgress(66, line2=utilities.getString(1430) % len(movies))
+			self.__updateProgress(48, line2=utilities.getString(32085) % len(traktMoviesToAdd))
 
-		#split movie list into chunks of 50
-		chunksize = 50
-		chunked_movies = utilities.chunks([{"jsonrpc": "2.0", "method": "VideoLibrary.SetMovieDetails", "params": {"movieid": movies[i]['movieid'], "playcount": movies[i]['plays']}, "id": i} for i in range(len(movies))], chunksize)
-		i = 0
-		x = float(len(chunked_movies))
-		for chunk in chunked_movies:
-			if self.__isCanceled():
+	def __deleteMoviesFromTraktCollection(self, traktMovies, kodiMovies):
+
+		if utilities.getSettingAsBool('clean_trakt_movies') and not self.__isCanceled():
+			removeTraktMovies = copy.deepcopy(traktMovies)
+			removeKodiMovies = copy.deepcopy(kodiMovies)
+
+			logger.debug("[Movies Sync] Starting to remove.")
+			traktMoviesToRemove = self.__compareMovies(removeTraktMovies, removeKodiMovies)
+			self.sanitizeMovies(traktMoviesToRemove)
+			logger.debug("[Movies Sync] Compared movies, found %s to remove." % len(traktMoviesToRemove))
+
+			if len(traktMoviesToRemove) == 0:
+				self.__updateProgress(60, line2=utilities.getString(32091))
+				logger.debug("[Movies Sync] Trakt.tv movie collection is clean, no movies to remove.")
 				return
-			utilities.kodiJsonRequest(chunk)
 
-			i += 1
-			y = ((i / x) * 16) + 66
-			self.__updateProgress(int(y), line2=utilities.getString(1472) % ((i+1)*chunksize, x))
+			titles = ", ".join(["%s" % (m['title']) for m in traktMoviesToRemove])
+			logger.debug("[Movies Sync] %i movie(s) will be removed from Trakt.tv collection." % len(traktMoviesToRemove))
+			logger.debug("[Movies Sync] Movies removed: %s" % titles)
 
-		self.__updateProgress(82, line2=utilities.getString(1473) % len(movies))
+			self.__updateProgress(49, line2=utilities.getString(32076) % len(traktMoviesToRemove))
 
-	def __traktAddMovies(self, movies):
-		if len(movies) == 0:
-			self.__updateProgress(98, line2=utilities.getString(1467))
-			Debug("[Movies Sync] trakt.tv movie collection is up to date.")
-			return
+			moviesToRemove = {'movies': traktMoviesToRemove}
+			try:
+				self.traktapi.removeFromCollection(moviesToRemove)
+			except Exception as ex:
+				message = utilities.createError(ex)
+				logging.fatal(message)
 
-		Debug("[Movies Sync] %i movie(s) will be added to trakt.tv collection." % len(movies))
+			self.__updateProgress(60, line2=utilities.getString(32092) % len(traktMoviesToRemove))
 
-		self.__updateProgress(83, line2=utilities.getString(1426) % len(movies))
 
-		moviesToAdd = {'movies': movies}
-		Debug("Movies to add: %s" % movies)
-		self.traktapi.addToCollection(moviesToAdd)
+	def __addMoviesToTraktWatched(self, kodiMovies, traktMovies):
 
-		self.__updateProgress(98, line2=utilities.getString(1468) % len(movies))
+		if utilities.getSettingAsBool('trakt_movie_playcount') and not self.__isCanceled():
+			updateTraktTraktMovies = copy.deepcopy(traktMovies)
+			updateTraktKodiMovies = copy.deepcopy(kodiMovies)
+
+			traktMoviesToUpdate = self.__compareMovies(updateTraktKodiMovies, updateTraktTraktMovies, watched=True)
+			self.sanitizeMovies(traktMoviesToUpdate)
+
+			if len(traktMoviesToUpdate) == 0:
+				self.__updateProgress(72, line2=utilities.getString(32086))
+				logger.debug("[Movies Sync] Trakt.tv movie playcount is up to date")
+				return
+
+			titles = ", ".join(["%s" % (m['title']) for m in traktMoviesToUpdate])
+			logger.debug("[Movies Sync] %i movie(s) playcount will be updated on Trakt.tv" % len(traktMoviesToUpdate))
+			logger.debug("[Movies Sync] Movies updated: %s" % titles)
+
+			self.__updateProgress(61, line2=utilities.getString(32064) % len(traktMoviesToUpdate))
+			# Send request to update playcounts on Trakt.tv
+			chunksize = 200
+			chunked_movies = utilities.chunks([movie for movie in traktMoviesToUpdate], chunksize)
+			errorcount = 0
+			i = 0
+			x = float(len(traktMoviesToUpdate))
+			for chunk in chunked_movies:
+				if self.__isCanceled():
+					return
+				i += 1
+				y = ((i / x) * 11) + 61
+				self.__updateProgress(int(y), line2=utilities.getString(32093) % ((i)*chunksize if (i)*chunksize < x else x, x))
+
+				params = {'movies': chunk}
+				#logger.debug("moviechunk: %s" % params)
+				try:
+					self.traktapi.addToHistory(params)
+				except Exception as ex:
+					message = utilities.createError(ex)
+					logging.fatal(message)
+					errorcount += 1
+
+			logger.debug("[Movies Sync] Movies updated: %d error(s)" % errorcount)
+			self.__updateProgress(72, line2=utilities.getString(32087) % len(traktMoviesToUpdate))
+
+	def __addMoviesToKodiWatched(self, traktMovies, kodiMovies):
+
+		if utilities.getSettingAsBool('kodi_movie_playcount') and not self.__isCanceled():
+			updateKodiTraktMovies = copy.deepcopy(traktMovies)
+			updateKodiKodiMovies = copy.deepcopy(kodiMovies)
+
+			kodiMoviesToUpdate = self.__compareMovies(updateKodiTraktMovies, updateKodiKodiMovies, watched=True, restrict=True)
+
+			if len(kodiMoviesToUpdate) == 0:
+				self.__updateProgress(84, line2=utilities.getString(32088))
+				logger.debug("[Movies Sync] Kodi movie playcount is up to date.")
+				return
+
+			titles = ", ".join(["%s" % (m['title']) for m in kodiMoviesToUpdate])
+			logger.debug("[Movies Sync] %i movie(s) playcount will be updated in Kodi" % len(kodiMoviesToUpdate))
+			logger.debug("[Movies Sync] Movies to add: %s" % titles)
+
+			self.__updateProgress(73, line2=utilities.getString(32065) % len(kodiMoviesToUpdate))
+
+			#split movie list into chunks of 50
+			chunksize = 50
+			chunked_movies = utilities.chunks([{"jsonrpc": "2.0", "method": "VideoLibrary.SetMovieDetails", "params": {"movieid": kodiMoviesToUpdate[i]['movieid'], "playcount": kodiMoviesToUpdate[i]['plays'], "lastplayed": utilities.convertUtcToDateTime(kodiMoviesToUpdate[i]['last_watched_at'])}, "id": i} for i in range(len(kodiMoviesToUpdate))], chunksize)
+			i = 0
+			x = float(len(kodiMoviesToUpdate))
+			for chunk in chunked_movies:
+				if self.__isCanceled():
+					return
+				i += 1
+				y = ((i / x) * 11) + 73
+				self.__updateProgress(int(y), line2=utilities.getString(32089) % ((i)*chunksize if (i)*chunksize < x else x, x))
+
+				utilities.kodiJsonRequest(chunk)
+
+			self.__updateProgress(84, line2=utilities.getString(32090) % len(kodiMoviesToUpdate))
+
+	def __addMovieProgressToKodi(self, traktMovies, kodiMovies):
+
+		if utilities.getSettingAsBool('trakt_movie_playback') and traktMovies and not self.__isCanceled():
+			updateKodiTraktMovies = copy.deepcopy(traktMovies)
+			updateKodiKodiMovies = copy.deepcopy(kodiMovies)
+
+			kodiMoviesToUpdate = self.__compareMovies(updateKodiTraktMovies['movies'], updateKodiKodiMovies, restrict=True, playback=True)
+			if len(kodiMoviesToUpdate) == 0:
+				self.__updateProgress(99, line2=utilities.getString(32125))
+				logger.debug("[Movies Sync] Kodi movie playbacks are up to date.")
+				return
+
+			logger.debug("[Movies Sync] %i movie(s) playbacks will be updated in Kodi" % len(kodiMoviesToUpdate))
+
+			self.__updateProgress(85, line2=utilities.getString(32126) % len(kodiMoviesToUpdate))
+			#need to calculate the progress in int from progress in percent from Trakt
+			#split movie list into chunks of 50
+			chunksize = 50
+			chunked_movies = utilities.chunks([{"jsonrpc": "2.0", "id": i, "method": "VideoLibrary.SetMovieDetails", "params": {"movieid": kodiMoviesToUpdate[i]['movieid'], "resume": {"position": kodiMoviesToUpdate[i]['runtime']/100.0*kodiMoviesToUpdate[i]['progress']}}} for i in range(len(kodiMoviesToUpdate))], chunksize)
+			i = 0
+			x = float(len(kodiMoviesToUpdate))
+			for chunk in chunked_movies:
+				if self.__isCanceled():
+					return
+				i += 1
+				y = ((i / x) * 14) + 85
+				self.__updateProgress(int(y), line2=utilities.getString(32127) % ((i)*chunksize if (i)*chunksize < x else x, x))
+				utilities.kodiJsonRequest(chunk)
+
+			self.__updateProgress(99, line2=utilities.getString(32128) % len(kodiMoviesToUpdate))
 
 	def __syncMovies(self):
 		if not self.show_progress and self.sync_on_update and self.notify and self.notify_during_playback:
-			notification('%s %s' % (utilities.getString(1400), utilities.getString(1402)), utilities.getString(1420)) #Sync started
+			notification('%s %s' % (utilities.getString(32045), utilities.getString(32046)), utilities.getString(32061)) #Sync started
 		if self.show_progress and not self.run_silent:
-			progress.create("%s %s" % (utilities.getString(1400), utilities.getString(1402)), line1=" ", line2=" ", line3=" ")
+			progress.create("%s %s" % (utilities.getString(32045), utilities.getString(32046)), line1=" ", line2=" ", line3=" ")
 
 		kodiMovies = self.__kodiLoadMovies()
 		if not isinstance(kodiMovies, list) and not kodiMovies:
-			Debug("[Movies Sync] Kodi movie list is empty, aborting movie Sync.")
+			logger.debug("[Movies Sync] Kodi movie list is empty, aborting movie Sync.")
+			if self.show_progress and not self.run_silent:
+				progress.close()
+			return
+		try:
+			traktMovies = self.__traktLoadMovies()
+		except Exception:
+			logger.debug("[Movies Sync] Error getting Trakt.tv movie list, aborting movie Sync.")
 			if self.show_progress and not self.run_silent:
 				progress.close()
 			return
 
-		traktMovies = self.__traktLoadMovies()
-		if not isinstance(traktMovies, list):
-			Debug("[Movies Sync] Error getting trakt.tv movie list, aborting movie Sync.")
-			if self.show_progress and not self.run_silent:
-				progress.close()
-			return
+		traktMoviesProgress = self.__traktLoadMoviesPlaybackProgress()
 
-		if utilities.getSettingAsBool('clean_trakt_movies') and not self.__isCanceled():
-			Debug("[Movies Sync] Starting to remove.")
-			traktMoviesToRemove = self.__compareMovies(traktMovies, kodiMovies)
-			Debug("[Movies Sync] Compared movies, found %s to remove." % len(traktMoviesToRemove))
-			self.__traktRemoveMovies(traktMoviesToRemove)
+		self.__addMoviesToTraktCollection(kodiMovies, traktMovies)
 
-		if utilities.getSettingAsBool('trakt_movie_playcount') and not self.__isCanceled():
-			traktMoviesToUpdate = self.__compareMovies(kodiMovies, traktMovies, watched=True)
-			self.__traktUpdateMovies(traktMoviesToUpdate)
+		self.__deleteMoviesFromTraktCollection(traktMovies, kodiMovies)
 
-		if utilities.getSettingAsBool('kodi_movie_playcount') and not self.__isCanceled():
-			kodiMoviesToUpdate = self.__compareMovies(traktMovies, kodiMovies, watched=True, restrict=True)
-			self.__kodiUpdateMovies(kodiMoviesToUpdate)
+		self.__addMoviesToTraktWatched(kodiMovies, traktMovies)
 
-		if utilities.getSettingAsBool('add_movies_to_trakt') and not self.__isCanceled():
-			traktMoviesToAdd = self.__compareMovies(kodiMovies, traktMovies)
-			Debug("[Movies Sync] Compared movies, found %s to add." % len(traktMoviesToAdd))
-			self.__traktAddMovies(traktMoviesToAdd)
+		self.__addMoviesToKodiWatched(traktMovies, kodiMovies)
 
-		if not self.__isCanceled() and self.show_progress and not self.run_silent:
-			self.__updateProgress(100, line1=utilities.getString(1431), line2=" ", line3=" ")
+		self.__addMovieProgressToKodi(traktMoviesProgress, kodiMovies)
+
+		if self.show_progress and not self.run_silent:
+			self.__updateProgress(100, line1=utilities.getString(32066), line2=" ", line3=" ")
 			progress.close()
 
 		if not self.show_progress and self.sync_on_update and self.notify and self.notify_during_playback:
-			notification('%s %s' % (utilities.getString(1400), utilities.getString(1402)), utilities.getString(1421)) #Sync complete
+			notification('%s %s' % (utilities.getString(32045), utilities.getString(32046)), utilities.getString(32062)) #Sync complete
 		
-		Debug("[Movies Sync] Movies on trakt.tv (%d), movies in Kodi (%d)." % (self.__countMovies(traktMovies), len(kodiMovies)))
-		Debug("[Movies Sync] Complete.")
+		logger.debug("[Movies Sync] Movies on Trakt.tv (%d), movies in Kodi (%d)." % (len(traktMovies), len(kodiMovies)))
+		logger.debug("[Movies Sync] Complete.")
 
-	def __compareMovies(self, movies_col1, movies_col2, watched=False, restrict=False):
+	def __compareMovies(self, movies_col1, movies_col2, watched=False, restrict=False, playback=False):
 		movies = []
 
 		for movie_col1 in movies_col1:
-			movie_col2 = utilities.findMediaObject(movie_col1, movies_col2)
-			#Debug("movie_col1 %s" % movie_col1)
-			#Debug("movie_col2 %s" % movie_col2)
+			if movie_col1:
+				movie_col2 = utilities.findMediaObject(movie_col1, movies_col2)
+				#logger.debug("movie_col1 %s" % movie_col1)
+				#logger.debug("movie_col2 %s" % movie_col2)
 
-			if movie_col2:  #match found
-				if watched: #are we looking for watched items
-					if movie_col2['watched'] == 0 and movie_col1['watched'] == 1:
+				if movie_col2:  #match found
+					if watched: #are we looking for watched items
+						if movie_col2['watched'] == 0 and movie_col1['watched'] == 1:
+							if 'movieid' not in movie_col1:
+								movie_col1['movieid'] = movie_col2['movieid']
+							movies.append(movie_col1)
+					elif playback:
 						if 'movieid' not in movie_col1:
-							movie_col1['movieid'] = movie_col2['movieid']
+								movie_col1['movieid'] = movie_col2['movieid']
+						movie_col1['runtime'] = movie_col2['runtime']
 						movies.append(movie_col1)
-				else:
-					if 'collected' in movie_col2 and not movie_col2['collected']:
-						movies.append(movie_col1)
-			else: #no match found
-				if not restrict:
-					if 'collected' in movie_col1 and movie_col1['collected']:
-						if watched and (movie_col1['plays'] > 0):
+					else:
+						if 'collected' in movie_col2 and not movie_col2['collected']:
 							movies.append(movie_col1)
-						elif not watched:
-							movies.append(movie_col1)
+				else: #no match found
+					if not restrict:
+						if 'collected' in movie_col1 and movie_col1['collected']:
+							if watched and (movie_col1['watched'] == 1):
+								movies.append(movie_col1)
+							elif not watched:
+								movies.append(movie_col1)
 
 		return movies
 
-	def __countMovies(self, movies, mode='collected'):
-		count = 0
-
-		if 'movies' in movies:
-			movies = movies['movies']
+	@staticmethod
+	def sanitizeMovies(movies):
+		# do not remove watched_at and collected_at may cause problems between the 4 sync types (would probably have to deepcopy etc)
 		for movie in movies:
-			if mode in movie and movie[mode]:
-				count += 1
-
-		return count
+			if 'collected' in movie:
+				del movie['collected']
+			if 'watched' in movie:
+				del movie['watched']
+			if 'movieid' in movie:
+				del movie['movieid']
+			if 'plays' in movie:
+				del movie['plays']
 
 	def __syncCheck(self, media_type):
-		if media_type == 'movies':
-			return utilities.getSettingAsBool('add_movies_to_trakt') or utilities.getSettingAsBool('trakt_movie_playcount') or utilities.getSettingAsBool('kodi_movie_playcount') or utilities.getSettingAsBool('clean_trakt_movies')
-		else:
-			return utilities.getSettingAsBool('add_episodes_to_trakt') or utilities.getSettingAsBool('trakt_episode_playcount') or utilities.getSettingAsBool('kodi_episode_playcount') or utilities.getSettingAsBool('clean_trakt_episodes')
+		return self.__syncCollectionCheck(media_type) or self.__syncWatchedCheck(media_type) or self.__syncPlaybackCheck(media_type)
 
-		return False
+
+	def __syncPlaybackCheck(self, media_type):
+		if media_type == 'movies':
+			return utilities.getSettingAsBool('trakt_movie_playback')
+		else:
+			return False
+			#we need a correct runtime for episodes until we have that this is commented out
+			#return utilities.getSettingAsBool('trakt_episode_playback')
+
+
+	def __syncCollectionCheck(self, media_type):
+		if media_type == 'movies':
+			return utilities.getSettingAsBool('add_movies_to_trakt') or utilities.getSettingAsBool('clean_trakt_movies')
+		else:
+			return utilities.getSettingAsBool('add_episodes_to_trakt') or utilities.getSettingAsBool('clean_trakt_episodes')
+
+	def __syncWatchedCheck(self, media_type):
+		if media_type == 'movies':
+			return utilities.getSettingAsBool('trakt_movie_playcount') or utilities.getSettingAsBool('kodi_movie_playcount')
+		else:
+			return utilities.getSettingAsBool('trakt_episode_playcount') or utilities.getSettingAsBool('kodi_episode_playcount')
 
 	def sync(self):
-		Debug("[Sync] Starting synchronization with trakt.tv")
+		logger.debug("Starting synchronization with Trakt.tv")
 
 		if self.__syncCheck('movies'):
 			if self.library in ["all", "movies"]:
 				self.__syncMovies()
 			else:
-				Debug("[Sync] Movie sync is being skipped for this manual sync.")
+				logger.debug("Movie sync is being skipped for this manual sync.")
 		else:
-			Debug("[Sync] Movie sync is disabled, skipping.")
+			logger.debug("Movie sync is disabled, skipping.")
 
 		if self.__syncCheck('episodes'):
 			if self.library in ["all", "episodes"]:
-				self.__syncEpisodes()
+				if not (self.__syncCheck('movies') and self.__isCanceled()):
+					self.__syncEpisodes()
+				else:
+					logger.debug("Episode sync is being skipped because movie sync was canceled.")
 			else:
-				Debug("[Sync] Episode sync is being skipped for this manual sync.")
+				logger.debug("Episode sync is being skipped for this manual sync.")
 		else:
-			Debug("[Sync] Episode sync is disabled, skipping.")
+			logger.debug("Episode sync is disabled, skipping.")
 
-		Debug("[Sync] Finished synchronization with trakt.tv")
-	
+		logger.debug("[Sync] Finished synchronization with Trakt.tv")
