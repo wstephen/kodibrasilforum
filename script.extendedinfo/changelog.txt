@@ -1,3 +1,24 @@
+v2.0.7
+- added RateMedia call
+- fixes for special chars in search terms for some calls
+- fix specials episodes
+- fix for case when no data available
+- fix for filter window page change logic
+- localization
+- code cleanup
+
+v2.0.6
+- fixes concerning plugin handling
+- new look for movie set part from movie info dialog
+- fixes for movie lists (also for removing / refreshing list items)
+- some more fixes for filter window
+- fixed 0.0 rating (not allowed)
+- context menu fixes
+- some more small stuff
+
+v2.0.5
+- added "Remove from list" context menu entry
+
 v2.0.4
 - fixed infodialog option
 - better matching for movie info dialog
@@ -6,6 +27,8 @@ v2.0.4
 - de-activated Buggalo Script for now
 - fixed RottenTomatoes low-quality thumbs
 - added similartvshows call (TheMovieDB)
+- also clear prop cache when clearing cache
+- allow missing containers for movieinfo dialog
 - some more bugfixes
 
 v2.0.3

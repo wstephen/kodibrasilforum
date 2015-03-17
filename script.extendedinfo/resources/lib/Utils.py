@@ -36,6 +36,15 @@ def dictfind(lst, key, value):
             return dic
     return ""
 
+
+def url_quote(url):
+    try:
+        url = urllib.quote_plus(url.encode('utf8', 'ignore'))
+    except:
+        url = urllib.quote_plus(unicode(url, "utf-8").encode("utf-8"))
+    return url
+
+
 class TextViewer_Dialog(xbmcgui.WindowXMLDialog):
     ACTION_PREVIOUS_MENU = [9, 92, 10]
 
@@ -75,12 +84,12 @@ class SlideShow(xbmcgui.WindowXMLDialog):
 
     def onInit(self):
         if self.imagelist:
-            self.getControl(10000).addItems(CreateListItems(self.imagelist))
+            self.getControl(10000).addItems(create_listitems(self.imagelist))
             xbmc.executebuiltin("Control.SetFocus(10000,%s)" % self.index)
         else:
             listitem = {"label": self.image,
                         "Thumb": self.image}
-            self.getControl(10000).addItems(CreateListItems([listitem]))
+            self.getControl(10000).addItems(create_listitems([listitem]))
 
     def onAction(self, action):
         if action in self.ACTION_PREVIOUS_MENU:
@@ -91,12 +100,6 @@ class SlideShow(xbmcgui.WindowXMLDialog):
         elif action in self.ACTION_RIGHT:
             self.action = "right"
             self.close()
-
-
-def WaitForVideoEnd():
-    xbmc.sleep(1000)
-    while xbmc.getCondVisibility("Player.HasVideo"):
-        xbmc.sleep(400)
 
 
 # def calculate_age(born):
@@ -135,7 +138,7 @@ def calculate_age(born):
     return base_age
 
 
-def PlayTrailer(youtube_id="", listitem=None, popstack=False):
+def play_trailer(youtube_id="", listitem=None, popstack=False):
     if not listitem:
         listitem = xbmcgui.ListItem(xbmc.getLocalizedString(20410))
         listitem.setInfo('video', {'Title': xbmc.getLocalizedString(20410), 'Genre': 'Youtube Video'})
@@ -190,7 +193,7 @@ class VideoPlayer(xbmc.Player):
         else:
             Notify("no youtube id found")
 
-    def WaitForVideoEnd(self):
+    def wait_for_video_end(self):
         while not self.stopped:
             xbmc.sleep(200)
         self.stopped = False
@@ -478,7 +481,7 @@ def fetch(dictionary, key):
     return ""
 
 
-def CompareWithLibrary(onlinelist=[], library_first=True, sortkey=False):
+def compare_with_library(onlinelist=[], library_first=True, sortkey=False):
     global id_list
     global originaltitle_list
     global title_list
@@ -601,14 +604,8 @@ def CompareWithLibrary(onlinelist=[], library_first=True, sortkey=False):
     else:
         return local_items + remote_items
 
-def GetMovieFromLocalDB(dbid):
-    json_query = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovieDetails", "params": {"properties": ["streamdetails", "resume", "year", "art", "writer", "file"], "movieid":%s }, "id": 1}' % dbid)
-    json_query = unicode(json_query, 'utf-8', errors='ignore')
-    json_response = simplejson.loads(json_query)
-    if "moviedetails" in json_response["result"]:
-        local_item = json_response['result']['moviedetails']
 
-def GetMusicBrainzIdFromNet(artist, xbmc_artist_id=-1):
+def fetch_musicbrainz_id(artist, xbmc_artist_id=-1):
     base_url = "http://musicbrainz.org/ws/2/artist/?fmt=json"
     url = '&query=artist:%s' % urllib.quote_plus(artist)
     results = Get_JSON_response(base_url + url, 30)
@@ -639,12 +636,16 @@ def CompareAlbumWithLibrary(onlinelist):
     return onlinelist
 
 
-def GetStringFromUrl(url):
+def GetStringFromUrl(url=None, headers=False):
     succeed = 0
+    if not headers:
+        headers = {'User-agent': 'XBMC/14.0 ( phil65@kodi.tv )'}
+    # prettyprint(headers)
+    request = urllib2.Request(url)
+    for (key, value) in headers.iteritems():
+        request.add_header(key, value)
     while (succeed < 5) and (not xbmc.abortRequested):
         try:
-            request = urllib2.Request(url)
-            request.add_header('User-agent', 'XBMC/14.0 ( phil65@kodi.tv )')
             response = urllib2.urlopen(request)
             data = response.read()
             return data
@@ -654,8 +655,25 @@ def GetStringFromUrl(url):
             succeed += 1
     return None
 
+# def GetStringFromUrl(url=None, headers=False):
+#     succeed = 0
+#     if not headers:
+#         headers = {'User-agent': 'XBMC/14.0 ( phil65@kodi.tv )'}
+#     prettyprint(headers)
+#     request = urllib2.Request(url, headers)
+#     while (succeed < 5) and (not xbmc.abortRequested):
+#         if True:
+#             response = urllib2.urlopen(request)
+#             data = response.read()
+#             return data
+#         else:
+#             log("GetStringFromURL: could not get data from %s" % url)
+#             xbmc.sleep(1000)
+#             succeed += 1
+#     return None
 
-def Get_JSON_response(url="", cache_days=7.0, folder=False):
+
+def Get_JSON_response(url="", cache_days=7.0, folder=False, headers=False):
     now = time.time()
     hashed_url = hashlib.md5(url).hexdigest()
     path = xbmc.translatePath(os.path.join(Addon_Data_Path, hashed_url + ".txt"))
@@ -672,7 +690,7 @@ def Get_JSON_response(url="", cache_days=7.0, folder=False):
         results = read_from_file(path)
         log("loaded file for %s. time: %f" % (url, time.time() - now))
     else:
-        response = GetStringFromUrl(url)
+        response = GetStringFromUrl(url, headers)
         try:
             results = simplejson.loads(response)
             log("download %s. time: %f" % (url, time.time() - now))
@@ -912,14 +930,14 @@ def prettyprint(string):
 
 
 def GetImdbIDFromDatabase(type, dbid):
+    if not dbid:
+        return []
     if type == "movie":
         json_query = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovieDetails", "params": {"properties": ["imdbnumber","title", "year"], "movieid":%s }, "id": 1}' % dbid)
         json_query = unicode(json_query, 'utf-8', errors='ignore')
         json_response = simplejson.loads(json_query)
         if "moviedetails" in json_response["result"]:
             return json_response['result']['moviedetails']['imdbnumber']
-        else:
-            return []
     elif type == "tvshow":
         json_query = xbmc.executeJSONRPC(
             '{"jsonrpc": "2.0", "method": "VideoLibrary.GetTVShowDetails", "params": {"properties": ["imdbnumber","title", "year"], "tvshowid":%s }, "id": 1}' % dbid)
@@ -927,11 +945,10 @@ def GetImdbIDFromDatabase(type, dbid):
         json_response = simplejson.loads(json_query)
         if "result" in json_response and "tvshowdetails" in json_response["result"]:
             return json_response['result']['tvshowdetails']['imdbnumber']
-        else:
-            return []
+    return []
 
 
-def GetImdbIDFromDatabasefromEpisode(dbid):
+def get_tvshow_id_from_db_by_episode(dbid):
     json_query = xbmc.executeJSONRPC(
         '{"jsonrpc": "2.0", "method": "VideoLibrary.GetEpisodeDetails", "params": {"properties": ["tvshowid"], "episodeid":%s }, "id": 1}' % dbid)
     json_query = unicode(json_query, 'utf-8', errors='ignore')
@@ -971,12 +988,13 @@ def passListToSkin(name="", data=None, prefix="", controlwindow=None, handle=Non
         homewindow.clearProperty(name)
         if data is not None:
             homewindow.setProperty(name + ".Count", str(len(data)))
-            items = CreateListItems(data)
-            xbmcplugin.setContent(handle, 'url')
+            items = create_listitems(data)
+            xbmcplugin.setContent(handle, 'files')
             itemlist = list()
             for item in items:
                 itemlist.append((item.getProperty("path"), item, False))
-            xbmcplugin.addDirectoryItems(handle, itemlist, False)
+            xbmcplugin.addDirectoryItems(handle, itemlist, len(itemlist))
+            xbmcplugin.endOfDirectory(handle)
     else:
         SetWindowProperties(name, data, prefix, debug)
 
@@ -998,7 +1016,7 @@ def SetWindowProperties(name, data, prefix="", debug=False):
         log("%s%s.Count = None" % (prefix, name))
 
 
-def CreateListItems(data=None, preload_images=0):
+def create_listitems(data=None, preload_images=0):
     Int_InfoLabels = ["year", "episode", "season", "top250", "tracknumber", "playcount", "overlay"]
     Float_InfoLabels = ["rating"]
     String_InfoLabels = ["genre", "director", "mpaa", "plot", "plotoutline", "title", "originaltitle", "sorttitle", "duration", "studio", "tagline", "writer",
@@ -1024,14 +1042,14 @@ def CreateListItems(data=None, preload_images=0):
                             image_requests.append(value)
                 if key.lower() in ["name", "label", "title"]:
                     listitem.setLabel(value)
-                if key.lower() in ["thumb"]:
+                elif key.lower() in ["thumb"]:
                     listitem.setThumbnailImage(value)
-                if key.lower() in ["icon"]:
+                elif key.lower() in ["icon"]:
                     listitem.setIconImage(value)
+                elif key.lower() in ["path"]:
+                    itempath = value
                 if key.lower() in ["thumb", "poster", "banner", "fanart", "clearart", "clearlogo", "landscape", "discart", "characterart", "tvshow.fanart", "tvshow.poster", "tvshow.banner", "tvshow.clearart", "tvshow.characterart"]:
                     listitem.setArt({key.lower(): value})
-                if key.lower() in ["path"]:
-                    itempath = value
            #     log("key: " + unicode(key) + "  value: " + unicode(value))
                 if key.lower() in Int_InfoLabels:
                     try:

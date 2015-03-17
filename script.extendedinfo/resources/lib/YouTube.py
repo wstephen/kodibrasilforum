@@ -1,4 +1,3 @@
-import urllib
 from Utils import *
 
 youtube_key = 'AI39si4DkJJhM8cm7GES91cODBmRR-1uKQuVNkJtbZIVJ6tRgSvNeUh4somGAjUwGlvHFj3d0kdvJdLqD0aQKTh6ttX7t_GjpQ'
@@ -69,10 +68,7 @@ def GetYoutubeSearchVideosV3(search_string="", hd="", orderby="relevance", limit
         hd_string = "&hd=true"
     else:
         hd_string = ""
-    try:
-        search_string = urllib.quote(search_string.replace('"', '').encode("utf-8"))
-    except:
-        search_string = urllib.quote(unicode(search_string.replace('"', ''), "utf-8").encode("utf-8"))
+    search_string = url_quote(search_string.replace('"', ''))
     base_url = 'https://www.googleapis.com/youtube/v3/search?part=id%2Csnippet&type=video'
     url = '&q=%s&order=%s&key=%s%s&maxResults=%i' % (search_string, orderby, youtube_key2, hd_string, int(limit))
     results = Get_JSON_response(base_url + url, 0.5)
@@ -88,7 +84,7 @@ def GetYoutubeSearchVideosV2(search_string="", hd="", orderby="relevance", time=
         hd_string = "&hd=true"
     else:
         hd_string = ""
-    search_string = urllib.quote(search_string.replace('"', ''))
+    search_string = url_quote(search_string.replace('"', ''))
     base_url = 'http://gdata.youtube.com/feeds/api/videos?v=2&alt=json'
     url = '&q=%s&time=%s&orderby=%s&key=%s%s' % (search_string, time, orderby, youtube_key, hd_string)
     results = Get_JSON_response(base_url + url, 0.5)
@@ -118,7 +114,7 @@ def GetYoutubePlaylistVideos(playlistid=""):
 
 
 def GetYoutubeUserVideos(userid=""):
-    userid = urllib.quote(userid.replace('"', ''))
+    userid = url_quote(userid.replace('"', ''))
     base_url = 'https://gdata.youtube.com/feeds/api/users/'
     url = '%s/uploads?v=2&alt=json' % (userid)
     results = Get_JSON_response(base_url + url, 0.5)
