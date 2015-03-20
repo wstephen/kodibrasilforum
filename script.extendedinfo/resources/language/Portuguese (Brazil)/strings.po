@@ -23,7 +23,7 @@ msgstr "Script info extendida"
 
 msgctxt "Addon Description"
 msgid "This script offers various possibilities to display online content inside skins. Used services are themoviedb.org, theaudiodb.org, rottentomatoes.com, Trakt.TV and a lot more. Can also be used for importing / exporting skin settings, adding additional fanart stuff to library and cooking eggs. Needs skin support for most functions."
-msgstr "Este script oferece várias possibilidades paa apresentar conteúdos online via skins. Usa serviços como themoviedb.org, theaudiodb.org, rottentomatoes.com, Trakt.TV e outros. Pode ser usado para importar / Exportar ajustes da skin, adicionar fanart extras para coleção. Maioria das funções requer que a skin lhe de suporte."
+msgstr "Este script oferece inúmeras possibilidades para apresentar conteúdos online via skin. Usa os serviços themoviedb.org, theaudiodb.org, rottentomatoes.com, Trakt.TV e outros. Pode ser usado para importar / Exportar ajustes da skin, adicionar fanart extras para coleção. A Maioria das funções requer que a skin lhe de suporte."
 
 msgctxt "#32010"
 msgid "Filmography"
@@ -73,6 +73,22 @@ msgctxt "#32022"
 msgid "Release Date"
 msgstr "Data do Lançamento"
 
+msgctxt "#32023"
+msgid "Filters"
+msgstr "Filtros"
+
+msgctxt "#32024"
+msgid "My account"
+msgstr "Minha conta"
+
+msgctxt "#32025"
+msgid "Episode index"
+msgstr "Index dos Episódios"
+
+msgctxt "#32026"
+msgid "Related TheMovieDB lists"
+msgstr "Listas Relacionadas TheMovieDB"
+
 msgctxt "#32030"
 msgid "Movie Appearances"
 msgstr "Filmes que atuou"
@@ -88,6 +104,18 @@ msgstr "Entre com o nome da pessoa"
 msgctxt "#32034"
 msgid "Person results for "%s"
 msgstr "Resultado da procura para %s"
+
+msgctxt "#32035"
+msgid "Remove from list"
+msgstr "Remover da lista"
+
+msgctxt "#32036"
+msgid "Movie list"
+msgstr "Lista de Filmes"
+
+msgctxt "#32037"
+msgid "Overview"
+msgstr "Visão Global"
 
 msgctxt "#32050"
 msgid "Online information"
@@ -380,3 +408,7 @@ msgstr "Avaliações"
 msgctxt "#32168"
 msgid "Releases"
 msgstr "Lançamentos"
+
+msgctxt "#32169"
+msgid "Rate TV Show"
+msgstr "Classificar Seriado"

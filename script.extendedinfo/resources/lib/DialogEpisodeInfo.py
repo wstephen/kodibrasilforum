@@ -33,15 +33,17 @@ class DialogEpisodeInfo(xbmcgui.WindowXMLDialog):
         self.showname = kwargs.get('tvshow')
         self.episodenumber = kwargs.get('episode')
         self.logged_in = checkLogin()
+        self.episode = False
         if self.tmdb_id or self.showname:
             self.episode = GetExtendedEpisodeInfo(self.tmdb_id, self.season, self.episodenumber)
             if not self.episode:
-                self.close()
+                xbmc.executebuiltin("Dialog.Close(busydialog)")
+                return
             xbmc.executebuiltin("ActivateWindow(busydialog)")
             search_string = "%s tv" % (self.episode["general"]["Title"])
             youtube_thread = Get_Youtube_Vids_Thread(search_string, "", "relevance", 15)
             youtube_thread.start()
-            if not "DBID" in self.episode["general"]: # need to add comparing for episodes
+            if not "DBID" in self.episode["general"]:  # need to add comparing for episodes
                 poster_thread = Get_ListItems_Thread(Get_File, self.episode["general"]["Poster"])
                 poster_thread.start()
             if not "DBID" in self.episode["general"]:
@@ -59,6 +61,10 @@ class DialogEpisodeInfo(xbmcgui.WindowXMLDialog):
         xbmc.executebuiltin("Dialog.Close(busydialog)")
 
     def onInit(self):
+        if not self.episode:
+            xbmc.executebuiltin("Dialog.Close(busydialog)")
+            self.close()
+            return
         homewindow.setProperty("movie.ImageColor", self.episode["general"]["ImageColor"])
         windowid = xbmcgui.getCurrentWindowDialogId()
         self.window = xbmcgui.Window(windowid)
@@ -99,7 +105,7 @@ class DialogEpisodeInfo(xbmcgui.WindowXMLDialog):
             dialog = SlideShow(u'script-%s-SlideShow.xml' % addon_name, addon_path, image=image)
             dialog.doModal()
         elif controlID == 132:
-            w = TextViewer_Dialog('DialogTextViewer.xml', addon_path, header="Overview", text=self.season["general"]["Plot"], color=self.season["general"]['ImageColor'])
+            w = TextViewer_Dialog('DialogTextViewer.xml', addon_path, header=addon.getLocalizedString(32037), text=self.season["general"]["Plot"], color=self.season["general"]['ImageColor'])
             w.doModal()
         elif controlID == 6001:
             rating = get_rating_from_user()

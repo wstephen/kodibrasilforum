@@ -35,6 +35,7 @@ class DialogTVShowInfo(xbmcgui.WindowXMLDialog):
         imdb_id = kwargs.get('imdbid')
         tvdb_id = kwargs.get('tvdb_id')
         self.name = kwargs.get('name')
+        self.tvshow = False
         if tmdb_id:
             self.tmdb_id = tmdb_id
         elif dbid and (int(dbid) > 0):
@@ -87,6 +88,9 @@ class DialogTVShowInfo(xbmcgui.WindowXMLDialog):
         xbmc.executebuiltin("Dialog.Close(busydialog)")
 
     def onInit(self):
+        if not self.tvshow:
+            self.close()
+            return
         homewindow.setProperty("movie.ImageColor", self.tvshow["general"]["ImageColor"])
         self.windowid = xbmcgui.getCurrentWindowDialogId()
         self.window = xbmcgui.Window(self.windowid)
@@ -210,7 +214,7 @@ class DialogTVShowInfo(xbmcgui.WindowXMLDialog):
         elif controlID == 6006:
             self.ShowRatedTVShows()
         elif controlID == 132:
-            w = TextViewer_Dialog('DialogTextViewer.xml', addon_path, header="Overview", text=self.tvshow["general"]["Plot"], color=self.tvshow["general"]['ImageColor'])
+            w = TextViewer_Dialog('DialogTextViewer.xml', addon_path, header=addon.getLocalizedString(32037), text=self.tvshow["general"]["Plot"], color=self.tvshow["general"]['ImageColor'])
             w.doModal()
         # elif controlID == 650:
         #     xbmc.executebuiltin("ActivateWindow(busydialog)")
