@@ -10,7 +10,7 @@ import os
 import sys
 import plugintools
 
-YOUTUBE_CHANNEL_ID = "programaolhardigital"
+YOUTUBE_CHANNEL_ID = "UCyz1mAW3FzQL0se1GW8O3zA"
 
 # Entry point
 def run():

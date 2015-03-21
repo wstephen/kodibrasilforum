@@ -282,7 +282,7 @@ I hope you like this!
 
 <addon id="plugin.video.programaolhardigital"
 	name="programaolhardigital"
-	version="1.0.2"
+	version="1.0.4"
 	provider-name="kodi.tv">
   <requires>
     <import addon="xbmc.python" version="2.13.0"/>
