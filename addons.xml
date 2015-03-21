@@ -359,6 +359,42 @@ I hope you like this!
   </extension>
 </addon>
 
+<addon id="plugin.video.vevobrasil"
+	name="Vevo Brasil"
+	version="1.0.2"
+	provider-name="xbmcbrasil.net">
+  <requires>
+    <import addon="xbmc.python" version="2.13.0"/>
+    <import addon="plugin.video.youtube" version="3.0.0"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource" library="default.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en">Vevo Brasil</summary>
+    <description lang="en">Awesome Vevo Brasil videos from YouTube.</description>
+    <platform>all</platform>
+  </extension>
+</addon>
+
+<addon id="plugin.video.vevoyoutube"
+	name="Vevo Youtube"
+	version="1.0.2"
+	provider-name="xbmcbrasil.net">
+  <requires>
+    <import addon="xbmc.python" version="2.13.0"/>
+    <import addon="plugin.video.youtube" version="3.0.0"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource" library="default.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en">VEVO Youtube</summary>
+    <description lang="en">Awesome VEVO videos from YouTube.</description>
+    <platform>all</platform>
+  </extension>
+</addon>
+
 <addon id="plugin.video.videosimprovaveis"
 	name="Barbixas - videos improvaveis"
 	version="1.0.2"
