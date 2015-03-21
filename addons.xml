@@ -21,6 +21,71 @@
     </extension>
 </addon>
 
+<addon id="plugin.video.akkaripoker"	name="Akkari Poker"	version="1.0.0"	provider-name="higor">
+  <requires>
+    <import addon="xbmc.python" version="2.13.0"/>
+    <import addon="plugin.video.youtube" version="3.0.0"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource" library="akkaripoker.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en">O plugin Akkari POKER busca os videos do canal do jogador Andre Akkari no YouTube.</summary>
+    <description lang="en">Assista aos videos do Akkari diretamente no KODI.</description>
+    <platform>all</platform>
+  </extension>
+</addon>
+
+<addon id="plugin.video.amigosporcarros"	name="Amigos por Carros"	version="1.0.0"	provider-name="higor">
+	<requires>
+		<import addon="xbmc.python" version="2.13.0"/>
+		<import addon="plugin.video.youtube" version="3.0.0"/>
+	</requires>
+	<extension point="xbmc.python.pluginsource" library="amigosporcarros.py">
+		<provides>video</provides>
+	</extension>
+	<extension point="xbmc.addon.metadata">
+		<summary lang="en">O Plugin busca videos do canal automotivo Amigos por Carros no youtube.</summary>
+		<description lang="en">Um programa jovem, dinÃ¢mico, moderno e descontraÃ­do. 4 amigos com gostos e preferÃªncias completamente diferentes discutem sobre o mercado de carros esportivos e luxo. Novidades, tendÃªncias, mercado e outros assuntos ligado ao mundo dos carros importados.[CR]
+			ConheÃ§a um pouco mais do perfil de William, Leone, Cadu e Korn.[CR]
+			Acessem o site e fiquem por dentro: www.amigosporcarros.com
+		</description>
+		<platform>all</platform>
+	</extension>
+</addon>
+
+<addon id="plugin.video.caiopessagno"	name="Caio Pessagno POKER"	version="1.0.0"	provider-name="higor">
+  <requires>
+    <import addon="xbmc.python" version="2.13.0"/>
+    <import addon="plugin.video.youtube" version="3.0.0"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource" library="caiopessagno.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en">O plugin Caio Pessagno POKER Busca videos no canal do Pessagno</summary>
+    <description lang="en">O plugin Caio Pessagno POKER busca os videos do jogador de poker pessagno no youtube.</description>
+    <platform>all</platform>
+  </extension>
+</addon>
+
+<addon id="plugin.video.cph.gruposuperpoker"	name="CPH - Grupo SuperPoker"	version="1.0.0"	provider-name="higor">
+  <requires>
+    <import addon="xbmc.python" version="2.13.0"/>
+    <import addon="plugin.video.youtube" version="3.0.0"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource" library="cph-poker.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en">CPH - Grupo SuperPoker</summary>
+	<summary lang="pt_BR">O Plugins CPH - Grupo SuperPoker busca os vÃ­deos do canal Grupo SuperPoker no Youtube</summary>
+    <description lang="en">Assista as transmissÃµes do maior circuito de poker regional do Brasil - Campeonato Paulista de Hold'em.</description>
+    <platform>all</platform>
+	<website>https://www.youtube.com/channel/UC7tYg7VuMwVtgTBtnHIskTA</website>
+  </extension>
+</addon>
+
 <addon id="plugin.video.globo.com"
 		name="Globo.com"
 		version="0.1.5.1.1"
@@ -154,6 +219,48 @@
   </extension>
 </addon>
 
+<addon id="plugin.video.pokerstars.tv" name="Pokerstars TV" provider-name="Sergey Pulyaev" version="0.0.12">
+  <requires>
+    <import addon="xbmc.python" version="1.0"/>
+  </requires>
+  <extension library="addon.py" point="xbmc.python.pluginsource" provides="video">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary>pokerstars.tv</summary>
+    <description>
+Plugin for watching video from site pokerstars.tv
+I hope you like this!
+    </description>
+    <platform>all</platform>
+    <license>GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007</license>
+    <email>serj1903@gmail.com</email>
+  </extension>
+</addon>
+
+<addon id="plugin.video.pokervideosbrasil"	name="Poker Videos Brasil"	version="1.0.0"	provider-name="higor">
+  <requires>
+    <import addon="xbmc.python" version="2.13.0"/>
+    <import addon="plugin.video.youtube" version="3.0.0"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource" library="pokervideosbrasil.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en">O plugin Poker Videos Brasil busca os videos do canal Poker Videos Brasil no YouTube.</summary>
+    <description lang="en">Assista as TransmissÃµes de poker na Band Sports.</description>
+	<description lang="pt_BR">
+			Assista as TransmissÃµes desse esporte da mente no Band Sports.[CR]
+			Assista ao programa Poker Night com Mirelle Moschella.[CR]
+			TransmissÃµes de grandes torneios como:[CR]
+			BSOP: Brazilian Series Of Poker	- O maior evento de poker da AmÃ©rica Latina[CR]
+			CPH: Campeonato Paulista de Poker - Campeonato mais tradicional de poker do Brasil.
+		</description>
+    <platform>all</platform>
+	<website>https://www.youtube.com/channel/UCMwMuVRuK90nrzTjEHPy3ww</website>
+  </extension>
+</addon>
+
 <addon id="plugin.video.programaolhardigital"
 	name="programaolhardigital"
 	version="1.0.2"
@@ -191,6 +298,24 @@
         <email>AddonScriptorDE at yahoo dot de</email>
         <website></website>
     </extension>
+</addon>
+
+<addon id="plugin.video.tvpokerpro"	name="TV Poker Pro"	version="1.0.0"	provider-name="higor">
+  <requires>
+    <import addon="xbmc.python" version="2.13.0"/>
+    <import addon="plugin.video.youtube" version="3.0.0"/>
+  </requires>
+  <extension point="xbmc.python.pluginsource" library="tvpokerpro.py">
+    <provides>video</provides>
+  </extension>
+  <extension point="xbmc.addon.metadata">
+    <summary lang="en">TV Poker Pro</summary>
+	<summary lang="pt_BR">O plugin TV Poker Pro busca os videos do canal TV Poker Pro no YouTube</summary>
+    <description lang="en">O plugin TV Poker Pro busca os videos do canal TV Poker Pro no YouTube.</description>
+	<description lang="pt_BR">O plugin TV Poker Pro busca os vÃ­deos no site do YouTube para reproduzÃ­-los no KODI</description>
+    <platform>all</platform>
+	<website>https://www.youtube.com/user/Tvpokerpro</website>
+  </extension>
 </addon>
 
 <addon id="plugin.video.vevo" name="VEVO" version="0.8.2" provider-name="BlueCop">
