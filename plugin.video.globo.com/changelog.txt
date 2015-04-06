@@ -1,3 +1,7 @@
+0.1.6
+ PT: adicionado autorização para Vivo (by greis)
+ EN: added authorization for Vivo (by greis)
+
 0.1.5.1.1
  PT: correção de bug
  EN: bug-fix
