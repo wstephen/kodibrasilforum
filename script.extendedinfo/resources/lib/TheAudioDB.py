@@ -1,11 +1,7 @@
-import xbmcaddon
-import os
 import xbmc
 from Utils import *
 
 AudioDB_apikey = '58353d43204d68753987fl'
-Addon_Data_Path = os.path.join(xbmc.translatePath("special://profile/addon_data/%s" % xbmcaddon.Addon().getAddonInfo('id')).decode("utf-8"))
-addon = xbmcaddon.Addon()
 base_url = 'http://www.theaudiodb.com/api/v1/json/%s/' % (AudioDB_apikey)
 
 
@@ -53,7 +49,6 @@ def HandleAudioDBAlbumResult(results):
 
 def HandleAudioDBTrackResult(results):
     tracks = []
- #   prettyprint(results)
     if 'track' in results and results['track']:
         for track in results['track']:
             if 'strMusicVid' in track and track['strMusicVid']:
@@ -78,7 +73,6 @@ def HandleAudioDBTrackResult(results):
 
 def HandleAudioDBMusicVideoResult(results):
     mvids = []
- #   prettyprint(results)
     if 'mvids' in results and results['mvids']:
         for mvid in results['mvids']:
             mvid = {'Track': mvid['strTrack'],
@@ -163,7 +157,6 @@ def GetDiscography(search_string):
 def GetArtistDetails(search_string):
     url = 'search.php?s=%s' % (url_quote(search_string))
     results = Get_JSON_response(base_url + url)
-   # prettyprint(results)
     return GetExtendedAudioDBInfo(results)
 
 
@@ -183,7 +176,6 @@ def GetAlbumDetails(audiodbid="", mbid=""):
     elif mbid:
         url = 'album-mb.php?i=%s' % (mbid)
     results = Get_JSON_response(base_url + url)
-  #  prettyprint(results)
     return HandleAudioDBAlbumResult(results)[0]
 
 

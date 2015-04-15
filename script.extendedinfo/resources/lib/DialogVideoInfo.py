@@ -1,5 +1,4 @@
 import xbmc
-import xbmcaddon
 import xbmcgui
 from Utils import *
 from TheMovieDB import *
@@ -12,16 +11,8 @@ try:
 except:
     log("Exception when importing ImageTools")
 import threading
-homewindow = xbmcgui.Window(10000)
 selectdialog = xbmcgui.Window(12000)
 busydialog = xbmcgui.Window(10138)
-
-addon = xbmcaddon.Addon()
-addon_id = addon.getAddonInfo('id')
-addon_name = addon.getAddonInfo('name')
-addon_version = addon.getAddonInfo('version')
-addon_strings = addon.getLocalizedString
-addon_path = addon.getAddonInfo('path').decode("utf-8")
 
 
 class DialogVideoInfo(xbmcgui.WindowXMLDialog):
@@ -48,20 +39,20 @@ class DialogVideoInfo(xbmcgui.WindowXMLDialog):
             self.tmdb_id = get_movie_tmdb_id(imdb_id=imdb_id, dbid=self.dbid, name=self.name)
         if self.tmdb_id:
             self.movie = GetExtendedMovieInfo(self.tmdb_id, self.dbid)
-            if not "general" in self.movie:
+            if "general" not in self.movie:
                 xbmc.executebuiltin("Dialog.Close(busydialog)")
                 return None
             log("Blur image %s with radius %i" % (self.movie["general"]["Thumb"], 25))
             youtube_thread = Get_Youtube_Vids_Thread(self.movie["general"]["Label"] + " " + self.movie["general"]["Year"] + ", movie", "", "relevance", 15)
             sets_thread = Get_Set_Items_Thread(self.movie["general"]["SetId"])
-            self.omdb_thread = Get_ListItems_Thread(GetOmdbMovieInfo, self.movie["general"]["imdb_id"])
-            lists_thread = Get_ListItems_Thread(self.SortLists, self.movie["lists"])
+            self.omdb_thread = Threaded_Function(GetOmdbMovieInfo, self.movie["general"]["imdb_id"])
+            lists_thread = Threaded_Function(self.SortLists, self.movie["lists"])
             self.omdb_thread.start()
             sets_thread.start()
             youtube_thread.start()
             lists_thread.start()
-            if not "DBID" in self.movie["general"]:
-                poster_thread = Get_ListItems_Thread(Get_File, self.movie["general"]["Poster"])
+            if "DBID" not in self.movie["general"]:
+                poster_thread = Threaded_Function(Get_File, self.movie["general"]["Poster"])
                 poster_thread.start()
             vid_id_list = []
             for item in self.movie["videos"]:
@@ -75,7 +66,7 @@ class DialogVideoInfo(xbmcgui.WindowXMLDialog):
                 else:
                     index = crew_id_list.index(item["id"])
                     self.crew_list[index]["job"] = self.crew_list[index]["job"] + " / " + item["job"]
-            if not "DBID" in self.movie["general"]:
+            if "DBID" not in self.movie["general"]:
                 poster_thread.join()
                 self.movie["general"]['Poster'] = poster_thread.listitems
             filter_thread = Filter_Image_Thread(self.movie["general"]["Thumb"], 25)
@@ -143,8 +134,6 @@ class DialogVideoInfo(xbmcgui.WindowXMLDialog):
         self.join_omdb.start()
 
     def onAction(self, action):
-        action_id = action.getId()
-        focusid = self.getFocusId()
         if action in self.ACTION_PREVIOUS_MENU:
             self.close()
             PopWindowStack()
@@ -160,24 +149,22 @@ class DialogVideoInfo(xbmcgui.WindowXMLDialog):
         #             Notify(list_id)
         #         selection = xbmcgui.Dialog().select(addon.getLocalizedString(32151), listitems)
 
-
     def onClick(self, controlID):
-        # selectdialog.setProperty("WindowColor", xbmc.getInfoLabel("Window(home).Property(movie.ImageColor)"))
-        # busydialog.setProperty("WindowColor", xbmc.getInfoLabel("Window(home).Property(movie.ImageColor)"))
+        control = self.getControl(controlID)
         if controlID in [1000, 750]:
-            actorid = self.getControl(controlID).getSelectedItem().getProperty("id")
+            actorid = control.getSelectedItem().getProperty("id")
             AddToWindowStack(self)
             self.close()
             dialog = DialogActorInfo.DialogActorInfo(u'script-%s-DialogInfo.xml' % addon_name, addon_path, id=actorid)
             dialog.doModal()
         elif controlID in [150, 250]:
-            movieid = self.getControl(controlID).getSelectedItem().getProperty("id")
+            movieid = control.getSelectedItem().getProperty("id")
             AddToWindowStack(self)
             self.close()
             dialog = DialogVideoInfo(u'script-%s-DialogVideoInfo.xml' % addon_name, addon_path, id=movieid)
             dialog.doModal()
         elif controlID in [1250, 1350]:
-            image = self.getControl(controlID).getSelectedItem().getProperty("original")
+            image = control.getSelectedItem().getProperty("original")
             dialog = SlideShow(u'script-%s-SlideShow.xml' % addon_name, addon_path, image=image)
             dialog.doModal()
         elif controlID in [350, 1150]:
@@ -185,9 +172,9 @@ class DialogVideoInfo(xbmcgui.WindowXMLDialog):
             self.close()
             listitem = xbmcgui.ListItem(xbmc.getLocalizedString(20410))
             listitem.setInfo('video', {'Title': xbmc.getLocalizedString(20410), 'Genre': 'Youtube Video'})
-            youtube_id = self.getControl(controlID).getSelectedItem().getProperty("youtube_id")
+            youtube_id = control.getSelectedItem().getProperty("youtube_id")
             if youtube_id:
-                self.movieplayer.playYoutubeVideo(youtube_id, self.getControl(controlID).getSelectedItem(), True)
+                self.movieplayer.playYoutubeVideo(youtube_id, control.getSelectedItem(), True)
                 self.movieplayer.wait_for_video_end()
                 PopWindowStack()
             else:
@@ -199,38 +186,38 @@ class DialogVideoInfo(xbmcgui.WindowXMLDialog):
         #     self.movieplayer.play(item=self.movie["general"]['FilenameAndPath'], listitem=listitem)
         #     self.movieplayer.wait_for_video_end()
         elif controlID == 550:
-            company_id = self.getControl(controlID).getSelectedItem().getProperty("id")
-            company_name = self.getControl(controlID).getSelectedItem().getLabel()
+            company_id = control.getSelectedItem().getProperty("id")
+            company_name = control.getSelectedItem().getLabel()
             filters = [{"id": company_id,
                         "type": "with_companies",
                         "typelabel": xbmc.getLocalizedString(20388),
                         "label": company_name}]
             self.OpenVideoList(filters=filters)
         elif controlID == 1050:
-            author = self.getControl(controlID).getSelectedItem().getProperty("author")
-            text = "[B]" + author + "[/B][CR]" + cleanText(self.getControl(controlID).getSelectedItem().getProperty("content"))
+            author = control.getSelectedItem().getProperty("author")
+            text = "[B]" + author + "[/B][CR]" + cleanText(control.getSelectedItem().getProperty("content"))
             w = TextViewer_Dialog('DialogTextViewer.xml', addon_path, header=xbmc.getLocalizedString(185), text=text, color=self.movie["general"]['ImageColor'])
             w.doModal()
         elif controlID == 950:
-            keyword_id = self.getControl(controlID).getSelectedItem().getProperty("id")
-            keyword_name = self.getControl(controlID).getSelectedItem().getLabel()
+            keyword_id = control.getSelectedItem().getProperty("id")
+            keyword_name = control.getSelectedItem().getLabel()
             filters = [{"id": keyword_id,
                         "type": "with_keywords",
                         "typelabel": addon.getLocalizedString(32114),
                         "label": keyword_name}]
             self.OpenVideoList(filters=filters)
         elif controlID == 850:
-            genre_id = self.getControl(controlID).getSelectedItem().getProperty("id")
-            genre_name = self.getControl(controlID).getSelectedItem().getLabel()
+            genre_id = control.getSelectedItem().getProperty("id")
+            genre_name = control.getSelectedItem().getLabel()
             filters = [{"id": genre_id,
                         "type": "with_genres",
                         "typelabel": xbmc.getLocalizedString(135),
                         "label": genre_name}]
             self.OpenVideoList(filters=filters)
         elif controlID == 650:
-            country = self.getControl(controlID).getSelectedItem().getProperty("iso_3166_1")
-            certification = self.getControl(controlID).getSelectedItem().getProperty("certification")
-            year = self.getControl(controlID).getSelectedItem().getProperty("year")
+            country = control.getSelectedItem().getProperty("iso_3166_1")
+            certification = control.getSelectedItem().getProperty("certification")
+            year = control.getSelectedItem().getProperty("year")
             filters = [{"id": country,
                         "type": "certification_country",
                         "typelabel": addon.getLocalizedString(32153),
@@ -245,8 +232,8 @@ class DialogVideoInfo(xbmcgui.WindowXMLDialog):
                         "label": year}]
             self.OpenVideoList(filters=filters)
         elif controlID == 450:
-            list_id = self.getControl(controlID).getSelectedItem().getProperty("id")
-            list_title = self.getControl(controlID).getSelectedItem().getLabel()
+            list_id = control.getSelectedItem().getProperty("id")
+            list_title = control.getSelectedItem().getLabel()
             self.OpenVideoList(mode="list", list_id=list_id, filter_label=list_title)
         elif controlID == 6001:
             rating = get_rating_from_user()
@@ -390,17 +377,15 @@ class DialogVideoInfo(xbmcgui.WindowXMLDialog):
         manage_list = []
         listitems = []
         movie_id = str(self.movie["general"].get("DBID", ""))
-        filename = self.movie["general"].get("FilenameAndPath", False)
+        # filename = self.movie["general"].get("FilenameAndPath", False)
         imdb_id = str(self.movie["general"].get("imdb_id", ""))
         if movie_id:
-            temp_list = [[xbmc.getLocalizedString(413), "RunScript(script.artwork.downloader,mode=gui,mediatype=movie,dbid=" + movie_id + ")"],
-                         [xbmc.getLocalizedString(14061), "RunScript(script.artwork.downloader, mediatype=movie, dbid=" + movie_id + ")"],
-                         [addon.getLocalizedString(32101), "RunScript(script.artwork.downloader,mode=custom,mediatype=movie,dbid=" + movie_id + ",extrathumbs)"],
-                         [addon.getLocalizedString(32100), "RunScript(script.artwork.downloader,mode=custom,mediatype=movie,dbid=" + movie_id + ")"]]
-            manage_list += temp_list
+            manage_list += [[xbmc.getLocalizedString(413), "RunScript(script.artwork.downloader,mode=gui,mediatype=movie,dbid=" + movie_id + ")"],
+                            [xbmc.getLocalizedString(14061), "RunScript(script.artwork.downloader, mediatype=movie, dbid=" + movie_id + ")"],
+                            [addon.getLocalizedString(32101), "RunScript(script.artwork.downloader,mode=custom,mediatype=movie,dbid=" + movie_id + ",extrathumbs)"],
+                            [addon.getLocalizedString(32100), "RunScript(script.artwork.downloader,mode=custom,mediatype=movie,dbid=" + movie_id + ")"]]
         else:
-            temp_list = [[addon.getLocalizedString(32165), "RunPlugin(plugin://plugin.video.couchpotato_manager/movies/add?imdb_id=" + imdb_id + ")||Notification(script.extendedinfo,Added Movie To CouchPota))"]]
-            manage_list += temp_list
+            manage_list += [[addon.getLocalizedString(32165), "RunPlugin(plugin://plugin.video.couchpotato_manager/movies/add?imdb_id=" + imdb_id + ")||Notification(script.extendedinfo,Added Movie To CouchPota))"]]
         # if xbmc.getCondVisibility("system.hasaddon(script.tvtunes)") and movie_id:
         #     manage_list.append([addon.getLocalizedString(32102), "RunScript(script.tvtunes,mode=solo&amp;tvpath=$ESCINFO[Window.Property(movie.FilenameAndPath)]&amp;tvname=$INFO[Window.Property(movie.TVShowTitle)])"])
         if xbmc.getCondVisibility("system.hasaddon(script.libraryeditor)") and movie_id:
@@ -410,9 +395,9 @@ class DialogVideoInfo(xbmcgui.WindowXMLDialog):
             listitems.append(item[0])
         selection = xbmcgui.Dialog().select(addon.getLocalizedString(32133), listitems)
         if selection > -1:
-            builtin_list = manage_list[selection][1].split("||")
-            for item in builtin_list:
+            for item in manage_list[selection][1].split("||"):
                 xbmc.executebuiltin(item)
+
 
 class Join_Omdb_Thread(threading.Thread):
 

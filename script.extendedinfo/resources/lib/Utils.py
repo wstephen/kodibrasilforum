@@ -19,8 +19,8 @@ addon_icon = addon.getAddonInfo('icon')
 addon_strings = addon.getLocalizedString
 addon_name = addon.getAddonInfo('name')
 addon_path = addon.getAddonInfo('path').decode("utf-8")
-
 Addon_Data_Path = os.path.join(xbmc.translatePath("special://profile/addon_data/%s" % addon_id).decode("utf-8"))
+Skin_Data_Path = os.path.join(xbmc.translatePath("special://profile/addon_data/%s" % xbmc.getSkinDir()).decode("utf-8"))
 homewindow = xbmcgui.Window(10000)
 id_list = []
 title_list = []
@@ -355,6 +355,20 @@ def get_db_movies(filter_string="", limit=10):
         for item in json_response["result"]["movies"]:
             movies.append(HandleDBMovieResult(item))
         return movies
+
+
+def millify(n):
+    millnames = [' ', '.000', ' Million', ' Billion', ' Trillion']
+    if n and n > 100:
+        n = float(n)
+        char_count = len(str(n))
+        millidx = (char_count / 3) - 1
+        if millidx == 3 or char_count == 9:
+            return '%.2f%s' % (n / 10 ** (3 * millidx), millnames[millidx])
+        else:
+            return '%.0f%s' % (n / 10 ** (3 * millidx), millnames[millidx])
+    else:
+        return ""
 
 
 def HandleDBMovieResult(movie):
@@ -917,7 +931,7 @@ def passDictToSkin(data=None, prefix="", debug=False, precache=False, window=100
             value = unicode(value)
             if precache:
                 if value.startswith("http://") and (value.endswith(".jpg") or value.endswith(".png")):
-                    if not value in image_requests and value:
+                    if value not in image_requests and value:
                         thread = Get_File_Thread(value)
                         threads += [thread]
                         thread.start()
@@ -950,7 +964,7 @@ def passListToSkin(name="", data=None, prefix="", controlwindow=None, handle=Non
 
 def SetWindowProperties(name, data, prefix="", debug=False):
     if data is not None:
-       # log( "%s%s.Count = %s" % (prefix, name, str(len(data)) ) )
+        # log("%s%s.Count = %s" % (prefix, name, str(len(data))))
         for (count, result) in enumerate(data):
             if debug:
                 log("%s%s.%i = %s" % (prefix, name, count + 1, str(result)))
@@ -984,7 +998,7 @@ def create_listitems(data=None, preload_images=0):
                 value = unicode(value)
                 if counter <= preload_images:
                     if value.startswith("http://") and (value.endswith(".jpg") or value.endswith(".png")):
-                        if not value in image_requests:
+                        if value not in image_requests:
                             thread = Get_File_Thread(value)
                             threads += [thread]
                             thread.start()
@@ -999,7 +1013,7 @@ def create_listitems(data=None, preload_images=0):
                     itempath = value
                 if key.lower() in ["thumb", "poster", "banner", "fanart", "clearart", "clearlogo", "landscape", "discart", "characterart", "tvshow.fanart", "tvshow.poster", "tvshow.banner", "tvshow.clearart", "tvshow.characterart"]:
                     listitem.setArt({key.lower(): value})
-           #     log("key: " + unicode(key) + "  value: " + unicode(value))
+                    # log("key: " + unicode(key) + "  value: " + unicode(value))
                 if key.lower() in Int_InfoLabels:
                     try:
                         listitem.setInfo('video', {key.lower(): int(value)})

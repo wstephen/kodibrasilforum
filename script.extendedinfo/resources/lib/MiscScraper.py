@@ -1,17 +1,14 @@
-import os
 import re
 import random
 import sys
 import urllib
 import xbmc
-import xbmcaddon
-import datetime
 from Utils import *
+import datetime
 import simplejson
 
 tvrage_key = 'VBp9BuIr5iOiBeWCFRMG'
 bandsintown_apikey = 'xbmc_open_source_media_center'
-Addon_Data_Path = os.path.join(xbmc.translatePath("special://profile/addon_data/%s" % xbmcaddon.Addon().getAddonInfo('id')).decode("utf-8"))
 
 
 def GetXKCDInfo():
@@ -123,9 +120,6 @@ def HandleBandsInTownResult(results):
                      'name': venue['name'],
                      'region': venue['region'],
                      'country': venue['country'],
-                     #        'artist_mbid': ,
-                     #           'status': event['status'],
-                     #            'ticket_status': event['ticket_status'],
                      'artists': artists}
             events.append(event)
         except Exception as e:
@@ -138,7 +132,6 @@ def HandleBandsInTownResult(results):
 def GetArtistNearEvents(Artists):  # not possible with api 2.0
     ArtistStr = ''
     count = 0
-  #  prettyprint(Artists)
     for art in Artists:
         artist = art['artist']
         try:
@@ -153,7 +146,6 @@ def GetArtistNearEvents(Artists):  # not possible with api 2.0
     base_url = 'http://api.bandsintown.com/events/search?format=json&location=use_geoip&radius=50&per_page=100&api_version=2.0'
     url = '&%sapp_id=%s' % (ArtistStr, bandsintown_apikey)
     results = Get_JSON_response(base_url + url)
-  #   prettyprint(results)
     return HandleBandsInTownResult(results)
     if False:
         log("GetArtistNearEvents: error when getting artist data from " + url)

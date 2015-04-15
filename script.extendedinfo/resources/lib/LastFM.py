@@ -1,11 +1,8 @@
-import xbmcaddon
-import os
 import xbmc
 from Utils import *
 
 lastfm_apikey = 'd942dd5ca4c9ee5bd821df58cf8130d4'
 googlemaps_key_old = 'AIzaSyBESfDvQgWtWLkNiOYXdrA9aU-2hv_eprY'
-Addon_Data_Path = os.path.join(xbmc.translatePath("special://profile/addon_data/%s" % xbmcaddon.Addon().getAddonInfo('id')).decode("utf-8"))
 base_url = 'http://ws.audioscrobbler.com/2.0/?api_key=%s&format=json&' % (lastfm_apikey)
 
 
@@ -38,7 +35,10 @@ def HandleLastFMEventResult(results):
                         search_string = url_quote(event['venue']['name'])
                 except:
                     search_string = ""
-                builtin = 'RunScript(script.maps.browser,eventid=%s)' % (str(event['id']))
+                if xbmc.getCondVisibility("System.HasAddon(script.maps.browser)"):
+                    builtin = 'RunScript(script.maps.browser,eventid=%s)' % (str(event['id']))
+                else:
+                    builtin = "Notification(Please install script.maps.browser)"
                 googlemap = 'http://maps.googleapis.com/maps/api/staticmap?&sensor=false&scale=2&maptype=roadmap&center=%s&zoom=13&markers=%s&size=640x640&key=%s' % (search_string, search_string, googlemaps_key_old)
                 event = {'date': event['startDate'][:-3],
                          'name': event['venue']['name'],
@@ -68,7 +68,7 @@ def HandleLastFMEventResult(results):
         Notify("Error", results["message"])
     else:
         log("Error in HandleLastFMEventResult. JSON query follows:")
-     #   prettyprint(results)
+    # prettyprint(results)
     return events
 
 
@@ -76,7 +76,7 @@ def HandleLastFMAlbumResult(results):
     albums = []
     if not results:
         return []
-    if 'topalbums' in results:
+    if 'topalbums' in results and "album" in results['topalbums']:
         for album in results['topalbums']['album']:
             album = {'artist': album['artist']['name'],
                      'mbid': album['mbid'],
@@ -142,9 +142,10 @@ def GetEvents(id, pastevents=False):
     return HandleLastFMEventResult(results)
 
 
-def GetArtistPodcast(artist):   #todo
+def GetArtistPodcast(artist):  # todo
     results = Get_JSON_response(base_url + "method=artist.getPodcast&limit=100")
     return HandleLastFMArtistResult(results['artists'])
+
 
 def GetHypedArtists():
     results = Get_JSON_response(base_url + "method=chart.gethypedartists&limit=100")
@@ -220,13 +221,13 @@ def GetNearEvents(tag=False, festivalsonly=False, lat="", lon="", location="", d
         festivalsonly = "0"
     url = 'method=geo.getevents&festivalsonly=%s&limit=40' % (festivalsonly)
     if tag:
-        url = url + '&tag=%s' % (url_quote(tag))
+        url += '&tag=%s' % (url_quote(tag))
     if lat:
-        url = url + '&lat=%s&long=%s' % (str(lat), str(lon))  # &distance=60
+        url += '&lat=%s&long=%s' % (str(lat), str(lon))  # &distance=60
     if location:
-        url = url + '&location=%s' % (url_quote(location))
+        url += '&location=%s' % (url_quote(location))
     if distance:
-        url = url + '&distance=%s' % (distance)
+        url += '&distance=%s' % (distance)
     results = Get_JSON_response(base_url + url, 0.5)
     return HandleLastFMEventResult(results)
 
@@ -241,5 +242,3 @@ def GetTrackInfo(artist="", track=""):
     url = 'method=track.getInfo&artist=%s&track=%s' % (url_quote(artist), url_quote(track))
     results = Get_JSON_response(base_url + url)
     return HandleLastFMTrackResult(results)
-
-

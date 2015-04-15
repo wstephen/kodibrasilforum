@@ -35,7 +35,7 @@ msgstr "Filmes Conhecidos"
 
 msgctxt "#32012"
 msgid "Birthday"
-msgstr "Nascido em"
+msgstr "Nasceu em"
 
 msgctxt "#32013"
 msgid "Day of Death"
@@ -88,6 +88,10 @@ msgstr "Index dos Episódios"
 msgctxt "#32026"
 msgid "Related TheMovieDB lists"
 msgstr "Listas Relacionadas TheMovieDB"
+
+msgctxt "#32027"
+msgid "Select person"
+msgstr "Selecione a pessoa"
 
 msgctxt "#32030"
 msgid "Movie Appearances"

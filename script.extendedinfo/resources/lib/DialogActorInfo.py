@@ -1,5 +1,4 @@
 import xbmc
-import xbmcaddon
 import xbmcgui
 from Utils import *
 try:
@@ -10,14 +9,6 @@ from TheMovieDB import *
 from YouTube import *
 import DialogVideoInfo
 import DialogTVShowInfo
-homewindow = xbmcgui.Window(10000)
-
-addon = xbmcaddon.Addon()
-addon_id = addon.getAddonInfo('id')
-addon_name = addon.getAddonInfo('name')
-addon_version = addon.getAddonInfo('version')
-addon_strings = addon.getLocalizedString
-addon_path = addon.getAddonInfo('path').decode("utf-8")
 
 
 class DialogActorInfo(xbmcgui.WindowXMLDialog):
@@ -32,10 +23,9 @@ class DialogActorInfo(xbmcgui.WindowXMLDialog):
         self.person = False
         if not self.id:
             name = kwargs.get('name').decode("utf-8").split(" " + xbmc.getLocalizedString(20347) + " ")
-            name = name[0].strip()
-            names = name.split(" / ")
+            names = name[0].strip().split(" / ")
             if len(names) > 1:
-                ret = xbmcgui.Dialog().select("Actor Info", names)
+                ret = xbmcgui.Dialog().select(addon.getLocalizedString(32027), names)
                 if ret == -1:
                     return None
                 name = names[ret]
