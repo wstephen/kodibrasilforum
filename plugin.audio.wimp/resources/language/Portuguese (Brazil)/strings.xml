@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<strings>
+    <string id="30001">Site</string>
+    <string id="30002">WiMP</string>
+    <string id="30003">Tidal</string>
+    <string id="30004">Qualidade</string>
+    <string id="30005">Lossless</string>
+    <string id="30006">Alta</string>
+    <string id="30007">Baixa</string>
+    <string id="30008">Nome do Usuário</string>
+    <string id="30009">Senha</string>
+</strings>

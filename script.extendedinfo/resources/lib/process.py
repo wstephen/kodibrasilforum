@@ -2,6 +2,7 @@ from LastFM import *
 from TheAudioDB import *
 from TheMovieDB import *
 from Utils import *
+from local_db import *
 from YouTube import *
 from Trakt import *
 
@@ -182,17 +183,17 @@ def StartInfoActions(infos, params):
             data = GetPopularActorList(), "PopularPeople"
         elif info == 'extendedinfo':
             from DialogVideoInfo import DialogVideoInfo
-            dialog = DialogVideoInfo(u'script-%s-DialogVideoInfo.xml' % addon_name, addon_path, id=params.get("id", ""),
+            dialog = DialogVideoInfo(u'script-%s-DialogVideoInfo.xml' % ADDON_NAME, ADDON_PATH, id=params.get("id", ""),
                                      dbid=params.get("dbid", None), imdbid=params.get("imdbid", ""), name=params.get("name", ""))
             dialog.doModal()
         elif info == 'extendedactorinfo':
             from DialogActorInfo import DialogActorInfo
-            dialog = DialogActorInfo(u'script-%s-DialogInfo.xml' % addon_name,
-                                     addon_path, id=params.get("id", ""), name=params.get("name", ""))
+            dialog = DialogActorInfo(u'script-%s-DialogInfo.xml' % ADDON_NAME,
+                                     ADDON_PATH, id=params.get("id", ""), name=params.get("name", ""))
             dialog.doModal()
         elif info == 'extendedtvinfo':
             from DialogTVShowInfo import DialogTVShowInfo
-            dialog = DialogTVShowInfo(u'script-%s-DialogVideoInfo.xml' % addon_name, addon_path, id=params.get("id", ""),
+            dialog = DialogTVShowInfo(u'script-%s-DialogVideoInfo.xml' % ADDON_NAME, ADDON_PATH, id=params.get("id", ""),
                                       dbid=params.get("dbid", None), imdbid=params.get("imdbid", ""), name=params.get("name", ""))
             dialog.doModal()
         elif info == 'ratemedia':
@@ -216,7 +217,7 @@ def StartInfoActions(infos, params):
             if params.get("tvshow", False) and params.get("season", False):
                 from DialogSeasonInfo import DialogSeasonInfo
                 dialog = DialogSeasonInfo(
-                    u'script-%s-DialogVideoInfo.xml' % addon_name, addon_path, tvshow=params["tvshow"], season=params["season"])
+                    u'script-%s-DialogVideoInfo.xml' % ADDON_NAME, ADDON_PATH, tvshow=params["tvshow"], season=params["season"])
                 dialog.doModal()
             else:
                 Notify("Error", "Required data missing in script call")
@@ -262,22 +263,24 @@ def StartInfoActions(infos, params):
             if params.get("artist_mbid"):
                 data = GetEvents(params.get("artist_mbid")), "ArtistEvents"
         elif info == 'youtubesearch':
-            homewindow.setProperty('%sSearchValue' % params.get("prefix", ""), params.get("id", ""))  # set properties
+            HOME.setProperty('%sSearchValue' % params.get("prefix", ""), params.get("id", ""))  # set properties
             if params.get("id", False):
-                data = GetYoutubeSearchVideosV3(params.get("id", ""), params.get("hd", ""), params.get("orderby", "relevance")), "YoutubeSearch"
+                data = GetYoutubeSearchVideos(params.get("id", ""), params.get("hd", ""), params.get("orderby", "relevance")), "YoutubeSearch"
         elif info == 'youtubeplaylist':
             if params.get("id", False):
                 data = GetYoutubePlaylistVideos(params.get("id", "")), "YoutubePlaylist"
         elif info == 'youtubeusersearch':
-            if params.get("id", ""):
-                data = GetYoutubeUserVideos(params.get("id", "")), "YoutubeUserSearch"
+            user_name = params.get("id", "")
+            if user_name:
+                playlists = GetUserPlaylists(user_name)
+                data = GetYoutubePlaylistVideos(playlists["uploads"]), "YoutubeUserSearch"
         elif info == 'nearevents':
             data = GetNearEvents(params.get("tag", ""), params.get("festivalsonly", ""), params.get("lat", ""), params.get("lon", ""), params.get("location", ""), params.get("distance", "")), "NearEvents"
         elif info == 'trackinfo':
-            homewindow.setProperty('%sSummary' % params.get("prefix", ""), "")  # set properties
+            HOME.setProperty('%sSummary' % params.get("prefix", ""), "")  # set properties
             if params["artistname"] and params["trackname"]:
                 TrackInfo = GetTrackInfo(params["artistname"], params["trackname"])
-                homewindow.setProperty('%sSummary' % params.get("prefix", ""), TrackInfo["summary"])  # set properties
+                HOME.setProperty('%sSummary' % params.get("prefix", ""), TrackInfo["summary"])  # set properties
         elif info == 'venueevents':
             if params["location"]:
                 params["id"] = GetVenueID(params["location"])
@@ -296,9 +299,9 @@ def StartInfoActions(infos, params):
                 favourites = GetFavouriteswithType(params.get("id", ""))
             else:
                 favourites = GetFavourites()
-                homewindow.setProperty('favourite.count', str(len(favourites)))
+                HOME.setProperty('favourite.count', str(len(favourites)))
                 if len(favourites) > 0:
-                    homewindow.setProperty('favourite.1.name', favourites[-1]["Label"])
+                    HOME.setProperty('favourite.1.name', favourites[-1]["Label"])
             data = favourites, "Favourites"
         elif info == 'json':
             data = GetYoutubeVideos(params["feed"]), "RSS"
@@ -329,9 +332,9 @@ def StartInfoActions(infos, params):
         elif info == 'action':
             xbmc.executebuiltin(params.get("id", ""))
         elif info == 'bounce':
-            homewindow.setProperty(params.get("name", ""), "True")
+            HOME.setProperty(params.get("name", ""), "True")
             xbmc.sleep(200)
-            homewindow.clearProperty(params.get("name", ""))
+            HOME.clearProperty(params.get("name", ""))
         elif info == "youtubevideo":
             if params.get("id", ""):
                 xbmc.executebuiltin("Dialog.Close(all,true)")
@@ -358,9 +361,9 @@ def StartInfoActions(infos, params):
         elif info == 'updatexbmcdatabasewithartistmbid':
             SetMusicBrainzIDsForAllArtists(True, False)
         elif info == 'deletecache':
-            homewindow.clearProperties()
-            for the_file in os.listdir(Addon_Data_Path):
-                file_path = os.path.join(Addon_Data_Path, the_file)
+            HOME.clearProperties()
+            for the_file in os.listdir(ADDON_DATA_PATH):
+                file_path = os.path.join(ADDON_DATA_PATH, the_file)
                 try:
                     if os.path.isfile(file_path) and not the_file == "settings.xml":
                         os.unlink(file_path)

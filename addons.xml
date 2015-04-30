@@ -21,6 +21,27 @@
     </extension>
 </addon>
 
+<addon id="plugin.audio.wimp" name="WiMP" version="1.1.1" provider-name="takoi">
+    <requires>
+        <import addon="xbmc.python" version="2.14.0"/>
+        <import addon="script.module.requests" version="2.3.0"/>
+        <import addon="script.module.routing" version="0.1.0"/>
+    </requires>
+    <extension point="xbmc.python.pluginsource" library="addon.py">
+        <provides>audio</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary lang="en">WiMP music add-on</summary>
+        <description lang="en">Play music from WiMP music streaming service. Visit wimpmusic.com for details.</description>
+        <disclaimer lang="en">This is an unofficial client and is not supported nor endorsed by WiMP.</disclaimer>
+        <license>GNU GENERAL PUBLIC LICENSE. Version 3, 29 June 2007</license>
+        <platform>all</platform>
+        <language>en de dk no sv pl</language>
+        <forum>http://forum.xbmc.org/showthread.php?tid=200555</forum>
+        <source>https://github.com/tamland/xbmc-wimp</source>
+    </extension>
+</addon>
+
 <addon id="plugin.video.Adrenaline"
 	name="Adrenaline Videos"
 	version="1.0.2"
@@ -102,6 +123,20 @@
     <platform>all</platform>
 	<website>https://www.youtube.com/channel/UC7tYg7VuMwVtgTBtnHIskTA</website>
   </extension>
+</addon>
+
+<addon id="plugin.video.gdrive-testing" version="0.6.13" name="gdrive-testing" provider-name="ddurdle">
+    <requires>
+        <import addon="xbmc.python" version="2.1.0"/>
+    </requires>
+    <extension point="xbmc.python.pluginsource" library="default.py">
+        <provides>video audio image programs</provides>
+    </extension>
+    <extension point="xbmc.addon.metadata">
+        <summary>Listen to music, watch videos and view photos from your Google Drive account</summary>
+        <description>Plays music and video from your Google Drive account.  Not affiliated with Google.</description>
+        <platform>all</platform>
+    </extension>
 </addon>
 
 <addon id="plugin.video.globo.com"
@@ -316,6 +351,57 @@ I hope you like this!
   </extension>
 </addon>
 
+<addon id="plugin.video.sbtvideos" name="SBT Videos" version="0.1.2" provider-name="vfranchi">
+	<requires>
+		<import addon="xbmc.python" version="2.1.0"/>
+	</requires>
+	<extension point="xbmc.python.pluginsource" library="sbt-videos.py">
+		<provides>video</provides>
+	</extension>
+	<extension point="xbmc.addon.metadata">
+		<summary lang="en">SBT Videos plugin fetches videos from the brazilian SBT tv network and opens them on XBMC</summary>
+		<summary lang="pt_BR">O plugin SBT Videos busca os todos os vÃ­deos do site do SBT para tocÃ¡-los no XBMC</summary>
+		<summary lang="pt">O plugin SBT Videos busca os todos os vÃ­deos do site do SBT para tocÃ¡-los no XBMC</summary>
+		<description lang="en">
+			SBT Videos plugin fetches videos from the brazilian SBT tv network and opens them on XBMC.[CR]
+			This plugin uses Google Analytics to help me decide see what people are using so I can better decide what should I develop on next updates. The exact events that are tracked are:[CR]
+			* Track when user installs the plugin[CR]
+			* Track when user uses the plugin (sees the Main Menu)[CR]
+			* Track what video category people see the most[CR]
+			* Track when user choose to play one video (not which video)[CR]
+			* Track when user choose to play the whole episode (not which episode)[CR][CR]
+			If you have any questions, feedback, want to report a bug, or just say hello. Please visit the official plugin thread at [http://forum.kodi.tv/showthread.php?tid=218591]
+		</description>
+		<description lang="pt_BR">
+			O plugin SBT Videos busca todos os vÃ­deos no site do SBT para tocÃ¡-los no XBMC, uma nova opÃ§Ã£o para assistir os seus programas prediletos.[CR]
+			Este plugin utiliza o Google Analytics para me ajudar a ver o que as pessoas estÃ£o usando mais, para me ajudar a decidir o que melhorar/desenvolver na prÃ³xima atualizaÃ§Ã£o. Os eventos exatos que sÃ£o monitorados sÃ£o:[CR]
+			* Evento quando o usuÃ¡rio instala o plugin[CR]
+			* Evento quando o usuÃ¡rio utiliza o plugin (visualiza o Menu principal)[CR]
+			* Evento de qual categoria Ã© mais vista pelo usuÃ¡rio[CR]
+			* Evento quando o usuÃ¡rio opta por tocar um Ãºnico vÃ­deo (nÃ£o qual vÃ­deo especÃ­fico)[CR]
+			* Evento quando o usuÃ¡rio opta por tocar um episÃ³dio inteiro (nÃ£o qual o episÃ³dio)[CR]
+			Se vocÃª tiver alguma dÃºvida, um feedback, quer reportar um bug, ou apenas dizer um ou. Por favor, visite a thread oficial do plugin em [http://forum.kodi.tv/showthread.php?tid=218591]
+		</description>
+		<description lang="pt">
+			O plugin SBT Videos busca todos os vÃ­deos no site do SBT para tocÃ¡-los no XBMC, uma nova opÃ§Ã£o para assistir os seus programas prediletos.[CR]
+			Este plugin utiliza o Google Analytics para me ajudar a ver o que as pessoas estÃ£o usando mais, para me ajudar a decidir o que melhorar/desenvolver na prÃ³xima atualizaÃ§Ã£o. Os eventos exatos que sÃ£o monitorados sÃ£o:[CR]
+			* Evento quando o usuÃ¡rio instala o plugin[CR]
+			* Evento quando o usuÃ¡rio utiliza o plugin (visualiza o Menu principal)[CR]
+			* Evento de qual categoria Ã© mais vista pelo usuÃ¡rio[CR]
+			* Evento quando o usuÃ¡rio opta por tocar um Ãºnico vÃ­deo (nÃ£o qual vÃ­deo especÃ­fico)[CR]
+			* Evento quando o usuÃ¡rio opta por tocar um episÃ³dio inteiro (nÃ£o qual o episÃ³dio)[CR]
+			Se vocÃª tiver alguma dÃºvida, um feedback, quer reportar um bug, ou apenas dizer um ou. Por favor, visite a thread oficial do plugin em [http://forum.kodi.tv/showthread.php?tid=218591]
+		</description>
+		<disclaimer lang="en">This plugin comes 'as is'. The authors are not responsible for any problems it may cause. For more info, visit the forum.</disclaimer>
+		<language>en pt_BR pt</language>
+		<platform>all</platform>
+		<license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
+		<website>http://www.sbt.com.br/sbtvideos/</website>
+		<forum>http://forum.kodi.tv/showthread.php?tid=218591</forum>
+		<source>https://github.com/vfranchi/plugin.video.sbtvideos</source>
+	</extension>
+</addon>
+
 <addon id="plugin.video.spotitube" name="Youtube Music" version="1.0.5" provider-name="AddonScriptorDE">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
@@ -501,7 +587,7 @@ I hope you like this!
     </extension>
 </addon>
 
-<addon id="script.extendedinfo" name="ExtendedInfo Script" version="2.0.7" provider-name="phil65">
+<addon id="script.extendedinfo" name="ExtendedInfo Script" version="2.0.9" provider-name="phil65">
 	<requires>
 		<import addon="xbmc.python" version="2.1.0"/>
 		<import addon="script.module.simplejson" version="2.0.10"/>

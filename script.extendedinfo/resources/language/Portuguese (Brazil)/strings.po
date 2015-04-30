@@ -42,7 +42,7 @@ msgid "Day of Death"
 msgstr "Morreu em"
 
 msgctxt "#32014"
-msgid "Place of Birth"
+msgid "Place of birth"
 msgstr "Natural de"
 
 msgctxt "#32015"
@@ -106,7 +106,7 @@ msgid "Enter Person Name"
 msgstr "Entre com o nome da pessoa"
 
 msgctxt "#32034"
-msgid "Person results for "%s"
+msgid "Person results for %s"
 msgstr "Resultado da procura para %s"
 
 msgctxt "#32035"
@@ -211,7 +211,7 @@ msgstr "Vídeos Oficiais"
 
 msgctxt "#32118"
 msgid "YouTube Videos"
-msgstr "Vídeos do Youtube"
+msgstr "Vídeos no Youtube"
 
 msgctxt "#32119"
 msgid "Artwork"
@@ -227,11 +227,11 @@ msgstr "Papel no Seriado"
 
 msgctxt "#32122"
 msgid "Movie crew member"
-msgstr "Membro da equipe do filme"
+msgstr "Participa no filme"
 
 msgctxt "#32123"
 msgid "TV Show crew member"
-msgstr "Membro da equipe do seriado"
+msgstr "Participa no seriado"
 
 msgctxt "#32124"
 msgid "Items"

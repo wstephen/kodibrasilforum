@@ -1,12 +1,11 @@
 import datetime
 from Utils import *
 
-trakt_key = 'e9a7fba3fa1b527c08c073770869c258804124c5d7c984ce77206e695fbaddd5'
-base_url = "https://api-v2launch.trakt.tv/"
-token = ""
-headers = {
+TRAKT_KEY = 'e9a7fba3fa1b527c08c073770869c258804124c5d7c984ce77206e695fbaddd5'
+BASE_URL = "https://api-v2launch.trakt.tv/"
+HEADERS = {
     'Content-Type': 'application/json',
-    'trakt-api-key': trakt_key,
+    'trakt-api-key': TRAKT_KEY,
     'trakt-api-version': 2
 }
 
@@ -19,7 +18,7 @@ def GetTraktCalendarShows(Type):
     elif Type == "premieres":
         url = 'calendars/shows/premieres/%s/14?extended=full,images' % datetime.date.today()
     try:
-        results = Get_JSON_response(base_url + url, 0.5, headers=headers)
+        results = Get_JSON_response(BASE_URL + url, 0.5, headers=HEADERS)
     except:
         log("Error when fetching Trakt data from net")
         log("Json Query: " + url)
@@ -62,7 +61,7 @@ def HandleTraktMovieResult(results):
             premiered = str(datetime.datetime.fromtimestamp(int(movie["movie"]["released"])))[:10]
         except:
             premiered = ""
-        if addon.getSetting("infodialog_onclick") != "false":
+        if ADDON.getSetting("infodialog_onclick") != "false":
             path = 'plugin://script.extendedinfo/?info=action&&id=RunScript(script.extendedinfo,info=extendedinfo,id=%s)' % str(fetch(movie["movie"]["ids"], 'tmdb'))
         else:
             path = "plugin://script.extendedinfo/?info=playtrailer&&id=" + str(fetch(movie["movie"]["ids"], 'tmdb'))
@@ -77,7 +76,7 @@ def HandleTraktMovieResult(results):
                  'mpaa': movie["movie"]["certification"],
                  'Plot': movie["movie"]["overview"],
                  'Premiered': premiered,
-                 'Rating': round(movie["movie"]["rating"] / 10.0, 1),
+                 'Rating': round(movie["movie"]["rating"], 1),
                  'Votes': movie["movie"]["votes"],
                  'Watchers': movie["watchers"],
                  'Genre': " / ".join(movie["movie"]["genres"]),
@@ -96,12 +95,8 @@ def HandleTraktTVShowResult(results):
             premiered = str(datetime.datetime.fromtimestamp(int(tvshow['show']["first_aired"])))[:10]
         except:
             premiered = ""
-        banner = tvshow['show']["images"]["banner"]["full"]
-        fanart = tvshow['show']["images"]["fanart"]["full"]
-        poster = tvshow['show']["images"]["poster"]["full"]
         airs = fetch(tvshow['show'], "airs")
-        air_day = fetch(airs, "day")
-        air_time = fetch(airs, "time")
+        path = 'plugin://script.extendedinfo/?info=action&&id=RunScript(script.extendedinfo,info=extendedtvinfo,imdbid=%s)' % tvshow['show']['ids']["imdb"]
         show = {'Title': tvshow['show']["title"],
                 'Label': tvshow['show']["title"],
                 'TVShowTitle': tvshow['show']["title"],
@@ -115,22 +110,22 @@ def HandleTraktTVShowResult(results):
                 'tvdb_id': tvshow['show']['ids']["tvdb"],
                 'imdb_id': tvshow['show']['ids']["imdb"],
                 'imdbid': tvshow['show']['ids']["imdb"],
-                'Path': 'plugin://script.extendedinfo/?info=extendedtvinfo&&imdbid=%s' % tvshow['show']['ids']["imdb"],
-                'AirDay': air_day,
-                'AirShortTime': air_time,
-                'Label2': air_day + " " + air_time,
+                'Path': path,
+                'AirDay': fetch(airs, "day"),
+                'AirShortTime': fetch(airs, "time"),
+                'Label2': fetch(airs, "day") + " " + fetch(airs, "time"),
                 'Premiered': premiered,
                 'Country': tvshow['show']["country"],
-                'Rating': round(tvshow['show']["rating"] / 10.0, 1),
+                'Rating': round(tvshow['show']["rating"], 1),
                 'Votes': tvshow['show']["votes"],
                 'Watchers': fetch(tvshow, "watchers"),
                 'Genre': " / ".join(tvshow['show']["genres"]),
-                'Art(poster)': poster,
-                'Poster': poster,
-                'Art(banner)': banner,
-                'Banner': banner,
-                'Art(fanart)': fanart,
-                'Fanart': fanart,
+                'Art(poster)': tvshow['show']["images"]["poster"]["full"],
+                'Poster': tvshow['show']["images"]["poster"]["full"],
+                'Art(banner)': tvshow['show']["images"]["banner"]["full"],
+                'Banner': tvshow['show']["images"]["banner"]["full"],
+                'Art(fanart)': tvshow['show']["images"]["fanart"]["full"],
+                'Fanart': tvshow['show']["images"]["fanart"]["full"],
                 'Thumb': tvshow['show']["images"]["fanart"]["thumb"]}
         shows.append(show)
     return shows
@@ -138,7 +133,7 @@ def HandleTraktTVShowResult(results):
 
 def GetTrendingShows():
     url = 'shows/trending?extended=full,images'
-    results = Get_JSON_response(base_url + url, headers=headers)
+    results = Get_JSON_response(BASE_URL + url, headers=HEADERS)
     if results is not None:
         return HandleTraktTVShowResult(results)
     else:
@@ -147,7 +142,7 @@ def GetTrendingShows():
 
 def GetTVShowInfo(imdb_id):
     url = 'show/%s?extended=full,images' % imdb_id
-    results = Get_JSON_response(base_url + url, headers=headers)
+    results = Get_JSON_response(BASE_URL + url, headers=HEADERS)
     if results is not None:
         return HandleTraktTVShowResult([results])
     else:
@@ -156,7 +151,7 @@ def GetTVShowInfo(imdb_id):
 
 def GetTrendingMovies():
     url = 'movies/trending?extended=full,images'
-    results = Get_JSON_response(base_url + url, headers=headers)
+    results = Get_JSON_response(BASE_URL + url, headers=HEADERS)
     if results is not None:
         return HandleTraktMovieResult(results)
     else:
@@ -166,7 +161,7 @@ def GetTrendingMovies():
 def GetSimilarTrakt(mediatype, imdb_id):
     if imdb_id is not None:
         url = '%s/%s/related?extended=full,images' % (mediatype, imdb_id)
-        results = Get_JSON_response(base_url + url, headers=headers)
+        results = Get_JSON_response(BASE_URL + url, headers=HEADERS)
         if results is not None:
             if mediatype == "show":
                 return HandleTraktTVShowResult(results)
