@@ -44,8 +44,6 @@ itunesForceCountry = addon.getSetting("itunesForceCountry") == "true"
 itunesCountry = addon.getSetting("itunesCountry")
 spotifyForceCountry = addon.getSetting("spotifyForceCountry") == "true"
 spotifyCountry = addon.getSetting("spotifyCountry")
-youtubeAddonUrl = addon.getSetting("youtubeAddon")
-youtubeAddonUrl = ["plugin://plugin.video.youtube/?path=/root/video&action=play_video&videoid=", "plugin://plugin.video.bromix.youtube/play/?video_id="][int(youtubeAddonUrl)]
 userAgent = "Mozilla/5.0 (Windows NT 6.1; rv:30.0) Gecko/20100101 Firefox/30.0"
 opener.addheaders = [('User-Agent', userAgent)]
 urlMainBB = "http://www.billboard.com"
@@ -67,11 +65,11 @@ if not cacheDir.startswith(('smb://', 'nfs://', 'upnp://', 'ftp://')) and not os
     os.mkdir(cacheDir)
 
 def index():
-    addDir("Beatport", "", "bpMain", "")
+    #addDir("Beatport", "", "bpMain", "")
     addDir("Billboard", "", "billboardMain", "")
     addDir("Hype Machine", "", "hypemMain", "")
     addDir(translation(30043), "", "itunesMain", "")
-    addDir("Official Charts Company (UK)", "", "ocMain", "")
+    #addDir("Official Charts Company (UK)", "", "ocMain", "")
     addDir(translation(30044), "", "spotifyMain", "")
     xbmcplugin.endOfDirectory(pluginhandle)
 
@@ -624,7 +622,7 @@ def playYTByTitle(title):
         if xbox:
             url = "plugin://video/YouTube/?path=/root/video&action=play_video&videoid=" + youtubeID
         else:
-            url = youtubeAddonUrl + youtubeID
+            url = "plugin://plugin.video.youtube/?path=/root/video&action=play_video&videoid=" + youtubeID
         listitem = xbmcgui.ListItem(path=url)
         xbmcplugin.setResolvedUrl(pluginhandle, True, listitem)
         if infoEnabled:
@@ -634,8 +632,8 @@ def playYTByTitle(title):
 
 
 def getYoutubeId(title):
-    content = cache("http://gdata.youtube.com/feeds/api/videos?vq="+urllib.quote_plus(title.lower())+"&max-results=1&start-index=1&orderby=relevance&time=all_time&v=2", 1)
-    match=re.compile('<yt:videoid>(.+?)</yt:videoid>', re.DOTALL).findall(content)
+    content = opener.open("http://www.youtube.com/results?lclk=video&filters=video&search_query="+urllib.quote_plus(title)).read()
+    match=re.compile('class="item-section">.+?data-context-item-id="(.+?)"', re.DOTALL).findall(content)
     return match[0]
 
 
