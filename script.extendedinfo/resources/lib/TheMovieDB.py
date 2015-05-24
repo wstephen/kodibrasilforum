@@ -2,6 +2,7 @@ from YouTube import *
 from Utils import *
 from local_db import compare_with_library, GetImdbIDFromDatabase
 import threading
+import re
 from urllib2 import Request, urlopen
 
 TMDB_KEY = '34142515d9d23817496eeb4ff1d223d0'
@@ -285,7 +286,7 @@ def HandleTMDBTVShowResult(results, local_first=True, sortkey="year"):
                  'Title': fetch(tv, 'name'),
                  'TVShowTitle': fetch(tv, 'name'),
                  'OriginalTitle': fetch(tv, 'original_name'),
-                 'Duration': duration,
+                 'duration': duration,
                  'ID': tmdb_id,
                  'credit_id': fetch(tv, 'credit_id'),
                  'Plot': fetch(tv, "overview"),
@@ -524,12 +525,12 @@ def GetPersonID(person, skip_dialog=False):
     response = GetMovieDBData("search/person?query=%s&include_adult=%s&" % (url_quote(person), include_adult), 30)
     if response and "results" in response:
         if len(response["results"]) > 1 and not skip_dialog:
-            names = []
-            for item in response["results"]:
-                names.append(item["name"])
+            listitems = create_listitems(HandleTMDBPeopleResult(response["results"]))
             xbmc.executebuiltin("Dialog.Close(busydialog)")
-            selection = xbmcgui.Dialog().select(ADDON.getLocalizedString(32151), names)
-            if selection > -1:
+            w = Select_Dialog('DialogSelect.xml', ADDON_PATH, listing=listitems)
+            w.doModal()
+            selection = w.index
+            if selection >= 0:
                 return response["results"][selection]
         elif response["results"]:
             return response["results"][0]
@@ -542,9 +543,7 @@ def GetKeywordID(keyword):
     response = GetMovieDBData("search/keyword?query=%s&include_adult=%s&" % (url_quote(keyword), include_adult), 30)
     if response and "results" in response and response["results"]:
         if len(response["results"]) > 1:
-            names = []
-            for item in response["results"]:
-                names.append(item["name"])
+            names = [item["name"] for item in response["results"]]
             selection = xbmcgui.Dialog().select(ADDON.getLocalizedString(32114), names)
             if selection > -1:
                 return response["results"][selection]
@@ -607,7 +606,13 @@ def GetCreditInfo(credit_id):
 def GetSeasonInfo(tmdb_tvshow_id, tvshowname, season_number):
     if not tmdb_tvshow_id:
         response = GetMovieDBData("search/tv?query=%s&language=%s&" % (url_quote(tvshowname), ADDON.getSetting("LanguageID")), 30)
-        tmdb_tvshow_id = str(response['results'][0]['id'])
+        if response["results"]:
+            tmdb_tvshow_id = str(response['results'][0]['id'])
+        else:
+            tvshowname = re.sub('\(.*?\)', '', tvshowname)
+            response = GetMovieDBData("search/tv?query=%s&language=%s&" % (url_quote(tvshowname), ADDON.getSetting("LanguageID")), 30)
+            if response["results"]:
+                tmdb_tvshow_id = str(response['results'][0]['id'])
     response = GetMovieDBData("tv/%s/season/%s?append_to_response=videos,images,external_ids,credits&language=%s&include_image_language=en,null,%s&" % (tmdb_tvshow_id, season_number, ADDON.getSetting("LanguageID"), ADDON.getSetting("LanguageID")), 7)
     # prettyprint(response)
     if not response:
@@ -652,7 +657,7 @@ def GetSeasonInfo(tmdb_tvshow_id, tvshowname, season_number):
 def get_movie_tmdb_id(imdb_id=None, name=None, dbid=None):
     if dbid and (int(dbid) > 0):
         movie_id = GetImdbIDFromDatabase("movie", dbid)
-        log("IMDBId from local DB:" + str(movie_id))
+        log("IMDB Id from local DB:" + str(movie_id))
         return movie_id
     elif imdb_id:
         response = GetMovieDBData("find/tt%s?external_source=imdb_id&language=%s&" % (imdb_id.replace("tt", ""), ADDON.getSetting("LanguageID")), 30)
@@ -683,17 +688,16 @@ def GetTrailer(movieid=None):
 
 
 def GetExtendedMovieInfo(movieid=None, dbid=None, cache_time=14):
-    session_string = ""
     if checkLogin():
         session_string = "session_id=%s&" % (get_session_id())
+    else:
+        session_string = ""
     response = GetMovieDBData("movie/%s?append_to_response=account_states,alternative_titles,credits,images,keywords,releases,videos,translations,similar,reviews,lists,rating&include_image_language=en,null,%s&language=%s&%s" %
                               (movieid, ADDON.getSetting("LanguageID"), ADDON.getSetting("LanguageID"), session_string), cache_time)
     # prettyprint(response)
     authors = []
     directors = []
-    genres = []
     year = ""
-    Studio = []
     mpaa = ""
     SetName = ""
     SetID = ""
@@ -703,8 +707,8 @@ def GetExtendedMovieInfo(movieid=None, dbid=None, cache_time=14):
     if not response:
         Notify("Could not get movie information")
         return {}
-    for item in response['genres']:
-        genres.append(item["name"])
+    genres = [item["name"] for item in response["genres"]]
+    Studio = [item["name"] for item in response["production_companies"]]
     for item in response['credits']['crew']:
         if item["job"] == "Author":
             authors.append(item["name"])
@@ -712,8 +716,6 @@ def GetExtendedMovieInfo(movieid=None, dbid=None, cache_time=14):
             directors.append(item["name"])
     if response['releases']['countries']:
         mpaa = response['releases']['countries'][0]['certification']
-    for item in response['production_companies']:
-        Studio.append(item["name"])
     Set = fetch(response, "belongs_to_collection")
     if Set:
         SetName = fetch(Set, "name")
@@ -734,7 +736,9 @@ def GetExtendedMovieInfo(movieid=None, dbid=None, cache_time=14):
              'Title': fetch(response, 'title'),
              'Label': fetch(response, 'title'),
              'Tagline': fetch(response, 'tagline'),
-             'Duration': fetch(response, 'runtime'),
+             'duration': fetch(response, 'runtime'),
+             'duration(h)': format_time(fetch(response, 'runtime'), "h"),
+             'duration(m)': format_time(fetch(response, 'runtime'), "m"),
              'mpaa': mpaa,
              'Director': " / ".join(directors),
              'Writer': " / ".join(authors),
@@ -767,30 +771,21 @@ def GetExtendedMovieInfo(movieid=None, dbid=None, cache_time=14):
         account_states = response["account_states"]
     else:
         account_states = None
-    similar_thread = Threaded_Function(HandleTMDBMovieResult, response["similar"]["results"])
-    actor_thread = Threaded_Function(HandleTMDBPeopleResult, response["credits"]["cast"])
-    crew_thread = Threaded_Function(HandleTMDBPeopleResult, response["credits"]["crew"])
-    poster_thread = Threaded_Function(HandleTMDBPeopleImagesResult, response["images"]["posters"])
-    threads = [similar_thread, actor_thread, crew_thread, poster_thread]
-    for thread in threads:
-        thread.start()
-    for thread in threads:
-        thread.join()
     synced_movie = compare_with_library([movie])
     if synced_movie:
         answer = {"general": synced_movie[0],
-                  "actors": actor_thread.listitems,
-                  "similar": similar_thread.listitems,
+                  "actors": HandleTMDBPeopleResult(response["credits"]["cast"]),
+                  "similar": HandleTMDBMovieResult(response["similar"]["results"]),
                   "lists": HandleTMDBMiscResult(response["lists"]["results"]),
                   "studios": HandleTMDBMiscResult(response["production_companies"]),
                   "releases": HandleTMDBMiscResult(response["releases"]["countries"]),
-                  "crew": crew_thread.listitems,
+                  "crew": HandleTMDBPeopleResult(response["credits"]["crew"]),
                   "genres": HandleTMDBMiscResult(response["genres"]),
                   "keywords": HandleTMDBMiscResult(response["keywords"]["keywords"]),
                   "reviews": HandleTMDBMiscResult(response["reviews"]["results"]),
                   "videos": videos,
                   "account_states": account_states,
-                  "images": poster_thread.listitems,
+                  "images": HandleTMDBPeopleImagesResult(response["images"]["posters"]),
                   "backdrops": HandleTMDBPeopleImagesResult(response["images"]["backdrops"])}
     else:
         answer = []
@@ -805,13 +800,6 @@ def GetExtendedTVShowInfo(tvshow_id=None, cache_time=7):
                               (str(tvshow_id), ADDON.getSetting("LanguageID"), ADDON.getSetting("LanguageID"), session_string), cache_time)
     # prettyprint(response)
     videos = []
-    similar_thread = Threaded_Function(HandleTMDBTVShowResult, response["similar"]["results"])
-    actor_thread = Threaded_Function(HandleTMDBPeopleResult, response["credits"]["cast"])
-    crew_thread = Threaded_Function(HandleTMDBPeopleResult, response["credits"]["crew"])
-    poster_thread = Threaded_Function(HandleTMDBPeopleImagesResult, response["images"]["posters"])
-    threads = [similar_thread, actor_thread, crew_thread, poster_thread]
-    for thread in threads:
-        thread.start()
     if "account_states" in response:
         account_states = response["account_states"]
     else:
@@ -820,23 +808,23 @@ def GetExtendedTVShowInfo(tvshow_id=None, cache_time=7):
         videos = HandleTMDBVideoResult(response["videos"]["results"])
     tmdb_id = fetch(response, 'id')
     poster_path = ""
-    duration = ""
-    year = ""
     backdrop_path = ""
     if ("backdrop_path" in response) and (response["backdrop_path"]):
         backdrop_path = base_url + fanart_size + response['backdrop_path']
     if ("poster_path" in response) and (response["poster_path"]):
         poster_path = base_url + "original" + response['poster_path']
-    if "episode_run_time" in response:
-        if len(response["episode_run_time"]) > 1:
-            duration = "%i - %i" % (min(response["episode_run_time"]), max(response["episode_run_time"]))
-        elif len(response["episode_run_time"]) == 1:
-            duration = "%i" % (response["episode_run_time"][0])
-        else:
-            duration = ""
+    if len(response.get("episode_run_time", -1)) > 1:
+        duration = "%i - %i" % (min(response["episode_run_time"]), max(response["episode_run_time"]))
+    elif len(response.get("episode_run_time", -1)) == 1:
+        duration = "%i" % (response["episode_run_time"][0])
+    else:
+        duration = ""
     release_date = fetch(response, 'first_air_date')
     if release_date:
         year = release_date[:4]
+    else:
+        year = ""
+    genres = [item["name"] for item in response["genres"]]
     newtv = {'Art(fanart)': backdrop_path,
              'Art(poster)': poster_path,
              'Thumb': poster_path,
@@ -845,8 +833,11 @@ def GetExtendedTVShowInfo(tvshow_id=None, cache_time=7):
              'Title': fetch(response, 'name'),
              'TVShowTitle': fetch(response, 'name'),
              'OriginalTitle': fetch(response, 'original_name'),
-             'Duration': duration,
+             'duration': duration,
+             'duration(h)': format_time(duration, "h"),
+             'duration(m)': format_time(duration, "m"),
              'ID': tmdb_id,
+             'Genre': " / ".join(genres),
              'credit_id': fetch(response, 'credit_id'),
              'Plot': cleanText(fetch(response, "overview")),
              'year': year,
@@ -866,21 +857,19 @@ def GetExtendedTVShowInfo(tvshow_id=None, cache_time=7):
              'Release_Date': release_date,
              'ReleaseDate': release_date,
              'Premiered': release_date}
-    for thread in threads:
-        thread.join()
     answer = {"general": newtv,
-              "actors": actor_thread.listitems,
-              "similar": similar_thread.listitems,
+              "actors": HandleTMDBPeopleResult(response["credits"]["cast"]),
+              "similar": HandleTMDBTVShowResult(response["similar"]["results"]),
               "studios": HandleTMDBMiscResult(response["production_companies"]),
               "networks": HandleTMDBMiscResult(response["networks"]),
               "certifications": HandleTMDBMiscResult(response["content_ratings"]["results"]),
-              "crew": crew_thread.listitems,
+              "crew": HandleTMDBPeopleResult(response["credits"]["crew"]),
               "genres": HandleTMDBMiscResult(response["genres"]),
               "keywords": HandleTMDBMiscResult(response["keywords"]["results"]),
               "videos": videos,
               "account_states": account_states,
               "seasons": HandleTMDBSeasonResult(response["seasons"]),
-              "images": poster_thread.listitems,
+              "images": HandleTMDBPeopleImagesResult(response["images"]["posters"]),
               "backdrops": HandleTMDBPeopleImagesResult(response["images"]["backdrops"])}
     return answer
 
@@ -897,51 +886,33 @@ def GetExtendedEpisodeInfo(tvshow_id, season, episode, cache_time=7):
     # prettyprint(response)
     if "videos" in response:
         videos = HandleTMDBVideoResult(response["videos"]["results"])
-    actor_thread = Threaded_Function(HandleTMDBPeopleResult, response["credits"]["cast"])
-    crew_thread = Threaded_Function(HandleTMDBPeopleResult, response["credits"]["crew"])
-    still_thread = Threaded_Function(HandleTMDBPeopleImagesResult, response["images"]["stills"])
-    threads = [actor_thread, crew_thread, still_thread]
-    for thread in threads:
-        thread.start()
     if "account_states" in response:
         account_states = response["account_states"]
     else:
         account_states = None
-    for thread in threads:
-        thread.join()
     answer = {"general": HandleTMDBEpisodesResult([response])[0],
-              "actors": actor_thread.listitems,
+              "actors": HandleTMDBPeopleResult(response["credits"]["cast"]),
               "account_states": account_states,
-              "crew": crew_thread.listitems,
+              "crew": HandleTMDBPeopleResult(response["credits"]["crew"]),
               # "genres": HandleTMDBMiscResult(response["genres"]),
               "videos": videos,
               # "seasons": HandleTMDBSeasonResult(response["seasons"]),
-              "images": still_thread.listitems}
+              "images": HandleTMDBPeopleImagesResult(response["images"]["stills"])}
     return answer
 
 
 def GetExtendedActorInfo(actorid):
     response = GetMovieDBData("person/%s?append_to_response=tv_credits,movie_credits,combined_credits,images,tagged_images&" % (actorid), 1)
-    movie_roles = Threaded_Function(HandleTMDBMovieResult, response["movie_credits"]["cast"])
-    tvshow_roles = Threaded_Function(HandleTMDBTVShowResult, response["tv_credits"]["cast"])
-    movie_crew_roles = Threaded_Function(HandleTMDBMovieResult, response["movie_credits"]["crew"])
-    tvshow_crew_roles = Threaded_Function(HandleTMDBTVShowResult, response["tv_credits"]["crew"])
-    poster_thread = Threaded_Function(HandleTMDBPeopleImagesResult, response["images"]["profiles"])
-    threads = [movie_roles, tvshow_roles, movie_crew_roles, tvshow_crew_roles, poster_thread]
-    for thread in threads:
-        thread.start()
-    for thread in threads:
-        thread.join()
     tagged_images = []
     if "tagged_images" in response:
         tagged_images = HandleTMDBPeopleTaggedImagesResult(response["tagged_images"]["results"])
     answer = {"general": HandleTMDBPeopleResult([response])[0],
-              "movie_roles": movie_roles.listitems,
-              "tvshow_roles": tvshow_roles.listitems,
-              "movie_crew_roles": movie_crew_roles.listitems,
-              "tvshow_crew_roles": tvshow_crew_roles.listitems,
+              "movie_roles": HandleTMDBMovieResult(response["movie_credits"]["cast"]),
+              "tvshow_roles": HandleTMDBTVShowResult(response["tv_credits"]["cast"]),
+              "movie_crew_roles": HandleTMDBMovieResult(response["movie_credits"]["crew"]),
+              "tvshow_crew_roles": HandleTMDBTVShowResult(response["tv_credits"]["crew"]),
               "tagged_images": tagged_images,
-              "images": poster_thread.listitems}
+              "images": HandleTMDBPeopleImagesResult(response["images"]["profiles"])}
     return answer
 
 
@@ -1065,7 +1036,6 @@ def GetSetMovies(set_id):
                 "Thumb": small_poster_path,
                 "Fanart": backdrop_path,
                 "overview": response["overview"],
-                "overview": response["overview"],
                 "ID": response["id"]}
         return HandleTMDBMovieResult(response.get("parts", [])), info
     else:
@@ -1094,20 +1064,6 @@ def search_media(media_name=None, year='', media_type="movie"):
                         return item['id']
         except Exception as e:
             log(e)
-
-
-class Threaded_Function(threading.Thread):
-
-    def __init__(self, function=None, param=None):
-        threading.Thread.__init__(self)
-        self.function = function
-        self.param = param
-        self.setName(self.function.__name__)
-        log("init " + self.function.__name__)
-
-    def run(self):
-        self.listitems = self.function(self.param)
-        return True
 
 
 class Get_Youtube_Vids_Thread(threading.Thread):

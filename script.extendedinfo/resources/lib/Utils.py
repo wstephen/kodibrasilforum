@@ -31,12 +31,58 @@ def dictfind(lst, key, value):
     return ""
 
 
+def format_time(time, format=None):
+    try:
+        intTime = int(time)
+    except:
+        return time
+    hour = str(intTime / 60)
+    minute = str(intTime % 60).zfill(2)
+    if format == "h":
+        return hour
+    elif format == "m":
+        return minute
+    elif intTime >= 60:
+        return hour + " h " + minute + " min"
+    else:
+        return minute + " min"
+
+
 def url_quote(url):
     try:
         url = urllib.quote_plus(url.encode('utf8', 'ignore'))
     except:
         url = urllib.quote_plus(unicode(url, "utf-8").encode("utf-8"))
     return url
+
+
+class Select_Dialog(xbmcgui.WindowXMLDialog):
+    ACTION_PREVIOUS_MENU = [9, 92, 10]
+
+    def __init__(self, *args, **kwargs):
+        xbmcgui.WindowXMLDialog.__init__(self)
+        self.items = kwargs.get('listing')
+        self.index = -1
+
+    def onInit(self):
+        self.list = self.getControl(6)
+        self.getControl(3).setVisible(False)
+        self.getControl(5).setVisible(False)
+        self.getControl(1).setLabel(ADDON.getLocalizedString(32151))
+        self.list.addItems(self.items)
+        self.setFocus(self.list)
+
+    def onAction(self, action):
+        if action in self.ACTION_PREVIOUS_MENU:
+            self.close()
+
+    def onClick(self, controlID):
+        if controlID == 6 or controlID == 3:
+            self.index = int(self.list.getSelectedItem().getProperty("index"))
+            self.close()
+
+    def onFocus(self, controlID):
+        pass
 
 
 class TextViewer_Dialog(xbmcgui.WindowXMLDialog):
@@ -378,6 +424,20 @@ def Get_JSON_response(url="", cache_days=7.0, folder=False, headers=False):
     return results
 
 
+class Threaded_Function(threading.Thread):
+
+    def __init__(self, function=None, param=None):
+        threading.Thread.__init__(self)
+        self.function = function
+        self.param = param
+        self.setName(self.function.__name__)
+        log("init " + self.function.__name__)
+
+    def run(self):
+        self.listitems = self.function(self.param)
+        return True
+
+
 class Get_File_Thread(threading.Thread):
 
     def __init__(self, url):
@@ -535,8 +595,8 @@ def read_from_file(path=""):
         log("loaded textfile %s. Time: %f" % (path, time.time() - now))
         return fc
     except:
-        return False
         log("failed to load JSON textfile: " + path)
+        return False
 
 
 def ConvertYoutubeURL(string):
@@ -604,13 +664,12 @@ def passDictToSkin(data=None, prefix="", debug=False, precache=False, window=100
             x.join()
 
 
-def passListToSkin(name="", data=None, prefix="", controlwindow=None, handle=None, limit=False, debug=False):
-    if limit and data:
-        if limit < len(data):
-            data = data[:limit]
+def passListToSkin(name="", data=[], prefix="", controlwindow=None, handle=None, limit=False, debug=False):
+    if limit and int(limit) < len(data):
+        data = data[:int(limit)]
     if handle:
         HOME.clearProperty(name)
-        if data is not None:
+        if data:
             HOME.setProperty(name + ".Count", str(len(data)))
             items = create_listitems(data)
             xbmcplugin.setContent(handle, 'files')
@@ -652,12 +711,11 @@ def create_listitems(data=None, preload_images=0):
         for (count, result) in enumerate(data):
             listitem = xbmcgui.ListItem('%s' % (str(count)))
             itempath = ""
-            counter = 1
             for (key, value) in result.iteritems():
                 if not value:
                     continue
                 value = unicode(value)
-                if counter <= preload_images:
+                if count < preload_images:
                     if value.startswith("http://") and (value.endswith(".jpg") or value.endswith(".png")):
                         if value not in image_requests:
                             thread = Get_File_Thread(value)
@@ -689,9 +747,8 @@ def create_listitems(data=None, preload_images=0):
                         pass
                 listitem.setProperty('%s' % (key), value)
             listitem.setPath(path=itempath)
-            listitem.setProperty("index", str(counter))
+            listitem.setProperty("index", str(count))
             itemlist.append(listitem)
-            counter += 1
         for x in threads:
             x.join()
     return itemlist

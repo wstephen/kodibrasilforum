@@ -379,7 +379,7 @@ msgstr "Idioma para requisições ao TheMovieDB"
 
 msgctxt "#32160"
 msgid "TheMovieDB username"
-msgstr "Usuário TheMovieDB"
+msgstr "Seu nome de usuário no TheMovieDB"
 
 msgctxt "#32161"
 msgid "TheMovieDB password"

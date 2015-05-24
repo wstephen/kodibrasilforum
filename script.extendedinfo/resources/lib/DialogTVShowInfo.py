@@ -21,7 +21,7 @@ class DialogTVShowInfo(xbmcgui.WindowXMLDialog):
         self.tmdb_id = None
         tmdb_id = kwargs.get('id', False)
         dbid = kwargs.get('dbid')
-        imdb_id = kwargs.get('imdbid')
+        imdb_id = kwargs.get('imdb_id')
         tvdb_id = kwargs.get('tvdb_id')
         self.name = kwargs.get('name')
         self.tvshow = False
@@ -29,7 +29,7 @@ class DialogTVShowInfo(xbmcgui.WindowXMLDialog):
             self.tmdb_id = tmdb_id
         elif dbid and (int(dbid) > 0):
             tvdb_id = GetImdbIDFromDatabase("tvshow", dbid)
-            log("IMDBId from local DB:" + str(tvdb_id))
+            log("IMDB Id from local DB:" + str(tvdb_id))
             if tvdb_id:
                 self.tmdb_id = get_show_tmdb_id(tvdb_id)
                 log("tvdb_id to tmdb_id: %s --> %s" % (str(tvdb_id), str(self.tmdb_id)))
@@ -246,7 +246,6 @@ class DialogTVShowInfo(xbmcgui.WindowXMLDialog):
 
     def ShowManageDialog(self):
         manage_list = []
-        listitems = []
         tvshow_dbid = str(self.tvshow["general"].get("DBID", ""))
         title = self.tvshow["general"].get("TVShowTitle", "")
         # imdb_id = str(self.tvshow["general"].get("imdb_id", ""))
@@ -264,8 +263,7 @@ class DialogTVShowInfo(xbmcgui.WindowXMLDialog):
         if xbmc.getCondVisibility("system.hasaddon(script.libraryeditor)") and tvshow_dbid:
             manage_list.append([ADDON.getLocalizedString(32103), "RunScript(script.libraryeditor,DBID=" + tvshow_dbid + ")"])
         manage_list.append([xbmc.getLocalizedString(1049), "Addon.OpenSettings(script.extendedinfo)"])
-        for item in manage_list:
-            listitems.append(item[0])
+        listitems = [item[0] for item in manage_list]
         selection = xbmcgui.Dialog().select(ADDON.getLocalizedString(32133), listitems)
         if selection > -1:
             builtin_list = manage_list[selection][1].split("||")

@@ -22,8 +22,8 @@ Available Properties:
 
 'Title':        Movie Title
 'Art(poster)':  Movie Poster
-'imdbid':       IMDB ID
-'Duration':     Movie Duration
+'imdb_id':       IMDB ID
+'duration':     Movie duration
 'Year':         Release Year
 'Premiered':    Release Date
 'mpaa':         MPAA Rating
@@ -113,7 +113,7 @@ RunScript(script.extendedinfo,info=similartvshowstrakt)     --> SimilarTVShows.%
 -- required additional parameters: dbid= (database id) or id= (tvdb id)
 
 'TVShowTitle':      TVShow Title
-'Duration':         Duration (?)
+'duration':         Duration (?)
 'Plot':             Plot
 'ID':               ID
 'Genre':            Genre
@@ -274,15 +274,6 @@ info=similarlocal
     -dbid: DBID of any movie in your library
 
 fetches similar movies from local database
-
-
-
-info=json
-    Property Prefix: RSS
-    needed parameters:
-    -feed: url to json feed
-
-fetches items from a json feed (yahoo pipes, youtube JSON API)
 
 
 

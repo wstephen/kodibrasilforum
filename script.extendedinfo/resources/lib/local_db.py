@@ -26,9 +26,8 @@ def GetSimilarArtistsInLibrary(artistid):
     artists = []
     for (count, simi_artist) in enumerate(simi_artists):
         for (count, xbmc_artist) in enumerate(xbmc_artists["result"]["artists"]):
-            if xbmc_artist['musicbrainzartistid'] != '':
-                if xbmc_artist['musicbrainzartistid'] == simi_artist['mbid']:
-                    artists.append(xbmc_artist)
+            if xbmc_artist['musicbrainzartistid'] != '' and xbmc_artist['musicbrainzartistid'] == simi_artist['mbid']:
+                artists.append(xbmc_artist)
             elif xbmc_artist['artist'] == simi_artist['name']:
                 json_response = get_Kodi_JSON('"method": "AudioLibrary.GetArtistDetails", "params": {"properties": ["genre", "description", "mood", "style", "born", "died", "formed", "disbanded", "yearsactive", "instrument", "fanart", "thumbnail"], "artistid": %s}' % str(xbmc_artist['artistid']))
                 item = json_response["result"]["artistdetails"]
@@ -54,47 +53,50 @@ def GetSimilarArtistsInLibrary(artistid):
 
 
 def GetSimilarFromOwnLibrary(dbid):
-    json_response = get_Kodi_JSON('"method": "VideoLibrary.GetMovieDetails", "params": {"properties": ["genre","director","country","year","mpaa"], "movieid":%s }' % dbid)
-    if "moviedetails" in json_response['result']:
-        genres = json_response['result']['moviedetails']['genre']
-        json_response = get_Kodi_JSON('"method": "VideoLibrary.GetMovies", "params": {"properties": ["genre","director","mpaa","country","year"], "sort": { "method": "random" } }')
-        if "movies" in json_response['result']:
-            quotalist = []
-            for item in json_response['result']['movies']:
-                difference = abs(int(item['year']) - int(json_response['result']['moviedetails']['year']))
-                hit = 0.0
-                miss = 0.0
-                quota = 0.0
-                for genre in genres:
-                    if genre in item['genre']:
-                        hit += 1.0
-                    else:
-                        miss += 1.0
-                miss += 0.00001
-                if hit > 0.0:
-                    quota = float(hit) / float(hit + miss)
-                if genres[0] == item['genre'][0]:
-                    quota += 0.3
-                if difference < 3:
-                    quota += 0.3
-                elif difference < 6:
-                    quota += 0.15
-                if json_response['result']['moviedetails']['country'][0] == item['country'][0]:
-                    quota += 0.4
-                if json_response['result']['moviedetails']['mpaa'] == item['mpaa']:
-                    quota += 0.4
-                if json_response['result']['moviedetails']['director'][0] == item['director'][0]:
-                    quota += 0.6
-                quotalist.append((quota, item["movieid"]))
-            quotalist = sorted(quotalist, key=lambda quota: quota[0], reverse=True)
-            for i, list_movie in enumerate(quotalist):
-                if json_response['result']['moviedetails']['movieid'] is not list_movie[1]:
-                    movies = []
-                    newmovie = GetMovieFromDB(list_movie[1])
-                    movies.append(newmovie)
-                    if i == 20:
-                        break
-            return movies
+    movie_response = get_Kodi_JSON('"method": "VideoLibrary.GetMovieDetails", "params": {"properties": ["genre","director","country","year","mpaa"], "movieid":%s }' % dbid)
+    if "moviedetails" not in movie_response['result']:
+        return []
+    comp_movie = movie_response['result']['moviedetails']
+    genres = comp_movie['genre']
+    json_response = get_Kodi_JSON('"method": "VideoLibrary.GetMovies", "params": {"properties": ["genre","director","mpaa","country","year"], "sort": { "method": "random" } }')
+    if "movies" not in json_response['result']:
+        return []
+    quotalist = []
+    for item in json_response['result']['movies']:
+        difference = abs(int(item['year']) - int(comp_movie['year']))
+        hit = 0.0
+        miss = 0.0
+        quota = 0.0
+        for genre in genres:
+            if genre in item['genre']:
+                hit += 1.0
+            else:
+                miss += 1.0
+        miss += 0.00001
+        if hit > 0.0:
+            quota = float(hit) / float(hit + miss)
+        if genres and item['genre'] and genres[0] == item['genre'][0]:
+            quota += 0.3
+        if difference < 3:
+            quota += 0.3
+        elif difference < 6:
+            quota += 0.15
+        if comp_movie['country'] and item['country'] and comp_movie['country'][0] == item['country'][0]:
+            quota += 0.4
+        if comp_movie['mpaa'] and item['mpaa'] and comp_movie['mpaa'] == item['mpaa']:
+            quota += 0.4
+        if comp_movie['director'] and item['director'] and comp_movie['director'][0] == item['director'][0]:
+            quota += 0.6
+        quotalist.append((quota, item["movieid"]))
+    quotalist = sorted(quotalist, key=lambda quota: quota[0], reverse=True)
+    movies = []
+    for i, list_movie in enumerate(quotalist):
+        if comp_movie['movieid'] is not list_movie[1]:
+            newmovie = GetMovieFromDB(list_movie[1])
+            movies.append(newmovie)
+            if i == 20:
+                break
+    return movies
 
 
 def get_db_movies(filter_string="", limit=10):
@@ -221,7 +223,7 @@ def compare_with_library(onlinelist=[], library_first=True, sortkey=False):
         elif online_item["Title"].lower() in title_list:
             index = title_list.index(online_item["Title"].lower())
             found = True
-        elif online_item["OriginalTitle"].lower() in originaltitle_list:
+        elif "OriginalTitle" in online_item and online_item["OriginalTitle"].lower() in originaltitle_list:
             index = originaltitle_list.index(online_item["OriginalTitle"].lower())
             found = True
         if found:
@@ -291,16 +293,17 @@ def CompareAlbumWithLibrary(onlinelist):
     locallist = GetXBMCAlbums()
     for online_item in onlinelist:
         for localitem in locallist:
-            if online_item["name"] == localitem["title"]:
-                json_response = get_Kodi_JSON('"method": "AudioLibrary.GetAlbumDetails", "params": {"properties": ["thumbnail"], "albumid":%s }' % str(localitem["albumid"]))
-                album = json_response["result"]["albumdetails"]
-                online_item.update({"DBID": album["albumid"]})
-                online_item.update(
-                    {"Path": 'XBMC.RunScript(service.skin.widgets,albumid=' + str(album["albumid"]) + ')'})
-                if album["thumbnail"]:
-                    online_item.update({"thumb": album["thumbnail"]})
-                    online_item.update({"Icon": album["thumbnail"]})
-                break
+            if not online_item["name"] == localitem["title"]:
+                continue
+            json_response = get_Kodi_JSON('"method": "AudioLibrary.GetAlbumDetails", "params": {"properties": ["thumbnail"], "albumid":%s }' % str(localitem["albumid"]))
+            album = json_response["result"]["albumdetails"]
+            online_item.update({"DBID": album["albumid"]})
+            online_item.update(
+                {"Path": 'XBMC.RunScript(service.skin.widgets,albumid=' + str(album["albumid"]) + ')'})
+            if album["thumbnail"]:
+                online_item.update({"thumb": album["thumbnail"]})
+                online_item.update({"Icon": album["thumbnail"]})
+            break
     return onlinelist
 
 

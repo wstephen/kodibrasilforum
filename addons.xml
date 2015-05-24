@@ -1,5 +1,28 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <addons>
+<addon id="plugin.audio.soundcloud" name="SoundCloud" version="1.2.1" provider-name="bromix">
+	<requires>
+		<import addon="xbmc.python" version="2.14.0"/>
+	</requires>
+	<extension point="xbmc.python.pluginsource" library="default.py">
+		<provides>audio</provides>
+	</extension>
+	<extension point="xbmc.addon.metadata">
+		<summary lang="en">SoundCloud is an online audio distribution platform.</summary>
+		<summary lang="de">Soundcloud ist ein Online-Audio-Vertriebsplattform.</summary>
+		<description lang="en">SoundCloud is an online audio distribution platform that enables its users to upload, record, promote and share their originally-created sounds.</description>
+		<description lang="de">Soundcloud ist ein Online-Audio-Vertriebsplattform. Benutzer kÃ¶nnen ihre ursprÃ¼nglich erstelle Music hochladen, aufnehmen und unter weiteren Benutzern teilen.</description>
+		<disclaimer lang="en"></disclaimer>
+		<language>de</language>
+		<platform>all</platform>
+		<license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
+		<forum></forum>
+		<website>http://www.soundcloud.com/</website>
+		<email>bromix at gmx dot net</email>
+		<source>https://github.com/bromix/plugin.audio.soundcloud</source>
+	</extension>
+</addon>
+
 <addon id="plugin.audio.spotlight" version="1.0.0" name="Spotlight" provider-name="Dariusz Biskup">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
@@ -141,7 +164,7 @@
 
 <addon id="plugin.video.globo.com"
 		name="Globo.com"
-		version="0.1.6"
+		version="0.1.7"
 		provider-name="vitorhirota">
 	<requires>
 		<import addon="xbmc.python" version="2.1.0"/>
@@ -517,6 +540,29 @@ I hope you like this!
   </extension>
 </addon>
 
+<addon id="plugin.video.vimeo" name="Vimeo" version="4.1.2" provider-name="bromix">
+	<requires>
+		<import addon="xbmc.python" version="2.14.0"/>
+	</requires>
+	<extension point="xbmc.python.pluginsource" library="default.py">
+		<provides>video</provides>
+	</extension>
+	<extension point="xbmc.addon.metadata">
+		<summary lang="en">Plugin for Vimeo</summary>
+        <description lang="en">Vimeo is a one of the biggest video-sharing websites of the world.</description>
+		<summary lang="de">Plugin fÃ¼r Vimeo</summary>
+        <description lang="de">Vimeo ist ein eines der grÃ¶ÃŸten Video-Sharing-Websites der Welt.</description>
+        <disclaimer lang="en"></disclaimer>
+		<language></language>
+		<platform>all</platform>
+		<license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
+		<forum>http://forum.kodi.tv/showthread.php?tid=220437</forum>
+		<website>www.vimeo.com</website>
+		<email>bromix at gmx dot net</email>
+		<source>https://github.com/bromix/plugin.video.vimeo</source>
+	</extension>
+</addon>
+
 <addon id="repository.kodibrasilforum" name="Kodi Brasil Forum Repository" version="1.0.5" provider-name="Wanilton">
 	<extension point="xbmc.addon.repository" name="Kodi Brasil Forum Repository">
 		<info>http://raw.github.com/kodibrasil/kodibrasilforum/master/addons.xml</info>
@@ -587,7 +633,7 @@ I hope you like this!
     </extension>
 </addon>
 
-<addon id="script.extendedinfo" name="ExtendedInfo Script" version="2.0.9" provider-name="phil65">
+<addon id="script.extendedinfo" name="ExtendedInfo Script" version="2.1.0" provider-name="phil65">
 	<requires>
 		<import addon="xbmc.python" version="2.1.0"/>
 		<import addon="script.module.simplejson" version="2.0.10"/>
@@ -748,26 +794,24 @@ I hope you like this!
 	</extension>
 </addon>
 
-<addon id="script.toolbox" name="Skin Toolbox" version="1.0.0" provider-name="phil65">
+<addon id="script.toolbox" name="ToolBox Script" version="1.0.1" provider-name="phil65">
 	<requires>
 		<import addon="xbmc.python" version="2.1.0"/>
 		<import addon="script.module.simplejson" version="2.0.10"/>
 		<import addon="script.module.pil" version="1.1.7"/>
 	</requires>
-	<extension point="xbmc.python.library"          library="default.py" />
-	<extension point="xbmc.python.pluginsource"     library="default.py" />
     <extension point="xbmc.python.script"           library="default.py">
         <provides>executable</provides>
     </extension>
 	<extension point="xbmc.addon.metadata">
 		<language/>
-		<summary lang="en">Skin Toolbox</summary>
-		<description lang="en">This script makes several python functions accessible for skinners.</description>
+		<summary lang="en">ToolBox Script</summary>
+		<description lang="en">This script exposes several python functions to the UI engine as well as some other stuff to make life for skinners a bit easier.</description>
 		<platform>all</platform>
 		<license>GNU GENERAL PUBLIC LICENSE Version 2, June 1991</license>
-		<forum>-</forum>
-		<source>-</source>
-		<email>-</email>
+		<forum>http://forum.kodi.tv/showthread.php?tid=207618</forum>
+		<source>https://github.com/phil65/script.toolbox</source>
+		<email>phil65@kodi.tv</email>
 	</extension>
 </addon>
 

@@ -1,5 +1,6 @@
 import datetime
 from Utils import *
+from local_db import compare_with_library
 
 TRAKT_KEY = 'e9a7fba3fa1b527c08c073770869c258804124c5d7c984ce77206e695fbaddd5'
 BASE_URL = "https://api-v2launch.trakt.tv/"
@@ -34,7 +35,9 @@ def GetTraktCalendarShows(Type):
                         'TVShowTitle': episode["show"]["title"],
                         'tvdb_id': episode["show"]["ids"]["tvdb"],
                         'Runtime': episode["show"]["runtime"],
-                        'Duration': episode["show"]["runtime"],
+                        'duration': episode["show"]["runtime"],
+                        'duration(h)': format_time(episode["show"]["runtime"], "h"),
+                        'duration(m)': format_time(episode["show"]["runtime"], "m"),
                         'Year': fetch(episode["show"], "year"),
                         'Certification': episode["show"]["certification"],
                         'Studio': episode["show"]["network"],
@@ -57,25 +60,24 @@ def GetTraktCalendarShows(Type):
 def HandleTraktMovieResult(results):
     movies = []
     for movie in results:
-        try:
-            premiered = str(datetime.datetime.fromtimestamp(int(movie["movie"]["released"])))[:10]
-        except:
-            premiered = ""
         if ADDON.getSetting("infodialog_onclick") != "false":
             path = 'plugin://script.extendedinfo/?info=action&&id=RunScript(script.extendedinfo,info=extendedinfo,id=%s)' % str(fetch(movie["movie"]["ids"], 'tmdb'))
         else:
             path = "plugin://script.extendedinfo/?info=playtrailer&&id=" + str(fetch(movie["movie"]["ids"], 'tmdb'))
         movie = {'Title': movie["movie"]["title"],
                  'Runtime': movie["movie"]["runtime"],
-                 'Duration': movie["movie"]["runtime"],
+                 'duration': movie["movie"]["runtime"],
+                 'duration(h)': format_time(movie["movie"]["runtime"], "h"),
+                 'duration(m)': format_time(movie["movie"]["runtime"], "m"),
                  'Tagline': movie["movie"]["tagline"],
                  'Trailer': ConvertYoutubeURL(movie["movie"]["trailer"]),
                  'Year': movie["movie"]["year"],
                  'ID': movie["movie"]["ids"]["tmdb"],
+                 'imdb_id': movie["movie"]["ids"]["imdb"],
                  'Path': path,
                  'mpaa': movie["movie"]["certification"],
                  'Plot': movie["movie"]["overview"],
-                 'Premiered': premiered,
+                 'Premiered': movie["movie"]["released"],
                  'Rating': round(movie["movie"]["rating"], 1),
                  'Votes': movie["movie"]["votes"],
                  'Watchers': movie["watchers"],
@@ -85,23 +87,22 @@ def HandleTraktMovieResult(results):
                  'Art(fanart)': movie["movie"]["images"]["fanart"]["full"],
                  'Fanart': movie["movie"]["images"]["fanart"]["full"]}
         movies.append(movie)
+    movies = compare_with_library(movies, False)
     return movies
 
 
 def HandleTraktTVShowResult(results):
     shows = []
     for tvshow in results:
-        try:
-            premiered = str(datetime.datetime.fromtimestamp(int(tvshow['show']["first_aired"])))[:10]
-        except:
-            premiered = ""
         airs = fetch(tvshow['show'], "airs")
-        path = 'plugin://script.extendedinfo/?info=action&&id=RunScript(script.extendedinfo,info=extendedtvinfo,imdbid=%s)' % tvshow['show']['ids']["imdb"]
+        path = 'plugin://script.extendedinfo/?info=action&&id=RunScript(script.extendedinfo,info=extendedtvinfo,imdb_id=%s)' % tvshow['show']['ids']["imdb"]
         show = {'Title': tvshow['show']["title"],
                 'Label': tvshow['show']["title"],
                 'TVShowTitle': tvshow['show']["title"],
                 'Runtime': tvshow['show']["runtime"],
-                'Duration': tvshow['show']["runtime"],
+                'duration': tvshow['show']["runtime"],
+                'duration(h)': format_time(tvshow['show']["runtime"], "h"),
+                'duration(m)': format_time(tvshow['show']["runtime"], "m"),
                 'Year': tvshow['show']["year"],
                 'Status': fetch(tvshow['show'], "status"),
                 'mpaa': tvshow['show']["certification"],
@@ -109,12 +110,11 @@ def HandleTraktTVShowResult(results):
                 'Plot': tvshow['show']["overview"],
                 'tvdb_id': tvshow['show']['ids']["tvdb"],
                 'imdb_id': tvshow['show']['ids']["imdb"],
-                'imdbid': tvshow['show']['ids']["imdb"],
                 'Path': path,
                 'AirDay': fetch(airs, "day"),
                 'AirShortTime': fetch(airs, "time"),
                 'Label2': fetch(airs, "day") + " " + fetch(airs, "time"),
-                'Premiered': premiered,
+                'Premiered': tvshow['show']["first_aired"][:10],
                 'Country': tvshow['show']["country"],
                 'Rating': round(tvshow['show']["rating"], 1),
                 'Votes': tvshow['show']["votes"],

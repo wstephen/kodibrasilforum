@@ -11,17 +11,21 @@ from resources.lib.youtube.helper import utils, v3
 
 
 def play_video(provider, context, re_match):
-    def _compare(item):
-        vq = context.get_settings().get_video_quality()
-        return vq - item['format'].get('video', {}).get('resolution', 0)
-
     try:
         video_id = context.get_param('video_id')
         client = provider.get_client(context)
         video_streams = client.get_video_streams(context, video_id)
-        video_stream = kodion.utils.find_best_fit(video_streams, _compare)
+        if len(video_streams) == 0:
+            message = context.localize(provider.LOCAL_MAP['youtube.error.no_video_streams_found'])
+            context.get_ui().show_notification(message, time_milliseconds=5000)
+            return False
 
-        if video_stream['format'].get('rtmpe', False):
+        video_stream = kodion.utils.select_stream(context, video_streams)
+
+        if video_stream is None:
+            return False
+
+        if video_stream['video'].get('rtmpe', False):
             message = context.localize(provider.LOCAL_MAP['youtube.error.rtmpe_not_supported'])
             context.get_ui().show_notification(message, time_milliseconds=5000)
             return False

@@ -11,11 +11,11 @@ SORTS = {"movie": {ADDON.getLocalizedString(32110): "popularity",
                    ADDON.getLocalizedString(32108): "revenue",
                    # "Release Date": "primary_release_date",
                    xbmc.getLocalizedString(20376): "original_title",
-                   ADDON.getLocalizedString(32111): "vote_average",
+                   ADDON.getLocalizedString(32112): "vote_average",
                    ADDON.getLocalizedString(32111): "vote_count"},
          "tv": {ADDON.getLocalizedString(32110): "popularity",
                 xbmc.getLocalizedString(20416): "first_air_date",
-                ADDON.getLocalizedString(32111): "vote_average",
+                ADDON.getLocalizedString(32112): "vote_average",
                 ADDON.getLocalizedString(32111): "vote_count"},
          "favorites": {ADDON.getLocalizedString(32157): "created_at"},
          "list": {ADDON.getLocalizedString(32157): "created_at"},
@@ -397,11 +397,8 @@ class DialogVideoList(xbmcgui.WindowXMLDialog):
 
     def get_genre(self):
         response = GetMovieDBData("genre/%s/list?language=%s&" % (self.type, ADDON.getSetting("LanguageID")), 10)
-        id_list = []
-        label_list = []
-        for item in response["genres"]:
-            id_list.append(item["id"])
-            label_list.append(item["name"])
+        id_list = [item["id"] for item in response["genres"]]
+        label_list = [item["name"] for item in response["genres"]]
         index = xbmcgui.Dialog().select(ADDON.getLocalizedString(32151), label_list)
         if index > -1:
             # return "with_genres=" + str(id_list[index])
@@ -427,9 +424,7 @@ class DialogVideoList(xbmcgui.WindowXMLDialog):
             # prettyprint(response)
             if result > -1:
                 if len(response) > 1:
-                    names = []
-                    for item in response:
-                        names.append(item["name"])
+                    names = [item["name"] for item in response]
                     selection = xbmcgui.Dialog().select(ADDON.getLocalizedString(32151), names)
                     if selection > -1:
                         response = response[selection]

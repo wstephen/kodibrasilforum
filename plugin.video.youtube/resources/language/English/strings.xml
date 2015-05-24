@@ -5,6 +5,7 @@
     <string id="30001">Username</string>
     <string id="30002">Password</string>
 
+    <string id="30009">Always ask for the video quality</string>
     <string id="30010">Video Quality</string>
     <string id="30011">480p</string>
 	<string id="30012">720p (HD)</string>
@@ -104,4 +105,6 @@
     <string id="30545">No further links found.</string>
     <string id="30546">Please log in twice!</string>
     <string id="30547">You must enable two applications so that YouTube is functioning properly.</string>
+    <string id="30548">More...</string>
+    <string id="30549">No videos streams found</string>
 </strings>

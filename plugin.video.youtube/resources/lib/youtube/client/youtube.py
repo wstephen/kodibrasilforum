@@ -53,29 +53,18 @@ class YouTube(LoginClient):
         pass
 
     def get_video_streams(self, context, video_id):
-        def _sort(x):
-            index = {'mp4': 0,
-                     'ts': 0,
-                     'webm': -1,
-                     'flv': -10,
-                     '3gb': -20}
-            container = x.get('format', {}).get('container', '')
-            return index.get(container, -100)
-
         video_info = VideoInfo(context, access_token=self._access_token, language=self._language)
 
         video_streams = video_info.load_stream_infos(video_id)
-        video_streams = sorted(video_streams, key=_sort, reverse=True)
-        return video_streams
 
-    def get_uploaded_videos_of_subscriptions(self, start_index=0):
-        params = {'max-results': str(self._max_results),
-                  'alt': 'json'}
-        if start_index > 0:
-            params['start-index'] = str(start_index)
+        # update title
+        for video_stream in video_streams:
+            title = '[B]%s[/B] (%s;%s / %s@%d)' % (
+                video_stream['title'], video_stream['container'], video_stream['video']['encoding'],
+                video_stream['audio']['encoding'], video_stream['audio']['bitrate'])
+            video_stream['title'] = title
             pass
-        return self._perform_v2_request(method='GET', path='feeds/api/users/default/newsubscriptionvideos',
-                                        params=params)
+        return video_streams
 
     def remove_playlist(self, playlist_id):
         params = {'id': playlist_id,
@@ -497,7 +486,8 @@ class YouTube(LoginClient):
             pass
 
         json_data = self._perform_v1_tv_request(method='POST', path='browse', post_data=post_data)
-        data = json_data.get('contents', {}).get('sectionListRenderer', {}).get('contents', [{}])[0].get('shelfRenderer', {}).get('content', {}).get('horizontalListRenderer', {})
+        data = json_data.get('contents', {}).get('sectionListRenderer', {}).get('contents', [{}])[0].get(
+            'shelfRenderer', {}).get('content', {}).get('horizontalListRenderer', {})
         if not data:
             data = json_data.get('continuationContents', {}).get('horizontalListContinuation', {})
             pass
@@ -517,7 +507,7 @@ class YouTube(LoginClient):
         if continuations:
             _result['continuations'] = continuations
 
-            if len(_result['items'])+16 <= self._max_results:
+            if len(_result['items']) + 16 <= self._max_results:
                 self.get_my_subscriptions(page_token=continuations, _result=_result)
                 pass
             pass
@@ -574,44 +564,6 @@ class YouTube(LoginClient):
             return {}
 
         if result.headers.get('content-type', '').startswith('application/json'):
-            return result.json()
-        pass
-
-    def _perform_v2_request(self, method='GET', headers=None, path=None, post_data=None, params=None,
-                            allow_redirects=True):
-        # params
-        if not params:
-            params = {}
-            pass
-        _params = {'key': self._config['key']}
-        _params.update(params)
-
-        # headers
-        if not headers:
-            headers = {}
-            pass
-        _headers = {'Host': 'gdata.youtube.com',
-                    'X-GData-Key': 'key=%s' % self._config['key'],
-                    'GData-Version': '2.1',
-                    'Accept-Encoding': 'gzip, deflate',
-                    'User-Agent': 'Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.36 Safari/537.36'}
-        if self._access_token:
-            _headers['Authorization'] = 'Bearer %s' % self._access_token
-            pass
-        _headers.update(headers)
-
-        # url
-        url = 'https://gdata.youtube.com/%s/' % path.strip('/')
-
-        result = None
-        if method == 'GET':
-            result = requests.get(url, params=_params, headers=_headers, verify=False, allow_redirects=allow_redirects)
-            pass
-
-        if result is None:
-            return {}
-
-        if method != 'DELETE' and result.text:
             return result.json()
         pass
 

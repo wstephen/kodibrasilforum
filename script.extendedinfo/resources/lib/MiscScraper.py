@@ -1,11 +1,9 @@
 import re
 import random
-import sys
 import urllib
 import xbmc
 from Utils import *
 import datetime
-import simplejson
 
 # TVRAGE_KEY = 'VBp9BuIr5iOiBeWCFRMG'
 BANDSINTOWN_KEY = 'xbmc_open_source_media_center'
@@ -16,8 +14,7 @@ def GetXKCDInfo():
     filename = "xkcd" + str(now.month) + "x" + str(now.day) + "x" + str(now.year)
     path = xbmc.translatePath(ADDON_DATA_PATH + "/" + filename + ".txt")
     if xbmcvfs.exists(path):
-        results = read_from_file(path)
-        return results
+        return read_from_file(path)
     else:
         items = []
         for i in range(0, 10):
@@ -43,8 +40,7 @@ def GetCandHInfo():
     filename = "cyanide" + str(now.month) + "x" + str(now.day) + "x" + str(now.year)
     path = xbmc.translatePath(ADDON_DATA_PATH + "/" + filename + ".txt")
     if xbmcvfs.exists(path):
-        results = read_from_file(path)
-        return results
+        return read_from_file(path)
     else:
         items = []
         for i in range(1, 10):
@@ -71,8 +67,7 @@ def GetDailyBabes(single=False):
         filename = "babes" + str(now.month) + "x" + str(now.day) + "x" + str(now.year)
     path = xbmc.translatePath(ADDON_DATA_PATH + "/" + filename + ".txt")
     if xbmcvfs.exists(path):
-        results = read_from_file(path)
-        return results
+        return read_from_file(path)
     else:
         items = []
         for i in range(1, 10):
@@ -137,8 +132,9 @@ def GetArtistNearEvents(Artists):  # not possible with api 2.0
     base_url = 'http://api.bandsintown.com/events/search?format=json&location=use_geoip&radius=50&per_page=100&api_version=2.0'
     url = '&%sapp_id=%s' % (ArtistStr, BANDSINTOWN_KEY)
     results = Get_JSON_response(base_url + url)
-    return HandleBandsInTownResult(results)
-    if False:
-        log("GetArtistNearEvents: error when getting artist data from " + url)
+    if results:
+        return HandleBandsInTownResult(results)
+    else:
+        log("GetArtistNearEvents: Could not get data from " + url)
         log(results)
         return []
