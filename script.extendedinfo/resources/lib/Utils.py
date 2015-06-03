@@ -56,6 +56,74 @@ def url_quote(url):
     return url
 
 
+def merge_dicts(*dict_args):
+    '''
+    Given any number of dicts, shallow copy and merge into a new dict,
+    precedence goes to key value pairs in latter dicts.
+    '''
+    result = {}
+    for dictionary in dict_args:
+        result.update(dictionary)
+    return result
+
+
+def widget_selectdialog(filter=None, string_prefix="widget"):
+    # rottentomatoes
+    movie = {"intheaters": "RottenTomatoes: In theaters",
+             "boxoffice": "RottenTomatoes: Box office",
+             "opening": "RottenTomatoes: Opening movies",
+             "comingsoon": "RottenTomatoes: Upcoming movies",
+             "toprentals": "RottenTomatoes: Top rentals",
+             "currentdvdreleases": "RottenTomatoes: Current DVD releases",
+             "newdvdreleases": "RottenTomatoes: New DVD releases",
+             "upcomingdvds": "RottenTomatoes: Upcoming DVDs",
+             # tmdb
+             "incinemas": "TheMovieDB: In-cinema Movies",
+             "upcoming": "TheMovieDB: Upcoming movies",
+             "topratedmovies": "TheMovieDB: Top rated movies",
+             "popularmovies": "TheMovieDB: Popular movies",
+             # trakt
+             "trendingmovies": "Trakt.tv: Trending movies",
+             # tmdb
+             "starredmovies": "TheMovieDB: %s" % ADDON.getLocalizedString(32134),
+             "ratedmovies": "TheMovieDB: %s" % ADDON.getLocalizedString(32135),
+             # local
+             # "latestdbmovies": "Local DB: Latest movies",
+             # "randomdbmovies": "Local DB: Random movies",
+             # "inprogressdbmovies": "Local DB: In progress movies",
+             }
+    tvshow = {"airingshows": "Trakt.tv: Airing TV shows",
+              "premiereshows": "Trakt.tv: Premiere TV shows",
+              "trendingshows": "Trakt.tv: Trending TV shows",
+              "airingtodaytvshows": "TheMovieDB: TV shows airing today",
+              "onairtvshows": "TheMovieDB: TV shows on air",
+              "topratedtvshows": "TheMovieDB: Top rated TV shows",
+              "populartvshows": "TheMovieDB: Popular TV shows",
+              "starredtvshows": "TheMovieDB: %s" % ADDON.getLocalizedString(32144),
+              "ratedtvshows": "TheMovieDB: %s" % ADDON.getLocalizedString(32145),
+              }
+
+    image = {"xkcd": "XKCD webcomics",
+             "cyanide": "Cyanide & Happiness webcomics",
+             "dailybabe": "Daily babe",
+             "dailybabes": "Daily babes",
+             }
+# popularpeople
+    artist = {"topartists": "LastFM: Top artists",
+              "hypedartists": "LastFM: Hyped artists"
+              }
+    event = {}
+    if True:
+        listitems = merge_dicts(movie, tvshow, image, artist, event)
+    keywords = [key for key in listitems.keys()]
+    labels = [label for label in listitems.values()]
+    ret = xbmcgui.Dialog().select("Choose content", labels)
+    if ret > -1:
+        Notify(keywords[ret])
+        xbmc.executebuiltin("Skin.SetString(%s.path,plugin://script.extendedinfo?info=%s)" % (string_prefix, keywords[ret]))
+        xbmc.executebuiltin("Skin.SetString(%s.label,%s)" % (string_prefix, labels[ret]))
+
+
 class Select_Dialog(xbmcgui.WindowXMLDialog):
     ACTION_PREVIOUS_MENU = [9, 92, 10]
 
@@ -393,7 +461,11 @@ def GetStringFromUrl(url=None, headers=False):
 def Get_JSON_response(url="", cache_days=7.0, folder=False, headers=False):
     now = time.time()
     hashed_url = hashlib.md5(url).hexdigest()
-    path = xbmc.translatePath(os.path.join(ADDON_DATA_PATH, hashed_url + ".txt"))
+    if folder:
+        cache_path = xbmc.translatePath(os.path.join(ADDON_DATA_PATH, folder))
+    else:
+        cache_path = xbmc.translatePath(os.path.join(ADDON_DATA_PATH))
+    path = os.path.join(cache_path, hashed_url + ".txt")
     cache_seconds = int(cache_days * 86400.0)
     prop_time = HOME.getProperty(hashed_url + "_timestamp")
     if prop_time and now - float(prop_time) < cache_seconds:
@@ -411,7 +483,7 @@ def Get_JSON_response(url="", cache_days=7.0, folder=False, headers=False):
         try:
             results = simplejson.loads(response)
             log("download %s. time: %f" % (url, time.time() - now))
-            save_to_file(results, hashed_url, ADDON_DATA_PATH)
+            save_to_file(results, hashed_url, cache_path)
         except:
             log("Exception: Could not get new JSON data. Tryin to fallback to cache")
             log(response)
@@ -572,6 +644,8 @@ def save_to_file(content, filename, path=""):
     if path == "":
         text_file_path = get_browse_dialog() + filename + ".txt"
     else:
+        if not xbmcvfs.exists(ADDON_DATA_PATH):
+            xbmcvfs.mkdir(ADDON_DATA_PATH)
         if not xbmcvfs.exists(path):
             xbmcvfs.mkdir(path)
         text_file_path = os.path.join(path, filename + ".txt")
@@ -664,7 +738,7 @@ def passDictToSkin(data=None, prefix="", debug=False, precache=False, window=100
             x.join()
 
 
-def passListToSkin(name="", data=[], prefix="", controlwindow=None, handle=None, limit=False, debug=False):
+def passListToSkin(name="", data=[], prefix="", handle=None, limit=False):
     if limit and int(limit) < len(data):
         data = data[:int(limit)]
     if handle:
@@ -672,14 +746,12 @@ def passListToSkin(name="", data=[], prefix="", controlwindow=None, handle=None,
         if data:
             HOME.setProperty(name + ".Count", str(len(data)))
             items = create_listitems(data)
-            xbmcplugin.setContent(handle, 'files')
-            itemlist = list()
             for item in items:
-                itemlist.append((item.getProperty("path"), item, False))
+                itemlist = [(item.getProperty("path"), item, bool(item.getProperty("directory"))) for item in items]
             xbmcplugin.addDirectoryItems(handle, itemlist, len(itemlist))
             xbmcplugin.endOfDirectory(handle)
     else:
-        SetWindowProperties(name, data, prefix, debug)
+        SetWindowProperties(name, data, prefix)
 
 
 def SetWindowProperties(name, data, prefix="", debug=False):

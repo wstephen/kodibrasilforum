@@ -1,75 +1,58 @@
 import xbmc
-import xbmcgui
 from Utils import *
 from TheMovieDB import *
 from YouTube import *
 import DialogActorInfo
 import DialogVideoList
 from ImageTools import *
+from BaseClasses import DialogBaseInfo
 
 
-class DialogEpisodeInfo(xbmcgui.WindowXMLDialog):
-    ACTION_PREVIOUS_MENU = [92, 9]
-    ACTION_EXIT_SCRIPT = [13, 10]
+class DialogEpisodeInfo(DialogBaseInfo):
 
     def __init__(self, *args, **kwargs):
+        super(DialogEpisodeInfo, self).__init__(*args, **kwargs)
         xbmc.executebuiltin("ActivateWindow(busydialog)")
-        xbmcgui.WindowXMLDialog.__init__(self)
-        self.movieplayer = VideoPlayer(popstack=True)
         self.tmdb_id = kwargs.get('show_id')
         self.season = kwargs.get('season')
         self.showname = kwargs.get('tvshow')
         self.episodenumber = kwargs.get('episode')
-        self.logged_in = checkLogin()
-        self.episode = False
         if self.tmdb_id or self.showname:
-            self.episode = GetExtendedEpisodeInfo(self.tmdb_id, self.season, self.episodenumber)
-            if not self.episode:
+            self.data = GetExtendedEpisodeInfo(self.tmdb_id, self.season, self.episodenumber)
+            if not self.data:
                 xbmc.executebuiltin("Dialog.Close(busydialog)")
                 return
             xbmc.executebuiltin("ActivateWindow(busydialog)")
-            search_string = "%s tv" % (self.episode["general"]["Title"])
+            search_string = "%s tv" % (self.data["general"]["Title"])
             youtube_thread = Get_Youtube_Vids_Thread(search_string, "", "relevance", 15)
             youtube_thread.start()
-            if "DBID" not in self.episode["general"]:  # need to add comparing for episodes
-                poster_thread = Threaded_Function(Get_File, self.episode["general"]["Poster"])
+            if "DBID" not in self.data["general"]:  # need to add comparing for episodes
+                poster_thread = Threaded_Function(Get_File, self.data["general"]["Poster"])
                 poster_thread.start()
-            if "DBID" not in self.episode["general"]:
+            if "DBID" not in self.data["general"]:
                 poster_thread.join()
-                self.episode["general"]['Poster'] = poster_thread.listitems
-            filter_thread = Filter_Image_Thread(self.episode["general"]["Poster"], 25)
+                self.data["general"]['Poster'] = poster_thread.listitems
+            filter_thread = Filter_Image_Thread(self.data["general"]["Poster"], 25)
             filter_thread.start()
             youtube_thread.join()
             self.youtube_vids = youtube_thread.listitems
             filter_thread.join()
-            self.episode["general"]['ImageFilter'], self.episode["general"]['ImageColor'] = filter_thread.image, filter_thread.imagecolor
+            self.data["general"]['ImageFilter'], self.data["general"]['ImageColor'] = filter_thread.image, filter_thread.imagecolor
         else:
             Notify(ADDON.getLocalizedString(32143))
             self.close()
         xbmc.executebuiltin("Dialog.Close(busydialog)")
 
     def onInit(self):
-        if not self.episode:
-            xbmc.executebuiltin("Dialog.Close(busydialog)")
-            self.close()
-            return
-        HOME.setProperty("movie.ImageColor", self.episode["general"]["ImageColor"])
-        windowid = xbmcgui.getCurrentWindowDialogId()
-        self.window = xbmcgui.Window(windowid)
+        super(DialogEpisodeInfo, self).onInit()
+        HOME.setProperty("movie.ImageColor", self.data["general"]["ImageColor"])
         self.window.setProperty("type", "episode")
-        passDictToSkin(self.episode["general"], "movie.", False, False, windowid)
-        self.getControl(1000).addItems(create_listitems(self.episode["actors"], 0))
-        self.getControl(750).addItems(create_listitems(self.episode["crew"], 0))
-        self.getControl(1150).addItems(create_listitems(self.episode["videos"], 0))
+        passDictToSkin(self.data["general"], "movie.", False, False, self.windowid)
+        self.getControl(1000).addItems(create_listitems(self.data["actors"], 0))
+        self.getControl(750).addItems(create_listitems(self.data["crew"], 0))
+        self.getControl(1150).addItems(create_listitems(self.data["videos"], 0))
         self.getControl(350).addItems(create_listitems(self.youtube_vids, 0))
-        self.getControl(1350).addItems(create_listitems(self.episode["images"], 0))
-
-    def onAction(self, action):
-        if action in self.ACTION_PREVIOUS_MENU:
-            self.close()
-            PopWindowStack()
-        elif action in self.ACTION_EXIT_SCRIPT:
-            self.close()
+        self.getControl(1350).addItems(create_listitems(self.data["images"], 0))
 
     def onClick(self, controlID):
         HOME.setProperty("WindowColor", xbmc.getInfoLabel("Window(home).Property(movie.ImageColor)"))
@@ -97,45 +80,33 @@ class DialogEpisodeInfo(xbmcgui.WindowXMLDialog):
         elif controlID == 6001:
             rating = get_rating_from_user()
             if rating:
-                identifier = [self.tmdb_id, self.season, self.episode["general"]["episode"]]
+                identifier = [self.tmdb_id, self.season, self.data["general"]["episode"]]
                 send_rating_for_media_item("episode", identifier, rating)
                 self.UpdateStates()
         elif controlID == 6006:
             self.ShowRatedEpisodes()
 
-    def onFocus(self, controlID):
-        pass
-
     def UpdateStates(self, forceupdate=True):
         if forceupdate:
             xbmc.sleep(2000)  # delay because MovieDB takes some time to update
             self.update = GetExtendedEpisodeInfo(self.tmdb_id, self.season, self.episodenumber, 0)
-            self.episode["account_states"] = self.update["account_states"]
-        if self.episode["account_states"]:
-            # if self.episode["account_states"]["favorite"]:
+            self.data["account_states"] = self.update["account_states"]
+        if self.data["account_states"]:
+            # if self.data["account_states"]["favorite"]:
             #     self.window.setProperty("FavButton_Label", "UnStar episode")
             #     self.window.setProperty("movie.favorite", "True")
             # else:
             #     self.window.setProperty("FavButton_Label", "Star episode")
             #     self.window.setProperty("movie.favorite", "")
-            if self.episode["account_states"]["rated"]:
-                self.window.setProperty("movie.rated", str(self.episode["account_states"]["rated"]["value"]))
+            if self.data["account_states"]["rated"]:
+                self.window.setProperty("movie.rated", str(self.data["account_states"]["rated"]["value"]))
             else:
                 self.window.setProperty("movie.rated", "")
-            # self.window.setProperty("movie.watchlist", str(self.episode["account_states"]["watchlist"]))
-            # Notify(str(self.episode["account_states"]["rated"]["value"]))
+            # self.window.setProperty("movie.watchlist", str(self.data["account_states"]["watchlist"]))
+            # Notify(str(self.data["account_states"]["rated"]["value"]))
 
     def ShowRatedEpisodes(self):
         xbmc.executebuiltin("ActivateWindow(busydialog)")
-        list_items = GetRatedMedia("tv/episodes")
-        AddToWindowStack(self)
-        self.close()
-        dialog = DialogVideoList.DialogVideoList(u'script-%s-VideoList.xml' % ADDON_NAME, ADDON_PATH, listitems=list_items, color=self.episode["general"]['ImageColor'])
+        listitems = GetRatedMedia("tv/episodes")
         xbmc.executebuiltin("Dialog.Close(busydialog)")
-        dialog.doModal()
-
-    def OpenVideoList(self, listitems):
-        AddToWindowStack(self)
-        self.close()
-        dialog = DialogVideoList.DialogVideoList(u'script-%s-VideoList.xml' % ADDON_NAME, ADDON_PATH, listitems=listitems)
-        dialog.doModal()
+        self.OpenVideoList(listitems=listitems)

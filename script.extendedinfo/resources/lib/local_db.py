@@ -24,8 +24,8 @@ def GetSimilarArtistsInLibrary(artistid):
         return None
     xbmc_artists = GetXBMCArtists()
     artists = []
-    for (count, simi_artist) in enumerate(simi_artists):
-        for (count, xbmc_artist) in enumerate(xbmc_artists["result"]["artists"]):
+    for simi_artist in simi_artists:
+        for xbmc_artist in xbmc_artists["result"]["artists"]:
             if xbmc_artist['musicbrainzartistid'] != '' and xbmc_artist['musicbrainzartistid'] == simi_artist['mbid']:
                 artists.append(xbmc_artist)
             elif xbmc_artist['artist'] == simi_artist['name']:
@@ -309,7 +309,7 @@ def CompareAlbumWithLibrary(onlinelist):
 
 def GetMovieSetName(dbid):
     json_response = get_Kodi_JSON('"method": "VideoLibrary.GetMovieDetails", "params": {"properties": ["setid"], "movieid":%s }"' % dbid)
-    if "moviedetails" in json_response["result"]:
+    if "result" in json_response and "moviedetails" in json_response["result"]:
         dbsetid = json_response['result']['moviedetails'].get('setid', "")
         if dbsetid:
             json_response = get_Kodi_JSON('"method": "VideoLibrary.GetMovieSetDetails", "params": {"setid":%s }' % dbsetid)
@@ -317,14 +317,14 @@ def GetMovieSetName(dbid):
     return ""
 
 
-def GetImdbIDFromDatabase(type, dbid):
+def GetImdbIDFromDatabase(media_type, dbid):
     if not dbid:
         return []
-    if type == "movie":
+    if media_type == "movie":
         json_response = get_Kodi_JSON('"method": "VideoLibrary.GetMovieDetails", "params": {"properties": ["imdbnumber","title", "year"], "movieid":%s }' % dbid)
-        if "moviedetails" in json_response["result"]:
+        if "result" in json_response and "moviedetails" in json_response["result"]:
             return json_response['result']['moviedetails']['imdbnumber']
-    elif type == "tvshow":
+    elif media_type == "tvshow":
         json_response = get_Kodi_JSON('"method": "VideoLibrary.GetTVShowDetails", "params": {"properties": ["imdbnumber","title", "year"], "tvshowid":%s }' % dbid)
         if "result" in json_response and "tvshowdetails" in json_response["result"]:
             return json_response['result']['tvshowdetails']['imdbnumber']

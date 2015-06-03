@@ -19,7 +19,7 @@ def GetTraktCalendarShows(Type):
     elif Type == "premieres":
         url = 'calendars/shows/premieres/%s/14?extended=full,images' % datetime.date.today()
     try:
-        results = Get_JSON_response(BASE_URL + url, 0.5, headers=HEADERS)
+        results = Get_JSON_response(BASE_URL + url, 0.5, folder="Trakt", headers=HEADERS)
     except:
         log("Error when fetching Trakt data from net")
         log("Json Query: " + url)
@@ -34,6 +34,9 @@ def GetTraktCalendarShows(Type):
                 show = {'Title': episode["episode"]["title"],
                         'TVShowTitle': episode["show"]["title"],
                         'tvdb_id': episode["show"]["ids"]["tvdb"],
+                        'id': episode["show"]["ids"]["tvdb"],
+                        'imdb_id': episode["show"]["ids"]["imdb"],
+                        'Path': 'plugin://script.extendedinfo/?info=action&&id=RunScript(script.extendedinfo,info=extendedtvinfo,tvdb_id=%s)' % episode["show"]["ids"]["tvdb"],
                         'Runtime': episode["show"]["runtime"],
                         'duration': episode["show"]["runtime"],
                         'duration(h)': format_time(episode["show"]["runtime"], "h"),
@@ -95,7 +98,7 @@ def HandleTraktTVShowResult(results):
     shows = []
     for tvshow in results:
         airs = fetch(tvshow['show'], "airs")
-        path = 'plugin://script.extendedinfo/?info=action&&id=RunScript(script.extendedinfo,info=extendedtvinfo,imdb_id=%s)' % tvshow['show']['ids']["imdb"]
+        path = 'plugin://script.extendedinfo/?info=action&&id=RunScript(script.extendedinfo,info=extendedtvinfo,tvdb_id=%s)' % tvshow['show']['ids']["tvdb"]
         show = {'Title': tvshow['show']["title"],
                 'Label': tvshow['show']["title"],
                 'TVShowTitle': tvshow['show']["title"],
@@ -108,6 +111,7 @@ def HandleTraktTVShowResult(results):
                 'mpaa': tvshow['show']["certification"],
                 'Studio': tvshow['show']["network"],
                 'Plot': tvshow['show']["overview"],
+                'id': tvshow['show']['ids']["tvdb"],
                 'tvdb_id': tvshow['show']['ids']["tvdb"],
                 'imdb_id': tvshow['show']['ids']["imdb"],
                 'Path': path,
@@ -133,7 +137,7 @@ def HandleTraktTVShowResult(results):
 
 def GetTrendingShows():
     url = 'shows/trending?extended=full,images'
-    results = Get_JSON_response(BASE_URL + url, headers=HEADERS)
+    results = Get_JSON_response(BASE_URL + url, folder="Trakt", headers=HEADERS)
     if results is not None:
         return HandleTraktTVShowResult(results)
     else:
@@ -142,7 +146,7 @@ def GetTrendingShows():
 
 def GetTVShowInfo(imdb_id):
     url = 'show/%s?extended=full,images' % imdb_id
-    results = Get_JSON_response(BASE_URL + url, headers=HEADERS)
+    results = Get_JSON_response(BASE_URL + url, folder="Trakt", headers=HEADERS)
     if results is not None:
         return HandleTraktTVShowResult([results])
     else:
@@ -151,7 +155,7 @@ def GetTVShowInfo(imdb_id):
 
 def GetTrendingMovies():
     url = 'movies/trending?extended=full,images'
-    results = Get_JSON_response(BASE_URL + url, headers=HEADERS)
+    results = Get_JSON_response(BASE_URL + url, folder="Trakt", headers=HEADERS)
     if results is not None:
         return HandleTraktMovieResult(results)
     else:
@@ -161,7 +165,7 @@ def GetTrendingMovies():
 def GetSimilarTrakt(mediatype, imdb_id):
     if imdb_id is not None:
         url = '%s/%s/related?extended=full,images' % (mediatype, imdb_id)
-        results = Get_JSON_response(BASE_URL + url, headers=HEADERS)
+        results = Get_JSON_response(BASE_URL + url, folder="Trakt", headers=HEADERS)
         if results is not None:
             if mediatype == "show":
                 return HandleTraktTVShowResult(results)

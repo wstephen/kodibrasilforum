@@ -164,7 +164,7 @@
 
 <addon id="plugin.video.globo.com"
 		name="Globo.com"
-		version="0.1.7"
+		version="0.1.8"
 		provider-name="vitorhirota">
 	<requires>
 		<import addon="xbmc.python" version="2.1.0"/>
@@ -179,7 +179,11 @@
 	<extension point="xbmc.addon.metadata">
 		<summary>Globo.com videos for subscribers: Globo+ and Globosat Play</summary>
 		<summary language="pt">Globo+ e Globosat Play no XBMC</summary>
-		<description language="pt">Globo+ e Globosat Play no XBMC</description>
+		<description language="pt">
+				Globo+ e Globosat Play no XBMC.
+
+				AVISO: antes de poder assistir aos vÃ­deos do globosat play, vocÃª deve acessar a pÃ¡gina web, aceitar a polÃ­tica de uso do serviÃ§o e criar um perfil. Este addon selecionarÃ¡ automaticamente o primeiro da lista.
+		</description>
 		<platform>all</platform>
 	</extension>
 </addon>
@@ -642,7 +646,9 @@ I hope you like this!
 		<import addon="script.module.pil" version="1.1.7"/>
 	</requires>
 	<extension point="xbmc.python.library"          library="default.py" />
-	<extension point="xbmc.python.pluginsource"     library="default.py" />
+	<extension point="xbmc.python.pluginsource"     library="plugin.py">
+		<provides>video</provides>
+	</extension>
 	<extension point="xbmc.python.script"           library="default.py">
 		<provides>executable</provides>
 	</extension>

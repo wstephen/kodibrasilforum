@@ -1,3 +1,7 @@
+0.1.8
+ PT: corrigido problema de autorização
+ EN: fix authorization issue
+
 0.1.7
  PT: adicionado autorização para Claro (by guilhermegarnier)
  EN: added authorization for Claro (by guilhermegarnier)

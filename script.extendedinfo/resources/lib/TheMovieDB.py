@@ -1,3 +1,8 @@
+# -*- coding: utf8 -*-
+
+# Copyright (C) 2015 - Philipp Temminghoff <phil65@kodi.tv>
+# This program is Free Software see LICENSE file for details
+
 from YouTube import *
 from Utils import *
 from local_db import compare_with_library, GetImdbIDFromDatabase
@@ -138,19 +143,26 @@ def get_account_info():
     session_id = get_session_id()
     response = GetMovieDBData("account?session_id=%s&" % session_id, 999999)
     # prettyprint(response)
-    return response["id"]
+    if "id" in response:
+        return response["id"]
+    else:
+        return None
 
 
 def get_certification_list(media_type):
     response = GetMovieDBData("certification/%s/list?" % media_type, 999999)
-    return response["certifications"]
-
+    if "certifications" in response:
+        return response["certifications"]
+    else:
+        return None
 
 def get_guest_session_id():
     response = GetMovieDBData("authentication/guest_session/new?", 999999)
     # prettyprint(response)
-    return response["guest_session_id"]
-
+    if "guest_session_id" in response:
+        return response["guest_session_id"]
+    else:
+        return None
 
 def get_session_id():
     request_token = auth_request_token()
@@ -354,6 +366,7 @@ def HandleTMDBMiscResult(results):
                     'item_count': fetch(item, 'item_count'),
                     'favorite_count': fetch(item, 'favorite_count'),
                     'release_date': release_date,
+                    'path': "plugin://script.extendedinfo?info=listmovies&---id=%s" % fetch(item, 'id'),
                     'year': year,
                     'iso_3166_1': fetch(item, 'iso_3166_1'),
                     'author': fetch(item, 'author'),
@@ -416,10 +429,6 @@ def HandleTMDBPeopleResult(results):
     for person in results:
         image = ""
         image_small = ""
-        description = "[B]Known for[/B]:[CR][CR]"
-        if "known_for" in results:
-            for movie in results["known_for"]:
-                description = description + movie["title"] + " (%s)" % (movie["release_date"]) + "[CR]"
         builtin = 'RunScript(script.extendedinfo,info=extendedactorinfo,id=%s)' % str(person['id'])
         if "profile_path" in person and person["profile_path"]:
             image = base_url + poster_size + person["profile_path"]
@@ -437,8 +446,6 @@ def HandleTMDBPeopleResult(results):
                      'department': fetch(person, 'department'),
                      'job': fetch(person, 'job'),
                      'media_type': "person",
-                     'description': description,
-                     'plot': description,
                      'id': str(person['id']),
                      'cast_id': str(fetch(person, 'cast_id')),
                      'credit_id': str(fetch(person, 'credit_id')),
@@ -573,7 +580,7 @@ def GetMovieDBData(url="", cache_days=14, folder=False):
     if not base_url:
         base_url = True
         base_url, poster_size, fanart_size = GetMovieDBConfig()
-    return Get_JSON_response(url, cache_days, folder)
+    return Get_JSON_response(url, cache_days, "TheMovieDB")
 
 
 def GetMovieDBConfig():
@@ -798,7 +805,8 @@ def GetExtendedTVShowInfo(tvshow_id=None, cache_time=7):
         session_string = "session_id=%s&" % (get_session_id())
     response = GetMovieDBData("tv/%s?append_to_response=account_states,alternative_titles,content_ratings,credits,external_ids,images,keywords,rating,similar,translations,videos&language=%s&include_image_language=en,null,%s&%s" %
                               (str(tvshow_id), ADDON.getSetting("LanguageID"), ADDON.getSetting("LanguageID"), session_string), cache_time)
-    # prettyprint(response)
+    if not response:
+        return False
     videos = []
     if "account_states" in response:
         account_states = response["account_states"]
@@ -923,6 +931,7 @@ def GetMovieLists(list_id):
 
 
 def GetRatedMedia(media_type):
+    '''takes "tv/episodes", "tv" or "movies"'''
     if checkLogin():
         session_id = get_session_id()
         account_id = get_account_info()
@@ -939,10 +948,19 @@ def GetRatedMedia(media_type):
 
 
 def GetFavItems(media_type):
+    '''takes "tv/episodes", "tv" or "movies"'''
     session_id = get_session_id()
     account_id = get_account_info()
     response = GetMovieDBData("account/%s/favorite/%s?session_id=%s&language=%s&" % (str(account_id), media_type, str(session_id), ADDON.getSetting("LanguageID")), 0)
-    return HandleTMDBMovieResult(response["results"], False, None)
+    if "results" in response:
+        if media_type == "tv":
+            return HandleTMDBTVShowResult(response["results"], False, None)
+        elif media_type == "tv/episodes":
+            return HandleTMDBEpisodesResult(response["results"])
+        else:
+            return HandleTMDBMovieResult(response["results"], False, None)
+    else:
+        return []
 
 
 def GetMoviesFromList(list_id, cache_time=5):

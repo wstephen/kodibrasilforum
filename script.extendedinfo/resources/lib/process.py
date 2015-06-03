@@ -1,3 +1,8 @@
+# -*- coding: utf8 -*-
+
+# Copyright (C) 2015 - Philipp Temminghoff <phil65@kodi.tv>
+# This program is Free Software see LICENSE file for details
+
 from LastFM import *
 from TheAudioDB import *
 from TheMovieDB import *
@@ -15,6 +20,9 @@ def StartInfoActions(infos, params):
     prettyprint(infos)
     if "prefix" in params and (not params["prefix"].endswith('.')) and (params["prefix"] is not ""):
         params["prefix"] = params["prefix"] + '.'
+    # NOTICE: compatibility
+    if "imdbid" in params and "imdb_id" not in params:
+        params["imdb_id"] = params["imdbid"]
     for info in infos:
         data = []
         #  Images
@@ -105,6 +113,18 @@ def StartInfoActions(infos, params):
             data = GetMovieDBMovies("top_rated"), "TopRatedMovies"
         elif info == 'popularmovies':
             data = GetMovieDBMovies("popular"), "PopularMovies"
+        elif info == 'ratedmovies':
+            data = GetRatedMedia("movies"), "RatedMovies"
+        elif info == 'starredmovies':
+            data = GetFavItems("movies"), "StarredMovies"
+        elif info == 'accountlists':
+            account_lists = HandleTMDBMiscResult(GetAccountLists())
+            for item in account_lists:
+                item["directory"] = True
+            data = account_lists, "AccountLists"
+        elif info == 'listmovies':
+            movies = GetMoviesFromList(params["id"])
+            data = movies, "AccountLists"
         elif info == 'airingtodaytvshows':
             data = GetMovieDBTVShows("airing_today"), "AiringTodayTVShows"
         elif info == 'onairtvshows':
@@ -113,6 +133,10 @@ def StartInfoActions(infos, params):
             data = GetMovieDBTVShows("top_rated"), "TopRatedTVShows"
         elif info == 'populartvshows':
             data = GetMovieDBTVShows("popular"), "PopularTVShows"
+        elif info == 'ratedtvshows':
+            data = GetRatedMedia("tv"), "RatedTVShows"
+        elif info == 'starredtvshows':
+            data = GetFavItems("tv"), "StarredTVShows"
         elif info == 'similarmovies':
             dbid = params.get("dbid", False)
             if params.get("id", False):
@@ -198,7 +222,7 @@ def StartInfoActions(infos, params):
         elif info == 'extendedtvinfo':
             HOME.setProperty('infodialogs.active', "true")
             from DialogTVShowInfo import DialogTVShowInfo
-            dialog = DialogTVShowInfo(u'script-%s-DialogVideoInfo.xml' % ADDON_NAME, ADDON_PATH, id=params.get("id", ""),
+            dialog = DialogTVShowInfo(u'script-%s-DialogVideoInfo.xml' % ADDON_NAME, ADDON_PATH, id=params.get("id", ""), tvdb_id=params.get("tvdb_id", ""),
                                       dbid=params.get("dbid", None), imdb_id=params.get("imdb_id", ""), name=params.get("name", ""))
             dialog.doModal()
             HOME.clearProperty('infodialogs.active')
@@ -346,7 +370,7 @@ def StartInfoActions(infos, params):
                 play_trailer(params.get("id", ""))
         elif info == 'playtrailer':
             xbmc.executebuiltin("ActivateWindow(busydialog)")
-            xbmc.sleep(500)
+            xbmc.sleep(100)
             if params.get("id", ""):
                 movie_id = params.get("id", "")
             elif int(params.get("dbid", -1)) > 0:
@@ -363,6 +387,7 @@ def StartInfoActions(infos, params):
                     play_trailer(trailer)
                 else:
                     Notify("Error", "No Trailer available")
+            xbmc.executebuiltin("Dialog.Close(busydialog)")
         elif info == 'updatexbmcdatabasewithartistmbid':
             SetMusicBrainzIDsForAllArtists(True, False)
         elif info == 'deletecache':
@@ -377,6 +402,21 @@ def StartInfoActions(infos, params):
             Notify("Cache deleted")
         elif info == 'syncwatchlist':
             pass
+        elif info == "widgetdialog":
+            widget_selectdialog()
         if data:
             data, prefix = data
-            passListToSkin(prefix, data, params.get("prefix", ""), params.get("window", ""), params.get("handle", ""), params.get("limit", 20))
+            if params.get("handle"):
+                if info.endswith("shows"):
+                    xbmcplugin.setContent(params.get("handle"), 'tvshows')
+                    xbmcplugin.addSortMethod(params.get("handle"), xbmcplugin.SORT_METHOD_TITLE)
+                    xbmcplugin.addSortMethod(params.get("handle"), xbmcplugin.SORT_METHOD_VIDEO_YEAR)
+                    xbmcplugin.addSortMethod(params.get("handle"), xbmcplugin.SORT_METHOD_DURATION)
+
+                else:
+                    xbmcplugin.setContent(params.get("handle"), 'movies')
+                    xbmcplugin.addSortMethod(params.get("handle"), xbmcplugin.SORT_METHOD_TITLE)
+                    xbmcplugin.addSortMethod(params.get("handle"), xbmcplugin.SORT_METHOD_VIDEO_YEAR)
+                    xbmcplugin.addSortMethod(params.get("handle"), xbmcplugin.SORT_METHOD_DURATION)
+            passListToSkin(prefix, data, params.get("prefix", ""), params.get("handle", ""), params.get("limit", 20))
+
