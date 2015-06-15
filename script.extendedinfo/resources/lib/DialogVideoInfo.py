@@ -1,3 +1,8 @@
+# -*- coding: utf8 -*-
+
+# Copyright (C) 2015 - Philipp Temminghoff <phil65@kodi.tv>
+# This program is Free Software see LICENSE file for details
+
 import xbmc
 import xbmcgui
 from Utils import *
@@ -5,180 +10,159 @@ from TheMovieDB import *
 from YouTube import *
 from omdb import *
 import DialogActorInfo
-import DialogVideoList
 from ImageTools import *
 import threading
 from BaseClasses import DialogBaseInfo
+from WindowManager import wm
 
 
 class DialogVideoInfo(DialogBaseInfo):
 
+    @busy_dialog
     def __init__(self, *args, **kwargs):
         super(DialogVideoInfo, self).__init__(*args, **kwargs)
         if not ADDON.getSetting("first_start_infodialog"):
             ADDON.setSetting("first_start_infodialog", "True")
             xbmcgui.Dialog().ok(ADDON_NAME, ADDON.getLocalizedString(32140), ADDON.getLocalizedString(32141))
-        xbmc.executebuiltin("ActivateWindow(busydialog)")
         self.monitor = SettingsMonitor()
         tmdb_id = kwargs.get('id')
-        self.dbid = kwargs.get('dbid')
         imdb_id = kwargs.get('imdb_id')
         self.name = kwargs.get('name')
         if tmdb_id:
             self.tmdb_id = tmdb_id
         else:
             self.tmdb_id = get_movie_tmdb_id(imdb_id=imdb_id, dbid=self.dbid, name=self.name)
-        if self.tmdb_id:
-            self.data = GetExtendedMovieInfo(self.tmdb_id, self.dbid)
-            if "general" not in self.data:
-                xbmc.executebuiltin("Dialog.Close(busydialog)")
-                return None
-            log("Blur image %s with radius %i" % (self.data["general"]["Thumb"], 25))
-            youtube_thread = Get_Youtube_Vids_Thread(self.data["general"]["Label"] + " " + self.data["general"]["Year"] + ", movie", "", "relevance", 15)
-            sets_thread = Get_Set_Items_Thread(self.data["general"]["SetId"])
-            self.omdb_thread = Threaded_Function(GetOmdbMovieInfo, self.data["general"]["imdb_id"])
-            lists_thread = Threaded_Function(self.SortLists, self.data["lists"])
-            self.omdb_thread.start()
-            sets_thread.start()
-            youtube_thread.start()
-            lists_thread.start()
-            if "DBID" not in self.data["general"]:
-                poster_thread = Threaded_Function(Get_File, self.data["general"]["Poster"])
-                poster_thread.start()
-            vid_id_list = [item["key"] for item in self.data["videos"]]
-            self.crew_list = []
-            crew_id_list = []
-            for item in self.data["crew"]:
-                if item["id"] not in crew_id_list:
-                    crew_id_list.append(item["id"])
-                    self.crew_list.append(item)
-                else:
-                    index = crew_id_list.index(item["id"])
-                    self.crew_list[index]["job"] = self.crew_list[index]["job"] + " / " + item["job"]
-            if "DBID" not in self.data["general"]:
-                poster_thread.join()
-                self.data["general"]['Poster'] = poster_thread.listitems
-            filter_thread = Filter_Image_Thread(self.data["general"]["Thumb"], 25)
-            filter_thread.start()
-            lists_thread.join()
-            self.data["lists"] = lists_thread.listitems
-            sets_thread.join()
-            cert_list = get_certification_list("movie")
-            for item in self.data["releases"]:
-                if item["iso_3166_1"] in cert_list:
-                    language = item["iso_3166_1"]
-                    certification = item["certification"]
-                    language_certs = cert_list[language]
-                    hit = dictfind(language_certs, "certification", certification)
-                    if hit:
-                        item["meaning"] = hit["meaning"]
-            self.set_listitems = sets_thread.listitems
-            self.setinfo = sets_thread.setinfo
-            id_list = sets_thread.id_list
-            self.data["similar"] = [item for item in self.data["similar"] if item["ID"] not in id_list]
-            youtube_thread.join()
-            youtube_vids = [item for item in youtube_thread.listitems if item["youtube_id"] not in vid_id_list]
-            filter_thread.join()
-            self.data["general"]['ImageFilter'], self.data["general"]['ImageColor'] = filter_thread.image, filter_thread.imagecolor
-            self.listitems = [(1000, create_listitems(self.data["actors"], 0)),
-                              (150, create_listitems(self.data["similar"], 0)),
-                              (250, create_listitems(self.set_listitems, 0)),
-                              (450, create_listitems(self.data["lists"], 0)),
-                              (550, create_listitems(self.data["studios"], 0)),
-                              (650, create_listitems(self.data["releases"], 0)),
-                              (750, create_listitems(self.crew_list, 0)),
-                              (850, create_listitems(self.data["genres"], 0)),
-                              (950, create_listitems(self.data["keywords"], 0)),
-                              (1050, create_listitems(self.data["reviews"], 0)),
-                              (1150, create_listitems(self.data["videos"], 0)),
-                              (1250, create_listitems(self.data["images"], 0)),
-                              (1350, create_listitems(self.data["backdrops"], 0)),
-                              (350, create_listitems(youtube_vids, 0))]
-        else:
-            Notify(ADDON.getLocalizedString(32143))
-            self.close()
-        xbmc.executebuiltin("Dialog.Close(busydialog)")
+        if not self.tmdb_id:
+            notify(ADDON.getLocalizedString(32143))
+            return None
+        self.close()
+        self.data = extended_movie_info(self.tmdb_id, self.dbid)
+        if "general" not in self.data:
+            return None
+        log("Blur image %s with radius %i" % (self.data["general"]["thumb"], 25))
+        youtube_thread = GetYoutubeVidsThread(self.data["general"]["Label"] + " " + self.data["general"]["year"] + ", movie", "", "relevance", 15)
+        sets_thread = SetItemsThread(self.data["general"]["SetId"])
+        self.omdb_thread = FunctionThread(get_omdb_movie_info, self.data["general"]["imdb_id"])
+        lists_thread = FunctionThread(self.sort_lists, self.data["lists"])
+        self.omdb_thread.start()
+        sets_thread.start()
+        youtube_thread.start()
+        lists_thread.start()
+        vid_id_list = [item["key"] for item in self.data["videos"]]
+        crew_list = self.merge_person_listitems(self.data["crew"])
+        if "dbid" not in self.data["general"]:
+            self.data["general"]['Poster'] = get_file(self.data["general"]["Poster"])
+        filter_thread = FilterImageThread(self.data["general"]["thumb"], 25)
+        filter_thread.start()
+        lists_thread.join()
+        self.data["lists"] = lists_thread.listitems
+        sets_thread.join()
+        cert_list = get_certification_list("movie")
+        for item in self.data["releases"]:
+            if item["iso_3166_1"] in cert_list:
+                language = item["iso_3166_1"]
+                certification = item["certification"]
+                language_certs = cert_list[language]
+                hit = dictfind(language_certs, "certification", certification)
+                if hit:
+                    item["meaning"] = hit["meaning"]
+        self.set_listitems = sets_thread.listitems
+        self.setinfo = sets_thread.setinfo
+        id_list = sets_thread.id_list
+        self.data["similar"] = [item for item in self.data["similar"] if item["id"] not in id_list]
+        youtube_thread.join()
+        youtube_vids = [item for item in youtube_thread.listitems if item["youtube_id"] not in vid_id_list]
+        filter_thread.join()
+        self.data["general"]['ImageFilter'], self.data["general"]['ImageColor'] = filter_thread.image, filter_thread.imagecolor
+        self.listitems = [(1000, create_listitems(self.data["actors"], 0)),
+                          (150, create_listitems(self.data["similar"], 0)),
+                          (250, create_listitems(self.set_listitems, 0)),
+                          (450, create_listitems(self.data["lists"], 0)),
+                          (550, create_listitems(self.data["studios"], 0)),
+                          (650, create_listitems(self.data["releases"], 0)),
+                          (750, create_listitems(crew_list, 0)),
+                          (850, create_listitems(self.data["genres"], 0)),
+                          (950, create_listitems(self.data["keywords"], 0)),
+                          (1050, create_listitems(self.data["reviews"], 0)),
+                          (1150, create_listitems(self.data["videos"], 0)),
+                          (1250, create_listitems(self.data["images"], 0)),
+                          (1350, create_listitems(self.data["backdrops"], 0)),
+                          (350, create_listitems(youtube_vids, 0))]
 
     def onInit(self):
         super(DialogVideoInfo, self).onInit()
         HOME.setProperty("movie.ImageColor", self.data["general"]["ImageColor"])
-        self.window.setProperty("type", "movie")
-        passDictToSkin(self.data["general"], "movie.", False, False, self.windowid)
+        self.window.setProperty("type", "Movie")
+        pass_dict_to_skin(self.data["general"], "movie.", False, False, self.window_id)
         self.fill_lists()
-        passDictToSkin(self.setinfo, "movie.set.", False, False, self.windowid)
-        self.UpdateStates(False)
-        self.join_omdb = Join_Omdb_Thread(self.omdb_thread, self.windowid)
+        pass_dict_to_skin(self.setinfo, "movie.set.", False, False, self.window_id)
+        self.update_states(False)
+        self.join_omdb = JoinOmdbThread(self.omdb_thread, self.window_id)
         self.join_omdb.start()
 
-    def onClick(self, controlID):
-        control = self.getControl(controlID)
-        if controlID in [1000, 750]:
-            actorid = control.getSelectedItem().getProperty("id")
-            AddToWindowStack(self)
+    def onAction(self, action):
+        super(DialogVideoInfo, self).onAction(action)
+
+    def onClick(self, control_id):
+        control = self.getControl(control_id)
+        if control_id in [1000, 750]:
+            actor_id = control.getSelectedItem().getProperty("id")
+            wm.add_to_stack(self)
             self.close()
-            dialog = DialogActorInfo.DialogActorInfo(u'script-%s-DialogInfo.xml' % ADDON_NAME, ADDON_PATH, id=actorid)
+            dialog = DialogActorInfo.DialogActorInfo(u'script-%s-DialogInfo.xml' % ADDON_NAME, ADDON_PATH, id=actor_id)
             dialog.doModal()
-        elif controlID in [150, 250]:
-            movieid = control.getSelectedItem().getProperty("id")
-            AddToWindowStack(self)
+        elif control_id in [150, 250]:
+            movie_id = control.getSelectedItem().getProperty("id")
+            dbid = control.getSelectedItem().getProperty("dbid")
+            wm.add_to_stack(self)
             self.close()
-            dialog = DialogVideoInfo(u'script-%s-DialogVideoInfo.xml' % ADDON_NAME, ADDON_PATH, id=movieid)
+            dialog = DialogVideoInfo(u'script-%s-DialogVideoInfo.xml' % ADDON_NAME, ADDON_PATH, id=movie_id, dbid=dbid)
             dialog.doModal()
-        elif controlID in [1250, 1350]:
+        elif control_id in [1250, 1350]:
             image = control.getSelectedItem().getProperty("original")
             dialog = SlideShow(u'script-%s-SlideShow.xml' % ADDON_NAME, ADDON_PATH, image=image)
             dialog.doModal()
-        elif controlID in [350, 1150, 10]:
-            AddToWindowStack(self)
-            self.close()
+        elif control_id in [350, 1150, 10]:
             listitem = xbmcgui.ListItem(xbmc.getLocalizedString(20410))
-            listitem.setInfo('video', {'Title': xbmc.getLocalizedString(20410), 'Genre': 'Youtube Video'})
-            if controlID == 10:
+            listitem.setInfo('video', {'title': xbmc.getLocalizedString(20410), 'Genre': 'Youtube Video'})
+            if control_id == 10:
                 youtube_id = self.getControl(1150).getListItem(0).getProperty("youtube_id")
             else:
                 youtube_id = control.getSelectedItem().getProperty("youtube_id")
             if youtube_id:
-                self.movieplayer.playYoutubeVideo(youtube_id, control.getSelectedItem(), True)
-                self.movieplayer.wait_for_video_end()
-                PopWindowStack()
+                PLAYER.playYoutubeVideo(youtube_id, control.getSelectedItem(), window=self)
             else:
-                Notify(ADDON.getLocalizedString(32052))
-        # elif controlID in [8]:
-        #     AddToWindowStack(self)
-        #     self.close()
-        #     listitem = create_listitems([self.data["general"]])[0]
-        #     self.movieplayer.play(item=self.data["general"]['FilenameAndPath'], listitem=listitem)
-        #     self.movieplayer.wait_for_video_end()
-        elif controlID == 550:
+                notify(ADDON.getLocalizedString(32052))
+        elif control_id == 550:
             company_id = control.getSelectedItem().getProperty("id")
             company_name = control.getSelectedItem().getLabel()
             filters = [{"id": company_id,
                         "type": "with_companies",
                         "typelabel": xbmc.getLocalizedString(20388),
                         "label": company_name}]
-            self.OpenVideoList(filters=filters)
-        elif controlID == 1050:
+            self.open_video_list(filters=filters)
+        elif control_id == 1050:
             author = control.getSelectedItem().getProperty("author")
-            text = "[B]" + author + "[/B][CR]" + cleanText(control.getSelectedItem().getProperty("content"))
-            w = TextViewer_Dialog('DialogTextViewer.xml', ADDON_PATH, header=xbmc.getLocalizedString(185), text=text, color=self.data["general"]['ImageColor'])
+            text = "[B]" + author + "[/B][CR]" + clean_text(control.getSelectedItem().getProperty("content"))
+            w = TextViewerDialog('DialogTextViewer.xml', ADDON_PATH, header=xbmc.getLocalizedString(207), text=text, color=self.data["general"]['ImageColor'])
             w.doModal()
-        elif controlID == 950:
+        elif control_id == 950:
             keyword_id = control.getSelectedItem().getProperty("id")
             keyword_name = control.getSelectedItem().getLabel()
             filters = [{"id": keyword_id,
                         "type": "with_keywords",
                         "typelabel": ADDON.getLocalizedString(32114),
                         "label": keyword_name}]
-            self.OpenVideoList(filters=filters)
-        elif controlID == 850:
+            self.open_video_list(filters=filters)
+        elif control_id == 850:
             genre_id = control.getSelectedItem().getProperty("id")
             genre_name = control.getSelectedItem().getLabel()
             filters = [{"id": genre_id,
                         "type": "with_genres",
                         "typelabel": xbmc.getLocalizedString(135),
                         "label": genre_name}]
-            self.OpenVideoList(filters=filters)
-        elif controlID == 650:
+            self.open_video_list(filters=filters)
+        elif control_id == 650:
             country = control.getSelectedItem().getProperty("iso_3166_1")
             certification = control.getSelectedItem().getProperty("certification")
             year = control.getSelectedItem().getProperty("year")
@@ -194,20 +178,20 @@ class DialogVideoInfo(DialogBaseInfo):
                         "type": "year",
                         "typelabel": xbmc.getLocalizedString(345),
                         "label": year}]
-            self.OpenVideoList(filters=filters)
-        elif controlID == 450:
+            self.open_video_list(filters=filters)
+        elif control_id == 450:
             list_id = control.getSelectedItem().getProperty("id")
             list_title = control.getSelectedItem().getLabel()
-            self.OpenVideoList(mode="list", list_id=list_id, filter_label=list_title)
-        elif controlID == 6001:
+            self.open_video_list(mode="list", list_id=list_id, filter_label=list_title)
+        elif control_id == 6001:
             rating = get_rating_from_user()
             if rating:
                 send_rating_for_media_item("movie", self.tmdb_id, rating)
-                self.UpdateStates()
-        elif controlID == 6002:
+                self.update_states()
+        elif control_id == 6002:
             listitems = [ADDON.getLocalizedString(32134), ADDON.getLocalizedString(32135)]
             xbmc.executebuiltin("ActivateWindow(busydialog)")
-            account_lists = GetAccountLists()
+            account_lists = get_account_lists()
             for item in account_lists:
                 listitems.append("%s (%i)" % (item["name"], item["item_count"]))
             xbmc.executebuiltin("Dialog.Close(busydialog)")
@@ -215,38 +199,38 @@ class DialogVideoInfo(DialogBaseInfo):
             if index == -1:
                 pass
             elif index == 0:
-                self.OpenVideoList(mode="favorites")
+                self.open_video_list(mode="favorites")
             elif index == 1:
-                self.OpenVideoList(mode="rating")
+                self.open_video_list(mode="rating")
             else:
                 xbmc.executebuiltin("ActivateWindow(busydialog)")
                 list_id = account_lists[index - 2]["id"]
                 list_title = account_lists[index - 2]["name"]
                 xbmc.executebuiltin("Dialog.Close(busydialog)")
-                self.OpenVideoList(mode="list", list_id=list_id, filter_label=list_title, force=True)
-        elif controlID == 8:
+                self.open_video_list(mode="list", list_id=list_id, filter_label=list_title, force=True)
+        elif control_id == 8:
             self.close()
-            xbmc.executeJSONRPC('{ "jsonrpc": "2.0", "method": "Player.Open", "params": { "item": { "movieid": %i }, "options":{ "resume": %s } }, "id": 1 }' % (self.data["general"]['DBID'], "false"))
-        elif controlID == 9:
+            xbmc.executeJSONRPC('{ "jsonrpc": "2.0", "method": "Player.Open", "params": { "item": { "movieid": %s }, "options":{ "resume": %s } }, "id": 1 }' % (str(self.data["general"]['dbid']), "false"))
+        elif control_id == 9:
             self.close()
-            xbmc.executeJSONRPC('{ "jsonrpc": "2.0", "method": "Player.Open", "params": { "item": { "movieid": %i }, "options":{ "resume": %s } }, "id": 1 }' % (self.data["general"]['DBID'], "true"))
-        elif controlID == 445:
-            self.ShowManageDialog()
-        elif controlID == 132:
-            w = TextViewer_Dialog('DialogTextViewer.xml', ADDON_PATH, header=xbmc.getLocalizedString(207), text=self.data["general"]["Plot"], color=self.data["general"]['ImageColor'])
+            xbmc.executeJSONRPC('{ "jsonrpc": "2.0", "method": "Player.Open", "params": { "item": { "movieid": %s }, "options":{ "resume": %s } }, "id": 1 }' % (str(self.data["general"]['dbid']), "true"))
+        elif control_id == 445:
+            self.show_manage_dialog()
+        elif control_id == 132:
+            w = TextViewerDialog('DialogTextViewer.xml', ADDON_PATH, header=xbmc.getLocalizedString(207), text=self.data["general"]["Plot"], color=self.data["general"]['ImageColor'])
             w.doModal()
-        elif controlID == 6003:
+        elif control_id == 6003:
             if self.data["account_states"]["favorite"]:
-                ChangeFavStatus(self.data["general"]["ID"], "movie", "false")
+                change_fav_status(self.data["general"]["id"], "movie", "false")
             else:
-                ChangeFavStatus(self.data["general"]["ID"], "movie", "true")
-            self.UpdateStates()
-        elif controlID == 6006:
-            self.ShowRatedMovies()
-        elif controlID == 6005:
+                change_fav_status(self.data["general"]["id"], "movie", "true")
+            self.update_states()
+        elif control_id == 6006:
+            self.open_video_list(mode="rating")
+        elif control_id == 6005:
             xbmc.executebuiltin("ActivateWindow(busydialog)")
             listitems = [ADDON.getLocalizedString(32139)]
-            account_lists = GetAccountLists()
+            account_lists = get_account_lists()
             for item in account_lists:
                 listitems.append("%s (%i)" % (item["name"], item["item_count"]))
             listitems.append(ADDON.getLocalizedString(32138))
@@ -255,36 +239,36 @@ class DialogVideoInfo(DialogBaseInfo):
             if index == 0:
                 listname = xbmcgui.Dialog().input(ADDON.getLocalizedString(32137), type=xbmcgui.INPUT_ALPHANUM)
                 if listname:
-                    list_id = CreateList(listname)
+                    list_id = create_list(listname)
                     xbmc.sleep(1000)
-                    ChangeListStatus(list_id, self.tmdb_id, True)
+                    change_list_status(list_id, self.tmdb_id, True)
             elif index == len(listitems) - 1:
-                self.RemoveListDialog(account_lists)
+                self.remove_list_dialog(account_lists)
             elif index > 0:
-                ChangeListStatus(account_lists[index - 1]["id"], self.tmdb_id, True)
-                self.UpdateStates()
+                change_list_status(account_lists[index - 1]["id"], self.tmdb_id, True)
+                self.update_states()
 
-    def SortLists(self, lists):
+    def sort_lists(self, lists):
         if not self.logged_in:
             return lists
-        account_list = GetAccountLists(10)  # use caching here, forceupdate everywhere else
+        account_list = get_account_lists(10)  # use caching here, forceupdate everywhere else
         own_lists = []
         misc_lists = []
         id_list = [item["id"] for item in account_list]
         for item in lists:
-            if item["ID"] in id_list:
+            if item["id"] in id_list:
                 item["account"] = "True"
                 own_lists.append(item)
             else:
                 misc_lists.append(item)
-        # own_lists = [item for item in lists if item["ID"] in id_list]
-        # misc_lists = [item for item in lists if item["ID"] not in id_list]
+        # own_lists = [item for item in lists if item["id"] in id_list]
+        # misc_lists = [item for item in lists if item["id"] not in id_list]
         return own_lists + misc_lists
 
-    def UpdateStates(self, forceupdate=True):
+    def update_states(self, forceupdate=True):
         if forceupdate:
             xbmc.sleep(2000)  # delay because MovieDB takes some time to update
-            self.update = GetExtendedMovieInfo(self.tmdb_id, self.dbid, 0)
+            self.update = extended_movie_info(self.tmdb_id, self.dbid, 0)
             self.data["account_states"] = self.update["account_states"]
         if self.data["account_states"]:
             if self.data["account_states"]["favorite"]:
@@ -298,29 +282,23 @@ class DialogVideoInfo(DialogBaseInfo):
             else:
                 self.window.setProperty("movie.rated", "")
             self.window.setProperty("movie.watchlist", str(self.data["account_states"]["watchlist"]))
-            # Notify(str(self.data["account_states"]["rated"]["value"]))
+            # notify(str(self.data["account_states"]["rated"]["value"]))
 
-    def RemoveListDialog(self, account_lists):
+    def remove_list_dialog(self, account_lists):
         listitems = []
         for item in account_lists:
             listitems.append("%s (%i)" % (item["name"], item["item_count"]))
         prettyprint(account_lists)
         index = xbmcgui.Dialog().select(ADDON.getLocalizedString(32138), listitems)
         if index >= 0:
-            # ChangeListStatus(account_lists[index]["id"], self.tmdb_id, False)
-            RemoveList(account_lists[index]["id"])
-            self.UpdateStates()
+            # change_list_status(account_lists[index]["id"], self.tmdb_id, False)
+            remove_list(account_lists[index]["id"])
+            self.update_states()
 
-    def ShowRatedMovies(self):
-        xbmc.executebuiltin("ActivateWindow(busydialog)")
-        listitems = GetRatedMedia("movies")
-        xbmc.executebuiltin("Dialog.Close(busydialog)")
-        self.OpenVideoList(listitems=listitems)
-
-    def ShowManageDialog(self):
+    def show_manage_dialog(self):
         manage_list = []
         listitems = []
-        movie_id = str(self.data["general"].get("DBID", ""))
+        movie_id = str(self.data["general"].get("dbid", ""))
         # filename = self.data["general"].get("FilenameAndPath", False)
         imdb_id = str(self.data["general"].get("imdb_id", ""))
         if movie_id:
@@ -343,20 +321,20 @@ class DialogVideoInfo(DialogBaseInfo):
                 xbmc.executebuiltin(item)
 
 
-class Join_Omdb_Thread(threading.Thread):
+class JoinOmdbThread(threading.Thread):
 
-    def __init__(self, omdb_thread, windowid):
+    def __init__(self, omdb_thread, window_id):
         threading.Thread.__init__(self)
         self.omdb_thread = omdb_thread
-        self.windowid = windowid
+        self.window_id = window_id
 
     def run(self):
         self.omdb_thread.join()
-        if xbmcgui.getCurrentWindowDialogId() == self.windowid:
-            passDictToSkin(self.omdb_thread.listitems, "movie.omdb.", False, False, self.windowid)
+        if xbmcgui.getCurrentWindowDialogId() == self.window_id:
+            pass_dict_to_skin(self.omdb_thread.listitems, "movie.omdb.", False, False, self.window_id)
 
 
-class Get_Set_Items_Thread(threading.Thread):
+class SetItemsThread(threading.Thread):
 
     def __init__(self, set_id=""):
         threading.Thread.__init__(self)
@@ -364,18 +342,9 @@ class Get_Set_Items_Thread(threading.Thread):
 
     def run(self):
         if self.set_id:
-            self.listitems, self.setinfo = GetSetMovies(self.set_id)
-            self.id_list = [item["ID"] for item in self.listitems]
+            self.listitems, self.setinfo = get_set_movies(self.set_id)
+            self.id_list = [item["id"] for item in self.listitems]
         else:
             self.id_list = []
             self.listitems = []
             self.setinfo = {}
-
-
-class SettingsMonitor(xbmc.Monitor):
-
-    def __init__(self):
-        xbmc.Monitor.__init__(self)
-
-    def onSettingsChanged(self):
-        xbmc.sleep(300)

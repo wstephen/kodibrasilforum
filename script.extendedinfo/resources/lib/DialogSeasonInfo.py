@@ -1,3 +1,8 @@
+# -*- coding: utf8 -*-
+
+# Copyright (C) 2015 - Philipp Temminghoff <phil65@kodi.tv>
+# This program is Free Software see LICENSE file for details
+
 import xbmc
 from Utils import *
 from TheMovieDB import *
@@ -6,32 +11,26 @@ import DialogActorInfo
 import DialogEpisodeInfo
 from ImageTools import *
 from BaseClasses import DialogBaseInfo
-
+from WindowManager import wm
 
 class DialogSeasonInfo(DialogBaseInfo):
 
+    @busy_dialog
     def __init__(self, *args, **kwargs):
         super(DialogSeasonInfo, self).__init__(*args, **kwargs)
-        xbmc.executebuiltin("ActivateWindow(busydialog)")
         self.tmdb_id = kwargs.get('id')
         self.season = kwargs.get('season')
-        self.showname = kwargs.get('tvshow')
-        if self.tmdb_id or (self.season and self.showname):
-            self.data = GetSeasonInfo(self.tmdb_id, self.showname, self.season)
+        self.tvshow = kwargs.get('tvshow')
+        if self.tmdb_id or (self.season and self.tvshow):
+            self.data = extended_season_info(self.tmdb_id, self.tvshow, self.season)
             if not self.data:
-                xbmc.executebuiltin("Dialog.Close(busydialog)")
                 return
-            xbmc.executebuiltin("ActivateWindow(busydialog)")
-            search_string = "%s %s tv" % (self.data["general"]["TVShowTitle"], self.data["general"]["Title"])
-            youtube_thread = Get_Youtube_Vids_Thread(search_string, "", "relevance", 15)
+            search_string = "%s %s tv" % (self.data["general"]["TVShowTitle"], self.data["general"]['title'])
+            youtube_thread = GetYoutubeVidsThread(search_string, "", "relevance", 15)
             youtube_thread.start()
-            if "DBID" not in self.data["general"]:  # need to add comparing for seasons
-                poster_thread = Threaded_Function(Get_File, self.data["general"]["Poster"])
-                poster_thread.start()
-            if "DBID" not in self.data["general"]:
-                poster_thread.join()
-                self.data["general"]['Poster'] = poster_thread.listitems
-            filter_thread = Filter_Image_Thread(self.data["general"]["Poster"], 25)
+            if "dbid" not in self.data["general"]:  # need to add comparing for seasons
+                self.data["general"]['Poster'] = get_file(self.data["general"]["Poster"])
+            filter_thread = FilterImageThread(self.data["general"]["Poster"], 25)
             filter_thread.start()
             youtube_thread.join()
             filter_thread.join()
@@ -44,47 +43,42 @@ class DialogSeasonInfo(DialogBaseInfo):
                               (1350, create_listitems(self.data["backdrops"], 0)),
                               (350, create_listitems(youtube_thread.listitems, 0))]
         else:
-            Notify(ADDON.getLocalizedString(32143))
-        xbmc.executebuiltin("Dialog.Close(busydialog)")
+            notify(ADDON.getLocalizedString(32143))
 
     def onInit(self):
         super(DialogSeasonInfo, self).onInit()
         HOME.setProperty("movie.ImageColor", self.data["general"]["ImageColor"])
         self.window.setProperty("type", "season")
-        passDictToSkin(self.data["general"], "movie.", False, False, self.windowid)
+        pass_dict_to_skin(self.data["general"], "movie.", False, False, self.window_id)
         self.fill_lists()
 
-    def onClick(self, controlID):
-        control = self.getControl(controlID)
+    def onClick(self, control_id):
+        control = self.getControl(control_id)
         HOME.setProperty("WindowColor", xbmc.getInfoLabel("Window(home).Property(movie.ImageColor)"))
-        if controlID in [1000, 750]:
+        if control_id in [1000, 750]:
             actor_id = control.getSelectedItem().getProperty("id")
             credit_id = control.getSelectedItem().getProperty("credit_id")
-            AddToWindowStack(self)
+            wm.add_to_stack(self)
             self.close()
             dialog = DialogActorInfo.DialogActorInfo(u'script-%s-DialogInfo.xml' % ADDON_NAME, ADDON_PATH, id=actor_id, credit_id=credit_id)
             dialog.doModal()
-        elif controlID in [2000]:
+        elif control_id in [2000]:
             episode = control.getSelectedItem().getProperty("episode")
             season = control.getSelectedItem().getProperty("season")
             if not self.tmdb_id:
-                response = GetMovieDBData("search/tv?query=%s&language=%s&" % (urllib.quote_plus(self.showname), ADDON.getSetting("LanguageID")), 30)
+                response = get_tmdb_data("search/tv?query=%s&language=%s&" % (urllib.quote_plus(self.tvshow), ADDON.getSetting("LanguageID")), 30)
                 self.tmdb_id = str(response['results'][0]['id'])
-            AddToWindowStack(self)
+            wm.add_to_stack(self)
             self.close()
             dialog = DialogEpisodeInfo.DialogEpisodeInfo(u'script-%s-DialogVideoInfo.xml' % ADDON_NAME, ADDON_PATH, show_id=self.tmdb_id, season=season, episode=episode)
             dialog.doModal()
-        elif controlID in [350, 1150]:
+        elif control_id in [350, 1150]:
             listitem = control.getSelectedItem()
-            AddToWindowStack(self)
-            self.close()
-            self.movieplayer.playYoutubeVideo(listitem.getProperty("youtube_id"), listitem, True)
-            self.movieplayer.wait_for_video_end()
-            PopWindowStack()
-        elif controlID in [1250, 1350]:
+            PLAYER.playYoutubeVideo(listitem.getProperty("youtube_id"), listitem, window=self)
+        elif control_id in [1250, 1350]:
             image = control.getSelectedItem().getProperty("original")
             dialog = SlideShow(u'script-%s-SlideShow.xml' % ADDON_NAME, ADDON_PATH, image=image)
             dialog.doModal()
-        elif controlID == 132:
-            w = TextViewer_Dialog('DialogTextViewer.xml', ADDON_PATH, header=ADDON.getLocalizedString(32037), text=self.data["general"]["Plot"], color=self.data["general"]['ImageColor'])
+        elif control_id == 132:
+            w = TextViewerDialog('DialogTextViewer.xml', ADDON_PATH, header=ADDON.getLocalizedString(32037), text=self.data["general"]["Plot"], color=self.data["general"]['ImageColor'])
             w.doModal()

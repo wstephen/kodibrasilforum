@@ -1,6 +1,11 @@
+# -*- coding: utf8 -*-
+
+# Copyright (C) 2015 - Philipp Temminghoff <phil65@kodi.tv>
+# This program is Free Software see LICENSE file for details
+
 import datetime
 from Utils import *
-from local_db import compare_with_library
+from local_db import merge_with_local_movie_info
 
 TRAKT_KEY = 'e9a7fba3fa1b527c08c073770869c258804124c5d7c984ce77206e695fbaddd5'
 BASE_URL = "https://api-v2launch.trakt.tv/"
@@ -11,73 +16,74 @@ HEADERS = {
 }
 
 
-def GetTraktCalendarShows(Type):
+def get_trakt_calendar_shows(content):
     shows = []
     url = ""
-    if Type == "shows":
+    if content == "shows":
         url = 'calendars/shows/%s/14?extended=full,images' % datetime.date.today()
-    elif Type == "premieres":
+    elif content == "premieres":
         url = 'calendars/shows/premieres/%s/14?extended=full,images' % datetime.date.today()
     try:
-        results = Get_JSON_response(BASE_URL + url, 0.5, folder="Trakt", headers=HEADERS)
+        results = get_JSON_response(BASE_URL + url, 0.5, folder="Trakt", headers=HEADERS)
     except:
         log("Error when fetching Trakt data from net")
         log("Json Query: " + url)
         results = None
     count = 1
-    if results is not None:
-        for day in results.iteritems():
-            for episode in day[1]:
-                banner = episode["show"]["images"]["banner"]["full"]
-                fanart = episode["show"]["images"]["fanart"]["full"]
-                poster = episode["show"]["images"]["poster"]["full"]
-                show = {'Title': episode["episode"]["title"],
-                        'TVShowTitle': episode["show"]["title"],
-                        'tvdb_id': episode["show"]["ids"]["tvdb"],
-                        'id': episode["show"]["ids"]["tvdb"],
-                        'imdb_id': episode["show"]["ids"]["imdb"],
-                        'Path': 'plugin://script.extendedinfo/?info=action&&id=RunScript(script.extendedinfo,info=extendedtvinfo,tvdb_id=%s)' % episode["show"]["ids"]["tvdb"],
-                        'Runtime': episode["show"]["runtime"],
-                        'duration': episode["show"]["runtime"],
-                        'duration(h)': format_time(episode["show"]["runtime"], "h"),
-                        'duration(m)': format_time(episode["show"]["runtime"], "m"),
-                        'Year': fetch(episode["show"], "year"),
-                        'Certification': episode["show"]["certification"],
-                        'Studio': episode["show"]["network"],
-                        'Plot': episode["show"]["overview"],
-                        'Genre': " / ".join(episode["show"]["genres"]),
-                        'Thumb': episode["episode"]["images"]["screenshot"]["thumb"],
-                        'Art(poster)': poster,
-                        'Poster': poster,
-                        'Art(banner)': banner,
-                        'Banner': banner,
-                        'Art(fanart)': fanart,
-                        'Fanart': fanart}
-                shows.append(show)
-                count += 1
-                if count > 20:
-                    break
+    if not results:
+        return None
+    for day in results.iteritems():
+        for episode in day[1]:
+            banner = episode["show"]["images"]["banner"]["full"]
+            fanart = episode["show"]["images"]["fanart"]["full"]
+            poster = episode["show"]["images"]["poster"]["full"]
+            show = {'title': episode["episode"]["title"],
+                    'TVShowTitle': episode["show"]["title"],
+                    'tvdb_id': episode["show"]["ids"]["tvdb"],
+                    'id': episode["show"]["ids"]["tvdb"],
+                    'imdb_id': episode["show"]["ids"]["imdb"],
+                    'path': 'plugin://script.extendedinfo/?info=action&&id=RunScript(script.extendedinfo,info=extendedtvinfo,tvdb_id=%s)' % episode["show"]["ids"]["tvdb"],
+                    'Runtime': episode["show"]["runtime"],
+                    'duration': episode["show"]["runtime"],
+                    'duration(h)': format_time(episode["show"]["runtime"], "h"),
+                    'duration(m)': format_time(episode["show"]["runtime"], "m"),
+                    'year': fetch(episode["show"], "year"),
+                    'Certification': episode["show"]["certification"],
+                    'Studio': episode["show"]["network"],
+                    'Plot': episode["show"]["overview"],
+                    'Genre': " / ".join(episode["show"]["genres"]),
+                    'thumb': episode["episode"]["images"]["screenshot"]["thumb"],
+                    'Art(poster)': poster,
+                    'Poster': poster,
+                    'Art(banner)': banner,
+                    'Banner': banner,
+                    'Art(fanart)': fanart,
+                    'Fanart': fanart}
+            shows.append(show)
+            count += 1
+            if count > 20:
+                break
     return shows
 
 
-def HandleTraktMovieResult(results):
+def handle_trakt_movies(results):
     movies = []
     for movie in results:
         if ADDON.getSetting("infodialog_onclick") != "false":
             path = 'plugin://script.extendedinfo/?info=action&&id=RunScript(script.extendedinfo,info=extendedinfo,id=%s)' % str(fetch(movie["movie"]["ids"], 'tmdb'))
         else:
             path = "plugin://script.extendedinfo/?info=playtrailer&&id=" + str(fetch(movie["movie"]["ids"], 'tmdb'))
-        movie = {'Title': movie["movie"]["title"],
+        movie = {'title': movie["movie"]["title"],
                  'Runtime': movie["movie"]["runtime"],
                  'duration': movie["movie"]["runtime"],
                  'duration(h)': format_time(movie["movie"]["runtime"], "h"),
                  'duration(m)': format_time(movie["movie"]["runtime"], "m"),
                  'Tagline': movie["movie"]["tagline"],
-                 'Trailer': ConvertYoutubeURL(movie["movie"]["trailer"]),
-                 'Year': movie["movie"]["year"],
-                 'ID': movie["movie"]["ids"]["tmdb"],
+                 'Trailer': convert_youtube_url(movie["movie"]["trailer"]),
+                 'year': movie["movie"]["year"],
+                 'id': movie["movie"]["ids"]["tmdb"],
                  'imdb_id': movie["movie"]["ids"]["imdb"],
-                 'Path': path,
+                 'path': path,
                  'mpaa': movie["movie"]["certification"],
                  'Plot': movie["movie"]["overview"],
                  'Premiered': movie["movie"]["released"],
@@ -88,25 +94,26 @@ def HandleTraktMovieResult(results):
                  'Art(poster)': movie["movie"]["images"]["poster"]["full"],
                  'Poster': movie["movie"]["images"]["poster"]["full"],
                  'Art(fanart)': movie["movie"]["images"]["fanart"]["full"],
-                 'Fanart': movie["movie"]["images"]["fanart"]["full"]}
+                 'Fanart': movie["movie"]["images"]["fanart"]["full"],
+                 'thumb': movie['movie']["images"]["poster"]["thumb"]}
         movies.append(movie)
-    movies = compare_with_library(movies, False)
+    movies = merge_with_local_movie_info(movies, False)
     return movies
 
 
-def HandleTraktTVShowResult(results):
+def handle_trakt_tvshows(results):
     shows = []
     for tvshow in results:
         airs = fetch(tvshow['show'], "airs")
         path = 'plugin://script.extendedinfo/?info=action&&id=RunScript(script.extendedinfo,info=extendedtvinfo,tvdb_id=%s)' % tvshow['show']['ids']["tvdb"]
-        show = {'Title': tvshow['show']["title"],
+        show = {'title': tvshow['show']["title"],
                 'Label': tvshow['show']["title"],
                 'TVShowTitle': tvshow['show']["title"],
                 'Runtime': tvshow['show']["runtime"],
                 'duration': tvshow['show']["runtime"],
                 'duration(h)': format_time(tvshow['show']["runtime"], "h"),
                 'duration(m)': format_time(tvshow['show']["runtime"], "m"),
-                'Year': tvshow['show']["year"],
+                'year': tvshow['show']["year"],
                 'Status': fetch(tvshow['show'], "status"),
                 'mpaa': tvshow['show']["certification"],
                 'Studio': tvshow['show']["network"],
@@ -114,7 +121,7 @@ def HandleTraktTVShowResult(results):
                 'id': tvshow['show']['ids']["tvdb"],
                 'tvdb_id': tvshow['show']['ids']["tvdb"],
                 'imdb_id': tvshow['show']['ids']["imdb"],
-                'Path': path,
+                'path': path,
                 'AirDay': fetch(airs, "day"),
                 'AirShortTime': fetch(airs, "time"),
                 'Label2': fetch(airs, "day") + " " + fetch(airs, "time"),
@@ -130,47 +137,47 @@ def HandleTraktTVShowResult(results):
                 'Banner': tvshow['show']["images"]["banner"]["full"],
                 'Art(fanart)': tvshow['show']["images"]["fanart"]["full"],
                 'Fanart': tvshow['show']["images"]["fanart"]["full"],
-                'Thumb': tvshow['show']["images"]["fanart"]["thumb"]}
+                'thumb': tvshow['show']["images"]["poster"]["thumb"]}
         shows.append(show)
     return shows
 
 
-def GetTrendingShows():
+def get_trending_shows():
     url = 'shows/trending?extended=full,images'
-    results = Get_JSON_response(BASE_URL + url, folder="Trakt", headers=HEADERS)
+    results = get_JSON_response(BASE_URL + url, folder="Trakt", headers=HEADERS)
     if results is not None:
-        return HandleTraktTVShowResult(results)
+        return handle_trakt_tvshows(results)
     else:
         return []
 
 
-def GetTVShowInfo(imdb_id):
+def get_tshow_info(imdb_id):
     url = 'show/%s?extended=full,images' % imdb_id
-    results = Get_JSON_response(BASE_URL + url, folder="Trakt", headers=HEADERS)
+    results = get_JSON_response(BASE_URL + url, folder="Trakt", headers=HEADERS)
     if results is not None:
-        return HandleTraktTVShowResult([results])
+        return handle_trakt_tvshows([results])
     else:
         return []
 
 
-def GetTrendingMovies():
+def get_trending_movies():
     url = 'movies/trending?extended=full,images'
-    results = Get_JSON_response(BASE_URL + url, folder="Trakt", headers=HEADERS)
+    results = get_JSON_response(BASE_URL + url, folder="Trakt", headers=HEADERS)
     if results is not None:
-        return HandleTraktMovieResult(results)
+        return handle_trakt_movies(results)
     else:
         return []
 
 
-def GetSimilarTrakt(mediatype, imdb_id):
+def get_trakt_similar(media_type, imdb_id):
     if imdb_id is not None:
-        url = '%s/%s/related?extended=full,images' % (mediatype, imdb_id)
-        results = Get_JSON_response(BASE_URL + url, folder="Trakt", headers=HEADERS)
+        url = '%s/%s/related?extended=full,images' % (media_type, imdb_id)
+        results = get_JSON_response(BASE_URL + url, folder="Trakt", headers=HEADERS)
         if results is not None:
-            if mediatype == "show":
-                return HandleTraktTVShowResult(results)
-            elif mediatype == "movie":
-                return HandleTraktMovieResult(results)
+            if media_type == "show":
+                return handle_trakt_tvshows(results)
+            elif media_type == "movie":
+                return handle_trakt_movies(results)
     else:
-        Notify("Error when fetching info from Trakt.TV")
+        notify("Error when fetching info from Trakt.TV")
         return[]

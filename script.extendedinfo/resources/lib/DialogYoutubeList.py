@@ -1,15 +1,19 @@
+# -*- coding: utf8 -*-
+
+# Copyright (C) 2015 - Philipp Temminghoff <phil65@kodi.tv>
+# This program is Free Software see LICENSE file for details
+
 import xbmc
 import xbmcgui
 from Utils import *
 from YouTube import *
 from BaseClasses import DialogBaseList
-HOME = xbmcgui.Window(10000)
-
+from WindowManager import wm
 
 class DialogYoutubeList(DialogBaseList):
 
     def __init__(self, *args, **kwargs):
-        super(DialogYoutubeList, self).__init__()
+        super(DialogYoutubeList, self).__init__(*args, **kwargs)
         self.layout = "landscape"
         xbmc.executebuiltin("ActivateWindow(busydialog)")
         self.type = kwargs.get('type', "movie")
@@ -24,10 +28,10 @@ class DialogYoutubeList(DialogBaseList):
         self.filters = kwargs.get('filters', [])
         if self.listitem_list:
             self.listitems = create_listitems(self.listitem_list)
-            self.totalitems = len(self.listitem_list)
+            self.total_items = len(self.listitem_list)
         else:
             self.update_content(force_update=force)
-            # Notify(str(self.totalpages))
+            # notify(str(self.totalpages))
         xbmc.executebuiltin("Dialog.Close(busydialog)")
 
     def update_ui(self):
@@ -48,7 +52,7 @@ class DialogYoutubeList(DialogBaseList):
         focusid = self.getFocusId()
         if action in self.ACTION_PREVIOUS_MENU:
             self.close()
-            PopWindowStack()
+            wm.pop_stack()
         elif action in self.ACTION_EXIT_SCRIPT:
             self.close()
         elif action == xbmcgui.ACTION_CONTEXT_MENU:
@@ -76,11 +80,11 @@ class DialogYoutubeList(DialogBaseList):
                     self.update_content(force_update=True)
                     self.update_ui()
             elif selection == 1:
-                ChangeFavStatus(item_id, self.type, "true")
+                change_fav_status(item_id, self.type, "true")
             elif selection == 2:
                 xbmc.executebuiltin("ActivateWindow(busydialog)")
                 listitems = [ADDON.getLocalizedString(32139)]
-                account_lists = GetAccountLists()
+                account_lists = get_account_lists()
                 for item in account_lists:
                     listitems.append("%s (%i)" % (item["name"], item["item_count"]))
                 listitems.append(ADDON.getLocalizedString(32138))
@@ -89,24 +93,24 @@ class DialogYoutubeList(DialogBaseList):
                 if index == 0:
                     listname = xbmcgui.Dialog().input(ADDON.getLocalizedString(32137), type=xbmcgui.INPUT_ALPHANUM)
                     if listname:
-                        list_id = CreateList(listname)
+                        list_id = create_list(listname)
                         xbmc.sleep(1000)
-                        ChangeListStatus(list_id, item_id, True)
+                        change_list_status(list_id, item_id, True)
                 elif index == len(listitems) - 1:
-                    self.RemoveListDialog(account_lists)
+                    self.remove_list_dialog(account_lists)
                 elif index > 0:
-                    ChangeListStatus(account_lists[index - 1]["id"], item_id, True)
+                    change_list_status(account_lists[index - 1]["id"], item_id, True)
                     # xbmc.sleep(2000)
                     # self.update_content(force_update=True)
                     # self.update_ui()
             elif selection == 3:
-                ChangeListStatus(self.list_id, item_id, False)
+                change_list_status(self.list_id, item_id, False)
                 self.update_content(force_update=True)
                 self.update_ui()
 
-    def onClick(self, controlID):
-        if controlID in [500]:
-            AddToWindowStack(self)
+    def onClick(self, control_id):
+        if control_id in [500]:
+            wm.add_to_stack(self)
             self.close()
 
     def add_filter(self, key, value, typelabel, label):
@@ -114,4 +118,4 @@ class DialogYoutubeList(DialogBaseList):
         super(DialogYoutubeList, self).add_filter(key, value, typelabel, label)
 
     def fetch_data(self, force=False):
-        return GetYoutubeSearchVideos("test"), "20", "20"
+        return get_youtube_search_videos("test"), "20", "20"

@@ -1,3 +1,8 @@
+# -*- coding: utf8 -*-
+
+# Copyright (C) 2015 - Philipp Temminghoff <phil65@kodi.tv>
+# This program is Free Software see LICENSE file for details
+
 import urllib
 import xbmc
 import xbmcaddon
@@ -12,6 +17,9 @@ import simplejson
 import re
 import threading
 import datetime
+import codecs
+from functools import wraps
+import VideoPlayer
 
 ADDON = xbmcaddon.Addon()
 ADDON_ID = ADDON.getAddonInfo('id')
@@ -19,9 +27,36 @@ ADDON_ICON = ADDON.getAddonInfo('icon')
 ADDON_NAME = ADDON.getAddonInfo('name')
 ADDON_PATH = ADDON.getAddonInfo('path').decode("utf-8")
 ADDON_DATA_PATH = os.path.join(xbmc.translatePath("special://profile/addon_data/%s" % ADDON_ID).decode("utf-8"))
+ADDON_VERSION = ADDON.getAddonInfo('version')
 HOME = xbmcgui.Window(10000)
-global windowstack
-windowstack = []
+PLAYER = VideoPlayer.VideoPlayer()
+
+def run_async(func):
+    """
+    Decorator to run a function in a separate thread
+    """
+    @wraps(func)
+    def async_func(*args, **kwargs):
+        func_hl = threading.Thread(target=func, args=args, kwargs=kwargs)
+        func_hl.start()
+        return func_hl
+
+    return async_func
+
+
+def busy_dialog(func):
+    """
+    Decorator to show busy dialog while function is running
+    Only one of the decorated functions may run simultaniously
+    """
+
+    def decorator(self, *args, **kwargs):
+        xbmc.executebuiltin("ActivateWindow(busydialog)")
+        result = func(self, *args, **kwargs)
+        xbmc.executebuiltin("Dialog.Close(busydialog)")
+        return result
+
+    return decorator
 
 
 def dictfind(lst, key, value):
@@ -32,6 +67,10 @@ def dictfind(lst, key, value):
 
 
 def format_time(time, format=None):
+    """
+    get formatted time
+    format = h, m or None
+    """
     try:
         intTime = int(time)
     except:
@@ -48,12 +87,14 @@ def format_time(time, format=None):
         return minute + " min"
 
 
-def url_quote(url):
+def url_quote(input_string):
+    """
+    get url-quoted string
+    """
     try:
-        url = urllib.quote_plus(url.encode('utf8', 'ignore'))
+        return urllib.quote_plus(input_string.encode('utf8', 'ignore'))
     except:
-        url = urllib.quote_plus(unicode(url, "utf-8").encode("utf-8"))
-    return url
+        return urllib.quote_plus(unicode(input_string, "utf-8").encode("utf-8"))
 
 
 def merge_dicts(*dict_args):
@@ -67,7 +108,74 @@ def merge_dicts(*dict_args):
     return result
 
 
+def check_version():
+    """
+    check version, open TextViewer if update detected
+    """
+    if not ADDON.getSetting("changelog_version") == ADDON_VERSION:
+        path = os.path.join(ADDON_PATH, "changelog.txt")
+        changelog = read_from_file(path, True)
+        w = TextViewerDialog('DialogTextViewer.xml', ADDON_PATH, header="Changelog", text=changelog)
+        w.doModal()
+        ADDON.setSetting("changelog_version", ADDON_VERSION)
+
+
+def get_autocomplete_items(search_string):
+    """
+    get dict list with autocomplete labels from google
+    """
+    if ADDON.getSetting("autocomplete_provider") == "youtube":
+        return get_google_autocomplete_items(search_string, True)
+    elif ADDON.getSetting("autocomplete_provider") == "google":
+        return get_google_autocomplete_items(search_string)
+    else:
+        return get_common_words_autocomplete_items(search_string)
+
+
+def get_google_autocomplete_items(search_string, youtube=False):
+    """
+    get dict list with autocomplete labels from google
+    """
+    if not search_string:
+        return []
+    listitems = []
+    headers = {'User-agent': 'Mozilla/5.0'}
+    url = "http://clients1.google.com/complete/search?hl=%s&q=%s&json=t&client=serp" % (ADDON.getSetting("autocomplete_lang"), urllib.quote_plus(search_string))
+    if youtube:
+        url += "&ds=yt"
+    result = get_JSON_response(url, headers=headers, folder="Google")
+    for item in result[1]:
+        li = {"label": item,
+              "path": "plugin://script.extendedinfo/?info=selectautocomplete&&id=%s" % item}
+        listitems.append(li)
+    return listitems
+
+
+def get_common_words_autocomplete_items(search_string):
+    """
+    get dict list with autocomplete labels from locally saved lists
+    """
+    listitems = []
+    k = search_string.rfind(" ")
+    if k >= 0:
+        search_string = search_string[k + 1:]
+    path = os.path.join(ADDON_PATH, "resources", "data", "common_%s.txt" % ADDON.getSetting("autocomplete_lang_local"))
+    with codecs.open(path, encoding="utf8") as f:
+        for i, line in enumerate(f.readlines()):
+            if line.startswith(search_string) and len(line) > 3:
+                li = {"label": line,
+                      "path": "plugin://script.extendedinfo/?info=selectautocomplete&&id=%s" % line}
+                listitems.append(li)
+                if len(listitems) > 10:
+                    break
+    return listitems
+
+
 def widget_selectdialog(filter=None, string_prefix="widget"):
+    """
+    show dialog including all video media lists (for widget selection)
+    and set strings PREFIX.path and PREFIX.label with chosen values
+    """
     # rottentomatoes
     movie = {"intheaters": "RottenTomatoes: In theaters",
              "boxoffice": "RottenTomatoes: Box office",
@@ -119,18 +227,28 @@ def widget_selectdialog(filter=None, string_prefix="widget"):
     labels = [label for label in listitems.values()]
     ret = xbmcgui.Dialog().select("Choose content", labels)
     if ret > -1:
-        Notify(keywords[ret])
+        notify(keywords[ret])
         xbmc.executebuiltin("Skin.SetString(%s.path,plugin://script.extendedinfo?info=%s)" % (string_prefix, keywords[ret]))
         xbmc.executebuiltin("Skin.SetString(%s.label,%s)" % (string_prefix, labels[ret]))
 
 
-class Select_Dialog(xbmcgui.WindowXMLDialog):
+class SettingsMonitor(xbmc.Monitor):
+
+    def __init__(self):
+        xbmc.Monitor.__init__(self)
+
+    def onSettingsChanged(self):
+        xbmc.sleep(300)
+
+
+class SelectDialog(xbmcgui.WindowXMLDialog):
     ACTION_PREVIOUS_MENU = [9, 92, 10]
 
     def __init__(self, *args, **kwargs):
         xbmcgui.WindowXMLDialog.__init__(self)
         self.items = kwargs.get('listing')
         self.index = -1
+        self.type = None
 
     def onInit(self):
         self.list = self.getControl(6)
@@ -144,16 +262,17 @@ class Select_Dialog(xbmcgui.WindowXMLDialog):
         if action in self.ACTION_PREVIOUS_MENU:
             self.close()
 
-    def onClick(self, controlID):
-        if controlID == 6 or controlID == 3:
+    def onClick(self, control_id):
+        if control_id == 6 or control_id == 3:
             self.index = int(self.list.getSelectedItem().getProperty("index"))
+            self.type = self.list.getSelectedItem().getProperty("media_type")
             self.close()
 
-    def onFocus(self, controlID):
+    def onFocus(self, control_id):
         pass
 
 
-class TextViewer_Dialog(xbmcgui.WindowXMLDialog):
+class TextViewerDialog(xbmcgui.WindowXMLDialog):
     ACTION_PREVIOUS_MENU = [9, 92, 10]
 
     def __init__(self, *args, **kwargs):
@@ -163,8 +282,8 @@ class TextViewer_Dialog(xbmcgui.WindowXMLDialog):
         self.color = kwargs.get('color')
 
     def onInit(self):
-        windowid = xbmcgui.getCurrentWindowDialogId()
-        xbmcgui.Window(windowid).setProperty("WindowColor", self.color)
+        window_id = xbmcgui.getCurrentWindowDialogId()
+        xbmcgui.Window(window_id).setProperty("WindowColor", self.color)
         self.getControl(1).setLabel(self.header)
         self.getControl(5).setText(self.text)
 
@@ -172,10 +291,10 @@ class TextViewer_Dialog(xbmcgui.WindowXMLDialog):
         if action in self.ACTION_PREVIOUS_MENU:
             self.close()
 
-    def onClick(self, controlID):
+    def onClick(self, control_id):
         pass
 
-    def onFocus(self, controlID):
+    def onFocus(self, control_id):
         pass
 
 
@@ -196,7 +315,7 @@ class SlideShow(xbmcgui.WindowXMLDialog):
             xbmc.executebuiltin("Control.SetFocus(10000,%s)" % self.index)
         else:
             listitem = {"label": self.image,
-                        "Thumb": self.image}
+                        "thumb": self.image}
             self.getControl(10000).addItems(create_listitems([listitem]))
 
     def onAction(self, action):
@@ -211,6 +330,11 @@ class SlideShow(xbmcgui.WindowXMLDialog):
 
 
 def calculate_age(born, died=False):
+    """
+    calculate age based on born / died
+    display notification for birthday
+    return death age when already dead
+    """
     if died:
         ref_day = died.split("-")
     elif born:
@@ -226,143 +350,84 @@ def calculate_age(born, died=False):
         if diff_months < 0 or (diff_months == 0 and diff_days < 0):
             base_age -= 1
         elif diff_months == 0 and diff_days == 0 and not died:
-            Notify("%s (%i)" % (ADDON.getLocalizedString(32158), base_age))
+            notify("%s (%i)" % (ADDON.getLocalizedString(32158), base_age))
     return base_age
 
-
-def play_trailer(youtube_id="", listitem=None, popstack=False):
-    if not listitem:
-        listitem = xbmcgui.ListItem(xbmc.getLocalizedString(20410))
-        listitem.setInfo('video', {'Title': xbmc.getLocalizedString(20410), 'Genre': 'Youtube Video'})
-    import YDStreamExtractor
-    YDStreamExtractor.disableDASHVideo(True)
-    vid = YDStreamExtractor.getVideoInfo(youtube_id, quality=1)
-    if vid:
-        stream_url = vid.streamURL()
-        PlayMedia(stream_url, listitem, popstack)
-
-
-def PlayMedia(path="", listitem=None, popstack=False):
-    player = VideoPlayer(popstack=popstack)
-    player.play(item=path, listitem=listitem)
-
-
-class VideoPlayer(xbmc.Player):
-
-    def __init__(self, *args, **kwargs):
-        xbmc.Player.__init__(self)
-        self.stopped = False
-        self.popstack = kwargs.get("popstack", True)
-
-    def onPlayBackEnded(self):
-        self.stopped = True
-
-    def onPlayBackStopped(self):
-        self.stopped = True
-
-    def onPlayBackStarted(self):
-        self.stopped = False
-
-    def playYoutubeVideo(self, youtube_id="", listitem=None, popstack=True):
-        if not listitem:
-            listitem = xbmcgui.ListItem(xbmc.getLocalizedString(20410))
-            listitem.setInfo('video', {'Title': xbmc.getLocalizedString(20410), 'Genre': 'Youtube Video'})
-        import YDStreamExtractor
-        YDStreamExtractor.disableDASHVideo(True)
-        if youtube_id:
-            vid = YDStreamExtractor.getVideoInfo(youtube_id, quality=1)
-            if vid:
-                stream_url = vid.streamURL()
-                self.play(stream_url, listitem)
-        else:
-            Notify("no youtube id found")
-
-    def wait_for_video_end(self):
-        while not self.stopped:
-            xbmc.sleep(200)
-        self.stopped = False
-
-
-def AddToWindowStack(window):
-    windowstack.append(window)
-
-
-def PopWindowStack():
-    if windowstack:
-        dialog = windowstack.pop()
-        dialog.doModal()
-
-
-def GetPlaylistStats(path):
-    startindex = -1
-    endindex = -1
+def get_playlist_stats(path):
+    start_index = -1
+    end_index = -1
     if (".xsp" in path) and ("special://" in path):
-        startindex = path.find("special://")
-        endindex = path.find(".xsp") + 4
+        start_index = path.find("special://")
+        end_index = path.find(".xsp") + 4
     elif ("library://" in path):
-        startindex = path.find("library://")
-        endindex = path.rfind("/") + 1
+        start_index = path.find("library://")
+        end_index = path.rfind("/") + 1
     elif ("videodb://" in path):
-        startindex = path.find("videodb://")
-        endindex = path.rfind("/") + 1
-    if (startindex > 0) and (endindex > 0):
-        playlistpath = path[startindex:endindex]
-    #    Notify(playlistpath)
-    #   json_query = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter": {"field": "path", "operator": "contains", "value": "%s"}, "properties": ["playcount", "resume"]}, "id": 1}' % (playlistpath))
-        json_response = get_Kodi_JSON('"method": "Files.GetDirectory", "params": {"directory": "%s", "media": "video", "properties": ["playcount", "resume"]}' % playlistpath)
+        start_index = path.find("videodb://")
+        end_index = path.rfind("/") + 1
+    if (start_index > 0) and (end_index > 0):
+        playlist_path = path[start_index:end_index]
+    #    notify(playlist_path)
+    #   json_query = xbmc.executeJSONRPC('{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": {"filter": {"field": "path", "operator": "contains", "value": "%s"}, "properties": ["playcount", "resume"]}, "id": 1}' % (playlist_path))
+        json_response = get_kodi_json('"method": "Files.GetDirectory", "params": {"directory": "%s", "media": "video", "properties": ["playcount", "resume"]}' % playlist_path)
         if "result" in json_response:
             played = 0
-            inprogress = 0
+            in_progress = 0
             numitems = json_response["result"]["limits"]["total"]
             for item in json_response["result"]["files"]:
                 if "playcount" in item:
                     if item["playcount"] > 0:
                         played += 1
                     if item["resume"]["position"] > 0:
-                        inprogress += 1
+                        in_progress += 1
             HOME.setProperty('PlaylistWatched', str(played))
             HOME.setProperty('PlaylistUnWatched', str(numitems - played))
-            HOME.setProperty('PlaylistInProgress', str(inprogress))
+            HOME.setProperty('PlaylistInProgress', str(in_progress))
             HOME.setProperty('PlaylistCount', str(numitems))
 
 
-def GetSortLetters(path, focusedletter):
+def get_sort_letters(path, focused_letter):
+    """
+    create string including all sortletters
+    and put it into home window property "LetterList"
+    """
     listitems = []
-    letterlist = []
+    letter_list = []
     HOME.clearProperty("LetterList")
     if ADDON.getSetting("FolderPath") == path:
-        letterlist = ADDON.getSetting("LetterList")
-        letterlist = letterlist.split()
+        letter_list = ADDON.getSetting("LetterList").split()
     else:
         if path:
-            json_response = get_Kodi_JSON('"method": "Files.GetDirectory", "params": {"directory": "%s", "media": "files"}' % path)
+            json_response = get_kodi_json('"method": "Files.GetDirectory", "params": {"directory": "%s", "media": "files"}' % path)
             if "result" in json_response and "files" in json_response["result"]:
                 for movie in json_response["result"]["files"]:
                     cleaned_label = movie["label"].replace("The ", "")
                     if cleaned_label:
                         sortletter = cleaned_label[0]
-                        if sortletter not in letterlist:
-                            letterlist.append(sortletter)
-            ADDON.setSetting("LetterList", " ".join(letterlist))
+                        if sortletter not in letter_list:
+                            letter_list.append(sortletter)
+            ADDON.setSetting("LetterList", " ".join(letter_list))
             ADDON.setSetting("FolderPath", path)
-    HOME.setProperty("LetterList", "".join(letterlist))
-    if letterlist and focusedletter:
-        startord = ord("A")
+    HOME.setProperty("LetterList", "".join(letter_list))
+    if letter_list and focused_letter:
+        start_ord = ord("A")
         for i in range(0, 26):
-            letter = chr(startord + i)
-            if letter == focusedletter:
+            letter = chr(start_ord + i)
+            if letter == focused_letter:
                 label = "[B][COLOR FFFF3333]%s[/COLOR][/B]" % letter
-            elif letter in letterlist:
+            elif letter in letter_list:
                 label = letter
             else:
                 label = "[COLOR 55FFFFFF]%s[/COLOR]" % letter
-            listitem = {"label": label}
-            listitems.append(listitem)
+            listitems.append({"label": label})
     return listitems
 
 
 def millify(n):
-    millnames = [' ', '.000', ' Million', ' Billion', ' Trillion']
+    """
+    make large numbers human-readable, return string
+    """
+    millnames = [' ', '.000', ' ' + ADDON.getLocalizedString(32000), ' ' + ADDON.getLocalizedString(32001), ' ' + ADDON.getLocalizedString(32002)]
     if n and n > 100:
         n = float(n)
         char_count = len(str(n))
@@ -427,38 +492,57 @@ def fetch(dictionary, key):
     return ""
 
 
-def fetch_musicbrainz_id(artist, xbmc_artist_id=-1):
+def get_year(year_string):
+    """
+    return last 4 chars of string
+    """
+    if year_string and len(year_string) > 3:
+        return year_string[:4]
+    else:
+        return ""
+
+
+def fetch_musicbrainz_id(artist, artist_id=-1):
+    """
+    fetches MusicBrainz ID for given *artist and returns it
+    uses musicbrainz.org
+    """
     base_url = "http://musicbrainz.org/ws/2/artist/?fmt=json"
     url = '&query=artist:%s' % urllib.quote_plus(artist)
-    results = Get_JSON_response(base_url + url, 30)
+    results = get_JSON_response(base_url + url, 30, folder="MusicBrainz")
     if results and len(results["artists"]) > 0:
-        mbid = results["artists"][0]["id"]
-        log("found artist id for " + artist.decode("utf-8") + ": " + mbid)
-        return mbid
+        log("found artist id for %s: %s" % (artist.decode("utf-8"), results["artists"][0]["id"]))
+        return results["artists"][0]["id"]
     else:
         return None
 
 
-def GetStringFromUrl(url=None, headers=False):
+def get_http(url=None, headers=False):
+    """
+    fetches data from *url, returns it as a string
+    """
     succeed = 0
     if not headers:
         headers = {'User-agent': 'XBMC/14.0 ( phil65@kodi.tv )'}
     request = urllib2.Request(url)
     for (key, value) in headers.iteritems():
         request.add_header(key, value)
-    while (succeed < 5) and (not xbmc.abortRequested):
+    while (succeed < 3) and (not xbmc.abortRequested):
         try:
             response = urllib2.urlopen(request)
             data = response.read()
             return data
         except:
-            log("GetStringFromURL: could not get data from %s" % url)
+            log("get_http: could not get data from %s" % url)
             xbmc.sleep(1000)
             succeed += 1
     return None
 
 
-def Get_JSON_response(url="", cache_days=7.0, folder=False, headers=False):
+def get_JSON_response(url="", cache_days=7.0, folder=False, headers=False):
+    """
+    get JSON response for *url, makes use of prop and file cache.
+    """
     now = time.time()
     hashed_url = hashlib.md5(url).hexdigest()
     if folder:
@@ -474,18 +558,18 @@ def Get_JSON_response(url="", cache_days=7.0, folder=False, headers=False):
             log("prop load for %s. time: %f" % (url, time.time() - now))
             return prop
         except:
-            log("could not load prop data")
+            log("could not load prop data for %s" % url)
     if xbmcvfs.exists(path) and ((now - os.path.getmtime(path)) < cache_seconds):
         results = read_from_file(path)
         log("loaded file for %s. time: %f" % (url, time.time() - now))
     else:
-        response = GetStringFromUrl(url, headers)
+        response = get_http(url, headers)
         try:
             results = simplejson.loads(response)
             log("download %s. time: %f" % (url, time.time() - now))
             save_to_file(results, hashed_url, cache_path)
         except:
-            log("Exception: Could not get new JSON data. Tryin to fallback to cache")
+            log("Exception: Could not get new JSON data from %s. Tryin to fallback to cache" % url)
             log(response)
             if xbmcvfs.exists(path):
                 results = read_from_file(path)
@@ -496,7 +580,7 @@ def Get_JSON_response(url="", cache_days=7.0, folder=False, headers=False):
     return results
 
 
-class Threaded_Function(threading.Thread):
+class FunctionThread(threading.Thread):
 
     def __init__(self, function=None, param=None):
         threading.Thread.__init__(self)
@@ -510,33 +594,33 @@ class Threaded_Function(threading.Thread):
         return True
 
 
-class Get_File_Thread(threading.Thread):
+class GetFileThread(threading.Thread):
 
     def __init__(self, url):
         threading.Thread.__init__(self)
         self.url = url
 
     def run(self):
-        self.file = Get_File(self.url)
+        self.file = get_file(self.url)
 
 
-def Get_File(url):
+def get_file(url):
     clean_url = xbmc.translatePath(urllib.unquote(url)).replace("image://", "")
     if clean_url.endswith("/"):
         clean_url = clean_url[:-1]
-    cachedthumb = xbmc.getCacheThumbName(clean_url)
-    xbmc_vid_cache_file = os.path.join("special://profile/Thumbnails/Video", cachedthumb[0], cachedthumb)
-    xbmc_cache_file_jpg = os.path.join("special://profile/Thumbnails/", cachedthumb[0], cachedthumb[:-4] + ".jpg").replace("\\", "/")
-    xbmc_cache_file_png = xbmc_cache_file_jpg[:-4] + ".png"
-    if xbmcvfs.exists(xbmc_cache_file_jpg):
-        log("xbmc_cache_file_jpg Image: " + url + "-->" + xbmc_cache_file_jpg)
-        return xbmc.translatePath(xbmc_cache_file_jpg)
-    elif xbmcvfs.exists(xbmc_cache_file_png):
-        log("xbmc_cache_file_png Image: " + url + "-->" + xbmc_cache_file_png)
-        return xbmc_cache_file_png
-    elif xbmcvfs.exists(xbmc_vid_cache_file):
-        log("xbmc_vid_cache_file Image: " + url + "-->" + xbmc_vid_cache_file)
-        return xbmc_vid_cache_file
+    cached_thumb = xbmc.getCacheThumbName(clean_url)
+    vid_cache_file = os.path.join("special://profile/Thumbnails/Video", cached_thumb[0], cached_thumb)
+    cache_file_jpg = os.path.join("special://profile/Thumbnails/", cached_thumb[0], cached_thumb[:-4] + ".jpg").replace("\\", "/")
+    cache_file_png = cache_file_jpg[:-4] + ".png"
+    if xbmcvfs.exists(cache_file_jpg):
+        log("cache_file_jpg Image: " + url + "-->" + cache_file_jpg)
+        return xbmc.translatePath(cache_file_jpg)
+    elif xbmcvfs.exists(cache_file_png):
+        log("cache_file_png Image: " + url + "-->" + cache_file_png)
+        return cache_file_png
+    elif xbmcvfs.exists(vid_cache_file):
+        log("vid_cache_file Image: " + url + "-->" + vid_cache_file)
+        return vid_cache_file
     else:
         try:
             request = urllib2.Request(url)
@@ -548,79 +632,86 @@ def Get_File(url):
         except:
             log('image download failed: ' + url)
             return ""
-        if data != '':
-            try:
-                if url.endswith(".png"):
-                    image = xbmc_cache_file_png
-                else:
-                    image = xbmc_cache_file_jpg
-                tmpfile = open(xbmc.translatePath(image), 'wb')
-                tmpfile.write(data)
-                tmpfile.close()
-                return xbmc.translatePath(image)
-            except:
-                log('failed to save image ' + url)
-                return ""
-        else:
+        if not data:
+            return ""
+        try:
+            if url.endswith(".png"):
+                image = cache_file_png
+            else:
+                image = cache_file_jpg
+            tmp_file = open(xbmc.translatePath(image), 'wb')
+            tmp_file.write(data)
+            tmp_file.close()
+            return xbmc.translatePath(image)
+        except:
+            log('failed to save image ' + url)
             return ""
 
 
-def GetFavouriteswithType(favtype):
-    favs = GetFavourites()
-    favlist = []
+def get_favs_by_type(fav_type):
+    """
+    returns dict list containing favourites with type *fav_type
+    """
+    favs = get_favs()
+    fav_list = []
     for fav in favs:
-        if fav["Type"] == favtype:
-            favlist.append(fav)
-    return favlist
+        if fav["Type"] == fav_type:
+            fav_list.append(fav)
+    return fav_list
 
 
-def GetFavPath(fav):
-    path = ""
+def get_fav_path(fav):
     if fav["type"] == "media":
-        path = "PlayMedia(%s)" % (fav["path"])
+        return "PlayMedia(%s)" % (fav["path"])
     elif fav["type"] == "script":
-        path = "RunScript(%s)" % (fav["path"])
+        return "RunScript(%s)" % (fav["path"])
     elif "window" in fav and "windowparameter" in fav:
-        path = "ActivateWindow(%s,%s)" % (fav["window"], fav["windowparameter"])
+        return "ActivateWindow(%s,%s)" % (fav["window"], fav["windowparameter"])
     else:
         log("error parsing favs")
-    return path
 
 
-def GetFavourites():
+def get_favs():
+    """
+    returns dict list containing favourites
+    """
     items = []
-    json_response = get_Kodi_JSON('"method": "Favourites.GetFavourites", "params": {"type": null, "properties": ["path", "thumbnail", "window", "windowparameter"]}')
-    if json_response["result"]["limits"]["total"] > 0:
-        for fav in json_response["result"]["favourites"]:
-            path = GetFavPath(fav)
-            newitem = {'Label': fav["title"],
-                       'Thumb': fav["thumbnail"],
-                       'Type': fav["type"],
-                       'Builtin': path,
-                       'Path': "plugin://script.extendedinfo/?info=action&&id=" + path}
-            items.append(newitem)
+    json_response = get_kodi_json('"method": "Favourites.get_favs", "params": {"type": null, "properties": ["path", "thumbnail", "window", "windowparameter"]}')
+    if "result" not in json_response or json_response["result"]["limits"]["total"] == 0:
+        return []
+    for fav in json_response["result"]["favourites"]:
+        path = get_fav_path(fav)
+        newitem = {'Label': fav["title"],
+                   'thumb': fav["thumbnail"],
+                   'Type': fav["type"],
+                   'Builtin': path,
+                   'path': "plugin://script.extendedinfo/?info=action&&id=" + path}
+        items.append(newitem)
     return items
 
 
-def GetIconPanel(number):
+def get_icon_panel(number):
+    """
+    get icon panel with index *number, returns dict list based on skin strings
+    """
     items = []
     offset = number * 5 - 5
     for i in range(1, 6):
         newitem = {'Label': xbmc.getInfoLabel("Skin.String(IconPanelItem" + str(i + offset) + ".Label)").decode("utf-8"),
-                   'Path': "plugin://script.extendedinfo/?info=action&&id=" + xbmc.getInfoLabel("Skin.String(IconPanelItem" + str(i + offset) + ".Path)").decode("utf-8"),
-                   'Thumb': xbmc.getInfoLabel("Skin.String(IconPanelItem" + str(i + offset) + ".Icon)").decode("utf-8"),
-                   'ID': "IconPanelitem" + str(i + offset).decode("utf-8"),
+                   'path': "plugin://script.extendedinfo/?info=action&&id=" + xbmc.getInfoLabel("Skin.String(IconPanelItem" + str(i + offset) + ".Path)").decode("utf-8"),
+                   'thumb': xbmc.getInfoLabel("Skin.String(IconPanelItem" + str(i + offset) + ".Icon)").decode("utf-8"),
+                   'id': "IconPanelitem" + str(i + offset).decode("utf-8"),
                    'Type': xbmc.getInfoLabel("Skin.String(IconPanelItem" + str(i + offset) + ".Type)").decode("utf-8")}
         items.append(newitem)
     return items
 
 
-def GetWeatherImages():
+def get_weather_images():
     items = []
     for i in range(1, 6):
         newitem = {'Label': "bla",
-                   'Path': "plugin://script.extendedinfo/?info=action&&id=SetFocus(22222)",
-                   'Thumb': xbmc.getInfoLabel("Window(weather).Property(Map." + str(i) + ".Area)"),
+                   'path': "plugin://script.extendedinfo/?info=action&&id=SetFocus(22222)",
+                   'thumb': xbmc.getInfoLabel("Window(weather).Property(Map." + str(i) + ".Area)"),
                    'Layer': xbmc.getInfoLabel("Window(weather).Property(Map." + str(i) + ".Layer)"),
                    'Legend': xbmc.getInfoLabel("Window(weather).Property(Map." + str(i) + ".Legend)")}
         items.append(newitem)
@@ -641,13 +732,14 @@ def get_browse_dialog(default="", heading="Browse", dlg_type=3, shares="files", 
 
 
 def save_to_file(content, filename, path=""):
+    """
+    dump json and save to *filename in *path
+    """
     if path == "":
         text_file_path = get_browse_dialog() + filename + ".txt"
     else:
-        if not xbmcvfs.exists(ADDON_DATA_PATH):
-            xbmcvfs.mkdir(ADDON_DATA_PATH)
         if not xbmcvfs.exists(path):
-            xbmcvfs.mkdir(path)
+            xbmcvfs.mkdirs(path)
         text_file_path = os.path.join(path, filename + ".txt")
     now = time.time()
     text_file = xbmcvfs.File(text_file_path, "w")
@@ -657,57 +749,50 @@ def save_to_file(content, filename, path=""):
     return True
 
 
-def read_from_file(path=""):
+def read_from_file(path="", raw=False):
+    """
+    return data from file with *path
+    """
     if path == "":
         path = get_browse_dialog(dlg_type=1)
     if not xbmcvfs.exists(path):
         return False
-    now = time.time()
     try:
         f = open(path)
-        fc = simplejson.load(f)
-        log("loaded textfile %s. Time: %f" % (path, time.time() - now))
-        return fc
+        log("opened textfile %s." % (path))
+        if not raw:
+            return simplejson.load(f)
+        else:
+            return f.read()
     except:
-        log("failed to load JSON textfile: " + path)
+        log("failed to load textfile: " + path)
         return False
 
 
-def ConvertYoutubeURL(string):
-    if string and 'youtube.com/v' in string:
-        vid_ids = re.findall(
-            'http://www.youtube.com/v/(.{11})\??', string, re.DOTALL)
-        for id in vid_ids:
-            convertedstring = 'plugin://script.extendedinfo/?info=youtubevideo&&id=%s' % id
-            return convertedstring
-    if string and 'youtube.com/watch' in string:
-        vid_ids = re.findall(
-            'youtube.com/watch\?v=(.{11})\??', string, re.DOTALL)
-        for id in vid_ids:
-            convertedstring = 'plugin://script.extendedinfo/?info=youtubevideo&&id=%s' % id
-            return convertedstring
+def convert_youtube_url(raw_string):
+    youtube_id = extract_youtube_id(raw_string)
+    if youtube_id:
+        return 'plugin://script.extendedinfo/?info=youtubevideo&&id=%s' % youtube_id
     return ""
 
 
-def ExtractYoutubeID(string):
-    if string and 'youtube.com/v' in string:
-        vid_ids = re.findall(
-            'http://www.youtube.com/v/(.{11})\??', string, re.DOTALL)
+def extract_youtube_id(raw_string):
+    if raw_string and 'youtube.com/v' in raw_string:
+        vid_ids = re.findall('http://www.youtube.com/v/(.{11})\??', raw_string, re.DOTALL)
         for id in vid_ids:
             return id
-    if string and 'youtube.com/watch' in string:
-        vid_ids = re.findall(
-            'youtube.com/watch\?v=(.{11})\??', string, re.DOTALL)
+    if raw_string and 'youtube.com/watch' in raw_string:
+        vid_ids = re.findall('youtube.com/watch\?v=(.{11})\??', raw_string, re.DOTALL)
         for id in vid_ids:
             return id
     return ""
 
 
-def Notify(header="", message="", icon=ADDON_ICON, time=5000, sound=True):
+def notify(header="", message="", icon=ADDON_ICON, time=5000, sound=True):
     xbmcgui.Dialog().notification(heading=header, message=message, icon=icon, time=time, sound=sound)
 
 
-def get_Kodi_JSON(params):
+def get_kodi_json(params):
     json_query = xbmc.executeJSONRPC('{"jsonrpc": "2.0", %s, "id": 1}' % params)
     json_query = unicode(json_query, 'utf-8', errors='ignore')
     return simplejson.loads(json_query)
@@ -717,44 +802,45 @@ def prettyprint(string):
     log(simplejson.dumps(string, sort_keys=True, indent=4, separators=(',', ': ')))
 
 
-def passDictToSkin(data=None, prefix="", debug=False, precache=False, window=10000):
-    skinwindow = xbmcgui.Window(window)
-    if data is not None:
-        threads = []
-        image_requests = []
-        for (key, value) in data.iteritems():
-            value = unicode(value)
-            if precache:
-                if value.startswith("http://") and (value.endswith(".jpg") or value.endswith(".png")):
-                    if value not in image_requests and value:
-                        thread = Get_File_Thread(value)
-                        threads += [thread]
-                        thread.start()
-                        image_requests.append(value)
-            skinwindow.setProperty('%s%s' % (prefix, str(key)), value)
-            if debug:
-                log('%s%s' % (prefix, str(key)) + value)
-        for x in threads:
-            x.join()
+def pass_dict_to_skin(data=None, prefix="", debug=False, precache=False, window_id=10000):
+    window = xbmcgui.Window(window_id)
+    if not data:
+        return None
+    threads = []
+    image_requests = []
+    for (key, value) in data.iteritems():
+        value = unicode(value)
+        if precache:
+            if value.startswith("http://") and (value.endswith(".jpg") or value.endswith(".png")):
+                if value not in image_requests and value:
+                    thread = GetFileThread(value)
+                    threads += [thread]
+                    thread.start()
+                    image_requests.append(value)
+        window.setProperty('%s%s' % (prefix, str(key)), value)
+        if debug:
+            log('%s%s' % (prefix, str(key)) + value)
+    for x in threads:
+        x.join()
 
 
-def passListToSkin(name="", data=[], prefix="", handle=None, limit=False):
+def pass_list_to_skin(name="", data=[], prefix="", handle=None, limit=False):
     if limit and int(limit) < len(data):
         data = data[:int(limit)]
     if handle:
         HOME.clearProperty(name)
         if data:
             HOME.setProperty(name + ".Count", str(len(data)))
-            items = create_listitems(data)
-            for item in items:
+            if data:
+                items = create_listitems(data)
                 itemlist = [(item.getProperty("path"), item, bool(item.getProperty("directory"))) for item in items]
-            xbmcplugin.addDirectoryItems(handle, itemlist, len(itemlist))
-            xbmcplugin.endOfDirectory(handle)
+                xbmcplugin.addDirectoryItems(handle, itemlist, len(itemlist))
+        xbmcplugin.endOfDirectory(handle)
     else:
-        SetWindowProperties(name, data, prefix)
+        set_window_props(name, data, prefix)
 
 
-def SetWindowProperties(name, data, prefix="", debug=False):
+def set_window_props(name, data, prefix="", debug=False):
     if data is not None:
         # log("%s%s.Count = %s" % (prefix, name, str(len(data))))
         for (count, result) in enumerate(data):
@@ -772,88 +858,92 @@ def SetWindowProperties(name, data, prefix="", debug=False):
 
 
 def create_listitems(data=None, preload_images=0):
-    Int_InfoLabels = ["year", "episode", "season", "top250", "tracknumber", "playcount", "overlay"]
-    Float_InfoLabels = ["rating"]
-    String_InfoLabels = ["genre", "director", "mpaa", "plot", "plotoutline", "title", "originaltitle", "sorttitle", "duration", "studio", "tagline", "writer",
+    INT_INFOLABELS = ["year", "episode", "season", "top250", "tracknumber", "playcount", "overlay"]
+    FLOAT_INFOLABELS = ["rating"]
+    STRING_INFOLABELS = ["genre", "director", "mpaa", "plot", "plotoutline", "title", "originaltitle", "sorttitle", "duration", "studio", "tagline", "writer",
                          "tvshowtitle", "premiered", "status", "code", "aired", "credits", "lastplayed", "album", "votes", "trailer", "dateadded"]
+    if not data:
+        return []
     itemlist = []
-    if data is not None:
-        threads = []
-        image_requests = []
-        for (count, result) in enumerate(data):
-            listitem = xbmcgui.ListItem('%s' % (str(count)))
-            itempath = ""
-            for (key, value) in result.iteritems():
-                if not value:
-                    continue
-                value = unicode(value)
-                if count < preload_images:
-                    if value.startswith("http://") and (value.endswith(".jpg") or value.endswith(".png")):
-                        if value not in image_requests:
-                            thread = Get_File_Thread(value)
-                            threads += [thread]
-                            thread.start()
-                            image_requests.append(value)
-                if key.lower() in ["name", "label", "title"]:
-                    listitem.setLabel(value)
-                elif key.lower() in ["thumb"]:
-                    listitem.setThumbnailImage(value)
-                elif key.lower() in ["icon"]:
-                    listitem.setIconImage(value)
-                elif key.lower() in ["path"]:
-                    itempath = value
-                if key.lower() in ["thumb", "poster", "banner", "fanart", "clearart", "clearlogo", "landscape", "discart", "characterart", "tvshow.fanart", "tvshow.poster", "tvshow.banner", "tvshow.clearart", "tvshow.characterart"]:
-                    listitem.setArt({key.lower(): value})
-                    # log("key: " + unicode(key) + "  value: " + unicode(value))
-                if key.lower() in Int_InfoLabels:
-                    try:
-                        listitem.setInfo('video', {key.lower(): int(value)})
-                    except:
-                        pass
-                if key.lower() in String_InfoLabels:
-                    listitem.setInfo('video', {key.lower(): value})
-                if key.lower() in Float_InfoLabels:
-                    try:
-                        listitem.setInfo('video', {key.lower(): "%1.1f" % float(value)})
-                    except:
-                        pass
-                listitem.setProperty('%s' % (key), value)
-            listitem.setPath(path=itempath)
-            listitem.setProperty("index", str(count))
-            itemlist.append(listitem)
-        for x in threads:
-            x.join()
+    threads = []
+    image_requests = []
+    for (count, result) in enumerate(data):
+        listitem = xbmcgui.ListItem('%s' % (str(count)))
+        for (key, value) in result.iteritems():
+            if not value:
+                continue
+            value = unicode(value)
+            if count < preload_images:
+                if value.startswith("http://") and (value.endswith(".jpg") or value.endswith(".png")):
+                    if value not in image_requests:
+                        thread = GetFileThread(value)
+                        threads += [thread]
+                        thread.start()
+                        image_requests.append(value)
+            if key.lower() in ["name", "label"]:
+                listitem.setLabel(value)
+            elif key.lower() in ["title"]:
+                listitem.setLabel(value)
+                listitem.setInfo('video', {key.lower(): value})
+            elif key.lower() in ["thumb"]:
+                listitem.setThumbnailImage(value)
+                listitem.setArt({key.lower(): value})
+            elif key.lower() in ["icon"]:
+                listitem.setIconImage(value)
+                listitem.setArt({key.lower(): value})
+            elif key.lower() in ["path"]:
+                listitem.setPath(path=value)
+                # listitem.setProperty('%s' % (key), value)
+            # elif key.lower() in ["season", "episode"]:
+            #     listitem.setInfo('video', {key.lower(): int(value)})
+            #     listitem.setProperty('%s' % (key), value)
+            elif key.lower() in ["poster", "banner", "fanart", "clearart", "clearlogo", "landscape", "discart", "characterart", "tvshow.fanart", "tvshow.poster", "tvshow.banner", "tvshow.clearart", "tvshow.characterart"]:
+                listitem.setArt({key.lower(): value})
+            elif key.lower() in INT_INFOLABELS:
+                try:
+                    listitem.setInfo('video', {key.lower(): int(value)})
+                except:
+                    pass
+            elif key.lower() in STRING_INFOLABELS:
+                listitem.setInfo('video', {key.lower(): value})
+            elif key.lower() in FLOAT_INFOLABELS:
+                try:
+                    listitem.setInfo('video', {key.lower(): "%1.1f" % float(value)})
+                except:
+                    pass
+            # else:
+            listitem.setProperty('%s' % (key), value)
+        listitem.setProperty("index", str(count))
+        itemlist.append(listitem)
+    for x in threads:
+        x.join()
     return itemlist
 
 
-def cleanText(text):
-    if text:
-        text = re.sub('(From Wikipedia, the free encyclopedia)|(Description above from the Wikipedia.*?Wikipedia)', '', text)
-        text = text.replace('<br \/>', '[CR]')
-        text = re.sub('<(.|\n|\r)*?>', '', text)
-        text = text.replace('&quot;', '"')
-        text = text.replace('<em>', '[I]')
-        text = text.replace('</em>', '[/I]')
-        text = text.replace('&amp;', '&')
-        text = text.replace('&gt;', '>')
-        text = text.replace('&lt;', '<')
-        text = text.replace('&#39;', "'")
-        text = text.replace('User-contributed text is available under the Creative Commons By-SA License and may also be available under the GNU FDL.', '')
-        while text:
-            s = text[0]
-            e = text[-1]
-            if s == u'\u200b':
-                text = text[1:]
-            if text and e == u'\u200b':
-                text = text[:-1]
-            if s == " " or e == " ":
-                text = text.strip()
-            elif s == "." or e == ".":
-                text = text.strip(".")
-            elif s == "\n" or e == "\n":
-                text = text.strip("\n")
-            else:
-                break
-        return text.strip()
-    else:
+def clean_text(text):
+    if not text:
         return ""
+    text = re.sub('(From Wikipedia, the free encyclopedia)|(Description above from the Wikipedia.*?Wikipedia)', '', text)
+    text = re.sub('<(.|\n|\r)*?>', '', text)
+    text = text.replace('<br \/>', '[CR]')
+    text = text.replace('<em>', '[I]').replace('</em>', '[/I]')
+    text = text.replace('&amp;', '&')
+    text = text.replace('&gt;', '>').replace('&lt;', '<')
+    text = text.replace('&#39;', "'").replace('&quot;', '"')
+    text = text.replace('User-contributed text is available under the Creative Commons By-SA License and may also be available under the GNU FDL.', '')
+    while text:
+        s = text[0]
+        e = text[-1]
+        if s == u'\u200b':
+            text = text[1:]
+        if text and e == u'\u200b':
+            text = text[:-1]
+        if s == " " or e == " ":
+            text = text.strip()
+        elif s == "." or e == ".":
+            text = text.strip(".")
+        elif s == "\n" or e == "\n":
+            text = text.strip("\n")
+        else:
+            break
+    return text.strip()
