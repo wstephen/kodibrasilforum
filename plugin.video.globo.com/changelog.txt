@@ -1,3 +1,15 @@
+0.1.11
+ PT: correção de autorização e atualizado tocador da api globosat (by lucasrokam)
+ EN: fixed authorization and updated player in globosat api (by lucasrokam)
+
+0.1.10
+ PT: adicionado autorização para Visitantes (by guilhermegarnier)
+ EN: added authorization for Guests (by guilhermegarnier)
+
+0.1.9
+ PT: correção autorização Sky (by lucasrokam)
+ EN: fix authorization for Sky (by lucasrokam)
+
 0.1.8
  PT: corrigido problema de autorização
  EN: fix authorization issue

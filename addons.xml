@@ -65,89 +65,6 @@
     </extension>
 </addon>
 
-<addon id="plugin.video.Adrenaline"
-	name="Adrenaline Videos"
-	version="1.0.2"
-	provider-name="xbmcbrasil.net">
-  <requires>
-    <import addon="xbmc.python" version="2.13.0"/>
-    <import addon="plugin.video.youtube" version="3.0.0"/>
-  </requires>
-  <extension point="xbmc.python.pluginsource" library="default.py">
-    <provides>video</provides>
-  </extension>
-  <extension point="xbmc.addon.metadata">
-    <summary lang="en">Adrenaline</summary>
-    <description lang="en">Awesome Adrenaline videos from YouTube - www.adrenaline.uol.com.br.</description>
-    <platform>all</platform>
-  </extension>
-</addon>
-
-<addon id="plugin.video.akkaripoker"	name="Akkari Poker"	version="1.0.0"	provider-name="higor">
-  <requires>
-    <import addon="xbmc.python" version="2.13.0"/>
-    <import addon="plugin.video.youtube" version="3.0.0"/>
-  </requires>
-  <extension point="xbmc.python.pluginsource" library="akkaripoker.py">
-    <provides>video</provides>
-  </extension>
-  <extension point="xbmc.addon.metadata">
-    <summary lang="en">O plugin Akkari POKER busca os videos do canal do jogador Andre Akkari no YouTube.</summary>
-    <description lang="en">Assista aos videos do Akkari diretamente no KODI.</description>
-    <platform>all</platform>
-  </extension>
-</addon>
-
-<addon id="plugin.video.amigosporcarros"	name="Amigos por Carros"	version="1.0.0"	provider-name="higor">
-	<requires>
-		<import addon="xbmc.python" version="2.13.0"/>
-		<import addon="plugin.video.youtube" version="3.0.0"/>
-	</requires>
-	<extension point="xbmc.python.pluginsource" library="amigosporcarros.py">
-		<provides>video</provides>
-	</extension>
-	<extension point="xbmc.addon.metadata">
-		<summary lang="en">O Plugin busca videos do canal automotivo Amigos por Carros no youtube.</summary>
-		<description lang="en">Um programa jovem, dinÃ¢mico, moderno e descontraÃ­do. 4 amigos com gostos e preferÃªncias completamente diferentes discutem sobre o mercado de carros esportivos e luxo. Novidades, tendÃªncias, mercado e outros assuntos ligado ao mundo dos carros importados.[CR]
-			ConheÃ§a um pouco mais do perfil de William, Leone, Cadu e Korn.[CR]
-			Acessem o site e fiquem por dentro: www.amigosporcarros.com
-		</description>
-		<platform>all</platform>
-	</extension>
-</addon>
-
-<addon id="plugin.video.caiopessagno"	name="Caio Pessagno POKER"	version="1.0.0"	provider-name="higor">
-  <requires>
-    <import addon="xbmc.python" version="2.13.0"/>
-    <import addon="plugin.video.youtube" version="3.0.0"/>
-  </requires>
-  <extension point="xbmc.python.pluginsource" library="caiopessagno.py">
-    <provides>video</provides>
-  </extension>
-  <extension point="xbmc.addon.metadata">
-    <summary lang="en">O plugin Caio Pessagno POKER Busca videos no canal do Pessagno</summary>
-    <description lang="en">O plugin Caio Pessagno POKER busca os videos do jogador de poker pessagno no youtube.</description>
-    <platform>all</platform>
-  </extension>
-</addon>
-
-<addon id="plugin.video.cph.gruposuperpoker"	name="CPH - Grupo SuperPoker"	version="1.0.0"	provider-name="higor">
-  <requires>
-    <import addon="xbmc.python" version="2.13.0"/>
-    <import addon="plugin.video.youtube" version="3.0.0"/>
-  </requires>
-  <extension point="xbmc.python.pluginsource" library="cph-poker.py">
-    <provides>video</provides>
-  </extension>
-  <extension point="xbmc.addon.metadata">
-    <summary lang="en">CPH - Grupo SuperPoker</summary>
-	<summary lang="pt_BR">O Plugins CPH - Grupo SuperPoker busca os vÃ­deos do canal Grupo SuperPoker no Youtube</summary>
-    <description lang="en">Assista as transmissÃµes do maior circuito de poker regional do Brasil - Campeonato Paulista de Hold'em.</description>
-    <platform>all</platform>
-	<website>https://www.youtube.com/channel/UC7tYg7VuMwVtgTBtnHIskTA</website>
-  </extension>
-</addon>
-
 <addon id="plugin.video.gdrive-testing" version="0.6.13" name="gdrive-testing" provider-name="ddurdle">
     <requires>
         <import addon="xbmc.python" version="2.1.0"/>
@@ -164,7 +81,7 @@
 
 <addon id="plugin.video.globo.com"
 		name="Globo.com"
-		version="0.1.8"
+		version="0.1.11"
 		provider-name="vitorhirota">
 	<requires>
 		<import addon="xbmc.python" version="2.1.0"/>
@@ -226,156 +143,6 @@
         <forum>http://forum.xbmc.org/showthread.php?tid=137984</forum>
         <email>AddonScriptorDE at yahoo dot de</email>
     </extension>
-</addon>
-
-<addon id="plugin.video.japaonossodecadadia"
-	name="japao nosso de cada dia"
-	version="1.0.2"
-	provider-name="kodi.tv">
-  <requires>
-    <import addon="xbmc.python" version="2.13.0"/>
-    <import addon="plugin.video.youtube" version="3.0.0"/>
-  </requires>
-  <extension point="xbmc.python.pluginsource" library="default.py">
-    <provides>video</provides>
-  </extension>
-  <extension point="xbmc.addon.metadata">
-    <summary lang="en">Japao nosso de cada dia</summary>
-    <description lang="en">Curiosidades, diferencas e muito mais sobre o Japao!</description>
-    <platform>all</platform>
-  </extension>
-</addon>
-
-<addon id="plugin.video.manualdomundo"
-	name="manualdomundo"
-	version="1.0.2"
-	provider-name="Wanilton">
-  <requires>
-    <import addon="xbmc.python" version="2.13.0"/>
-    <import addon="plugin.video.youtube" version="3.0.0"/>
-  </requires>
-  <extension point="xbmc.python.pluginsource" library="default.py">
-    <provides>video</provides>
-  </extension>
-  <extension point="xbmc.addon.metadata">
-    <summary lang="en">manualdomundo</summary>
-    <description lang="en">Awesome Manual Do Mundo videos from YouTube.</description>
-    <platform>all</platform>
-  </extension>
-</addon>
-
-<addon id="plugin.video.omeleteve"
-	name="Omeleteve"
-	version="1.0.2"
-	provider-name="kodi.tv">
-  <requires>
-    <import addon="xbmc.python" version="2.13.0"/>
-    <import addon="plugin.video.youtube" version="3.0.0"/>
-  </requires>
-  <extension point="xbmc.python.pluginsource" library="default.py">
-    <provides>video</provides>
-  </extension>
-  <extension point="xbmc.addon.metadata">
-    <summary lang="pt">Omeleteve</summary>
-    <description lang="en">O canal de videos do http://omelete.com.br, o maior site de cultura pop do Brasil, referencia desde 2000! Cinema, Quadrinhos, Games, Musica, Series de TV e Literatura e com a gente mesmo! Assine agora e libere o seu lado nerd .</description>
-    <platform>all</platform>
-  </extension>
-</addon>
-
-<addon id="plugin.video.papodehomem"
-	name="Papo de Homem"
-	version="1.0.0"
-	provider-name="Wanilton">
-  <requires>
-    <import addon="xbmc.python" version="2.1.0"/>
-    <import addon="plugin.video.youtube" version="3.0.0"/>
-  </requires>
-  <extension point="xbmc.python.pluginsource" library="default.py">
-    <provides>video</provides>
-  </extension>
-  <extension point="xbmc.addon.metadata">
-    <summary lang="en">Papo de Homem</summary>
-    <description lang="en">Awesome Papo de Homem videos from YouTube.</description>
-    <platform>all</platform>
-  </extension>
-</addon>
-
-<addon id="plugin.video.pipocandovideos"
-	name="Pipocando"
-	version="1.0.2"
-	provider-name="kodi.tv">
-  <requires>
-    <import addon="xbmc.python" version="2.13.0"/>
-    <import addon="plugin.video.youtube" version="3.0.0"/>
-  </requires>
-  <extension point="xbmc.python.pluginsource" library="default.py">
-    <provides>video</provides>
-  </extension>
-  <extension point="xbmc.addon.metadata">
-    <summary lang="en">Pipocando</summary>
-    <description lang="en">Pipocando e um programa pra quem curte filmes, series, games e ziquizira.</description>
-    <platform>all</platform>
-  </extension>
-</addon>
-
-<addon id="plugin.video.pokerstars.tv" name="Pokerstars TV" provider-name="Sergey Pulyaev" version="0.0.12">
-  <requires>
-    <import addon="xbmc.python" version="1.0"/>
-  </requires>
-  <extension library="addon.py" point="xbmc.python.pluginsource" provides="video">
-    <provides>video</provides>
-  </extension>
-  <extension point="xbmc.addon.metadata">
-    <summary>pokerstars.tv</summary>
-    <description>
-Plugin for watching video from site pokerstars.tv
-I hope you like this!
-    </description>
-    <platform>all</platform>
-    <license>GNU GENERAL PUBLIC LICENSE Version 3, 29 June 2007</license>
-    <email>serj1903@gmail.com</email>
-  </extension>
-</addon>
-
-<addon id="plugin.video.pokervideosbrasil"	name="Poker Videos Brasil"	version="1.0.0"	provider-name="higor">
-  <requires>
-    <import addon="xbmc.python" version="2.13.0"/>
-    <import addon="plugin.video.youtube" version="3.0.0"/>
-  </requires>
-  <extension point="xbmc.python.pluginsource" library="pokervideosbrasil.py">
-    <provides>video</provides>
-  </extension>
-  <extension point="xbmc.addon.metadata">
-    <summary lang="en">O plugin Poker Videos Brasil busca os videos do canal Poker Videos Brasil no YouTube.</summary>
-    <description lang="en">Assista as TransmissÃµes de poker na Band Sports.</description>
-	<description lang="pt_BR">
-			Assista as TransmissÃµes desse esporte da mente no Band Sports.[CR]
-			Assista ao programa Poker Night com Mirelle Moschella.[CR]
-			TransmissÃµes de grandes torneios como:[CR]
-			BSOP: Brazilian Series Of Poker	- O maior evento de poker da AmÃ©rica Latina[CR]
-			CPH: Campeonato Paulista de Poker - Campeonato mais tradicional de poker do Brasil.
-		</description>
-    <platform>all</platform>
-	<website>https://www.youtube.com/channel/UCMwMuVRuK90nrzTjEHPy3ww</website>
-  </extension>
-</addon>
-
-<addon id="plugin.video.programaolhardigital"
-	name="programaolhardigital"
-	version="1.0.4"
-	provider-name="kodi.tv">
-  <requires>
-    <import addon="xbmc.python" version="2.13.0"/>
-    <import addon="plugin.video.youtube" version="3.0.0"/>
-  </requires>
-  <extension point="xbmc.python.pluginsource" library="default.py">
-    <provides>video</provides>
-  </extension>
-  <extension point="xbmc.addon.metadata">
-    <summary lang="en">programaolhardigital</summary>
-    <description lang="en">Awesome programaolhardigital videos from YouTube.</description>
-    <platform>all</platform>
-  </extension>
 </addon>
 
 <addon id="plugin.video.sbtvideos" name="SBT Videos" version="0.1.2" provider-name="vfranchi">
@@ -450,24 +217,6 @@ I hope you like this!
     </extension>
 </addon>
 
-<addon id="plugin.video.tvpokerpro"	name="TV Poker Pro"	version="1.0.0"	provider-name="higor">
-  <requires>
-    <import addon="xbmc.python" version="2.13.0"/>
-    <import addon="plugin.video.youtube" version="3.0.0"/>
-  </requires>
-  <extension point="xbmc.python.pluginsource" library="tvpokerpro.py">
-    <provides>video</provides>
-  </extension>
-  <extension point="xbmc.addon.metadata">
-    <summary lang="en">TV Poker Pro</summary>
-	<summary lang="pt_BR">O plugin TV Poker Pro busca os videos do canal TV Poker Pro no YouTube</summary>
-    <description lang="en">O plugin TV Poker Pro busca os videos do canal TV Poker Pro no YouTube.</description>
-	<description lang="pt_BR">O plugin TV Poker Pro busca os vÃ­deos no site do YouTube para reproduzÃ­-los no KODI</description>
-    <platform>all</platform>
-	<website>https://www.youtube.com/user/Tvpokerpro</website>
-  </extension>
-</addon>
-
 <addon id="plugin.video.vevo" name="VEVO" version="0.8.2" provider-name="BlueCop">
   <requires>
     <import addon="xbmc.python" version="2.1.0"/>
@@ -490,24 +239,6 @@ I hope you like this!
   </extension>
 </addon>
 
-<addon id="plugin.video.vevobrasil"
-	name="Vevo Brasil"
-	version="1.0.2"
-	provider-name="xbmcbrasil.net">
-  <requires>
-    <import addon="xbmc.python" version="2.13.0"/>
-    <import addon="plugin.video.youtube" version="3.0.0"/>
-  </requires>
-  <extension point="xbmc.python.pluginsource" library="default.py">
-    <provides>video</provides>
-  </extension>
-  <extension point="xbmc.addon.metadata">
-    <summary lang="en">Vevo Brasil</summary>
-    <description lang="en">Awesome Vevo Brasil videos from YouTube.</description>
-    <platform>all</platform>
-  </extension>
-</addon>
-
 <addon id="plugin.video.vevoyoutube"
 	name="Vevo Youtube"
 	version="1.0.2"
@@ -522,24 +253,6 @@ I hope you like this!
   <extension point="xbmc.addon.metadata">
     <summary lang="en">VEVO Youtube</summary>
     <description lang="en">Awesome VEVO videos from YouTube.</description>
-    <platform>all</platform>
-  </extension>
-</addon>
-
-<addon id="plugin.video.videosimprovaveis"
-	name="Barbixas - videos improvaveis"
-	version="1.0.2"
-	provider-name="kodi.tv">
-  <requires>
-    <import addon="xbmc.python" version="2.13.0"/>
-    <import addon="plugin.video.youtube" version="3.0.0"/>
-  </requires>
-  <extension point="xbmc.python.pluginsource" library="default.py">
-    <provides>video</provides>
-  </extension>
-  <extension point="xbmc.addon.metadata">
-    <summary lang="en">Barbixas - videos improvaveis</summary>
-    <description lang="en">Neste canal voce assiste alguns dos videos da Cia. Barbixas de Humor.</description>
     <platform>all</platform>
   </extension>
 </addon>
@@ -770,27 +483,6 @@ I hope you like this!
 		<forum>-</forum>
 		<source>-</source>
 		<email>-</email>
-	</extension>
-</addon>
-
-<addon id="script.toolbox" name="ToolBox Script" version="1.0.1" provider-name="phil65">
-	<requires>
-		<import addon="xbmc.python" version="2.1.0"/>
-		<import addon="script.module.simplejson" version="2.0.10"/>
-		<import addon="script.module.pil" version="1.1.7"/>
-	</requires>
-    <extension point="xbmc.python.script"           library="default.py">
-        <provides>executable</provides>
-    </extension>
-	<extension point="xbmc.addon.metadata">
-		<language/>
-		<summary lang="en">ToolBox Script</summary>
-		<description lang="en">This script exposes several python functions to the UI engine as well as some other stuff to make life for skinners a bit easier.</description>
-		<platform>all</platform>
-		<license>GNU GENERAL PUBLIC LICENSE Version 2, June 1991</license>
-		<forum>http://forum.kodi.tv/showthread.php?tid=207618</forum>
-		<source>https://github.com/phil65/script.toolbox</source>
-		<email>phil65@kodi.tv</email>
 	</extension>
 </addon>
 
