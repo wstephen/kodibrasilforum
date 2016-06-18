@@ -10,8 +10,11 @@
 		<platform>all</platform>
 		<language>en</language>
 		<summary lang="en">World maps, locations, and views</summary>
+		<summary lang="zh_TW">世界地圖、位點、及景觀</summary>
 		<description lang="en">By utilizing multiple maps and locations providers, this add-on will allow you to explore the World map, find points of interest, and see panoramic views in certain places.</description>
+		<description lang="zh_TW">透過使用多位地圖和地點服務提供者，此附加元件能讓您探索世界地圖、找到興趣點、以及觀看景某些地方的全景圖。</description>
 		<disclaimer lang="en">Requires your own credentials to access the providers. Each provider has its own terms of service.</disclaimer>
+		<disclaimer lang="zh_TW">此等服務皆需要你自己向個別的服務供應/營運者申請憑證。每位供應者都有自己的服務條款。</disclaimer>
 		<license>GNU GENERAL PUBLIC LICENSE. Version 2, June 1991</license>
 		<email>a.a.alsaleh@gmail.com</email>
 		<forum>http://forum.xbmc.org/showthread.php?tid=202096</forum>
