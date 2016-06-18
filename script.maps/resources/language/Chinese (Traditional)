@@ -1,0 +1,193 @@
+# XBMC Media Center language file
+# Addon Name: Maps
+# Addon id: script.maps
+# Addon Provider: A. Alsaleh
+msgid ""
+msgstr ""
+"Project-Id-Version: XBMC Addons\n"
+"Report-Msgid-Bugs-To: alanwww1@xbmc.org\n"
+"POT-Creation-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: XBMC Translation Team\n"
+"Language-Team: Chinese (Traditional) (http://www.transifex.com/projects/p/xbmc-addons/language/zh_TW/)\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: zh_TW\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+# Main 320xx-235xx
+
+msgctxt "#32001"
+msgid "Address, City, Country, or Latitude,Longitude"
+msgstr "地址，城市，國家，或經緯度"
+
+msgctxt "#32002"
+msgid "Search"
+msgstr "搜尋"
+
+msgctxt "#32003"
+msgid "Home"
+msgstr "住家"
+
+msgctxt "#32004"
+msgid "Places"
+msgstr "地方"
+
+msgctxt "#32005"
+msgid "Panorama"
+msgstr "全景"
+
+# Messages 327xx
+
+msgctxt "#32700"
+msgid "No Result"
+msgstr "沒有匹配"
+
+msgctxt "#32701"
+msgid "Nothing was found for your search query"
+msgstr "已按您的查詢進行搜尋，但無法找到相關資料"
+
+msgctxt "#32702"
+msgid "Limit Exceeded"
+msgstr "已超過服務上限"
+
+msgctxt "#32703"
+msgid "Your usage exceeded the limit set by the geocoding provider"
+msgstr "已超過該地圖服務的使用上限"
+
+msgctxt "#32704"
+msgid "Error"
+msgstr "錯誤"
+
+msgctxt "#32705"
+msgid "An unexpected error has occurred"
+msgstr "發生未預期的錯誤"
+
+msgctxt "#32706"
+msgid "Cache Cleared"
+msgstr "已清除暫存"
+
+msgctxt "#32707"
+msgid "Cache has been cleared successfully"
+msgstr "已清除暫存記憶體"
+
+msgctxt "#32708"
+msgid "Enter search query (name of place or category)"
+msgstr "請輸入搜尋查詢 (地方或類別名稱)"
+
+msgctxt "#32709"
+msgid "Not Possible"
+msgstr "無法提供"
+
+msgctxt "#32710"
+msgid "No panorama view around this location"
+msgstr "此位置附近沒有全景視圖"
+
+# Settings 328xx
+
+msgctxt "#32800"
+msgid "General"
+msgstr "一般"
+
+msgctxt "#32801"
+msgid "Cache"
+msgstr "暫存記憶"
+
+msgctxt "#32802"
+msgid "Credentials"
+msgstr "服務使用憑證"
+
+msgctxt "#32810"
+msgid "Map provider"
+msgstr "地圖服務提供者"
+
+msgctxt "#32811"
+msgid "Geocoding provider"
+msgstr "地理編碼提供者"
+
+msgctxt "#32812"
+msgid "Places provider"
+msgstr "地點資料提供者"
+
+msgctxt "#32813"
+msgid "Panorama provider"
+msgstr "全景提供者"
+
+msgctxt "#32814"
+msgid "Map type"
+msgstr "地圖類型"
+
+msgctxt "#32815"
+msgid "Map zoom"
+msgstr "地圖縮放"
+
+msgctxt "#32816"
+msgid "Map quality"
+msgstr "地圖質素"
+
+msgctxt "#32817"
+msgid "Home (lat,lon or full address)"
+msgstr "住家 (緯經度或完整地址)"
+
+msgctxt "#32818"
+msgid "Remember last location"
+msgstr "記憶上次的位置"
+
+msgctxt "#32830"
+msgid "Cache maps"
+msgstr "儲存地圖到暫存記憶"
+
+msgctxt "#32831"
+msgid "Clear cache"
+msgstr "清除暫存記憶"
+
+msgctxt "#32832"
+msgid "Clear cache now"
+msgstr "執行清除暫存記憶"
+
+# Values 329xx
+
+msgctxt "#32900"
+msgid "Roadmap"
+msgstr "路線圖"
+
+msgctxt "#32901"
+msgid "Satellite"
+msgstr "衛星定位"
+
+msgctxt "#32902"
+msgid "Hybrid"
+msgstr "混合定位"
+
+msgctxt "#32903"
+msgid "High"
+msgstr "精準"
+
+msgctxt "#32904"
+msgid "Medium"
+msgstr "中度"
+
+msgctxt "#32905"
+msgid "Low"
+msgstr "粗略"
+
+msgctxt "#32906"
+msgid "Manually"
+msgstr "手動"
+
+msgctxt "#32907"
+msgid "On Exit"
+msgstr "關閉時"
+
+msgctxt "#32908"
+msgid "Daily"
+msgstr "每日"
+
+msgctxt "#32909"
+msgid "Weekly"
+msgstr "每週"
+
+msgctxt "#32910"
+msgid "Monthly"
+msgstr "每月"
